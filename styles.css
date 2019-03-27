@@ -1,0 +1,24 @@
+#wrapper {
+  margin: auto;
+  width: 50%;
+  text-align: center;
+  padding-top: 30px;
+}
+
+#title {
+  color: white;
+}
+
+button {
+  margin: 5px;
+  padding: 30px;
+  width: 400px;
+  border: none;
+  background-color: grey;
+  font-size: 15px;
+  border-radius: 5px;
+}
+
+body {
+  background-image: url("images/wild_oliva.png")
+}
