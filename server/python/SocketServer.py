@@ -2,9 +2,11 @@ import socketio
 import eventlet
 import random
 import string
-from player import Player
+from Player import Player
+from Lobby import Lobby
+from LobbyHandler import LobbyHandler
 
-lobbyList = {}
+lobbyHandler = LobbyHandler()
 
 def generateRandomString(num):
     output = ""
@@ -19,38 +21,34 @@ app = socketio.WSGIApp(io)
 
 
 def sendPlayerList(sid):
-    lobby = lobbyList[io.get_session(sid)['lobbyCode']]
-    output = []
-    for playerID, playerObject in lobby.items():
-        output.append(playerObject.username)
-    io.emit('playerList', output, room=sid)
+    playerList = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getPlayerList()
+    io.emit('playerList', playerList, room=sid)
 
 @io.on('joinLobby')
 def joinLobby(sid, data):
-    print(data['username'],' joined ' , data['lobbyCode'], flush=True)
-    io.enter_room(sid, data['lobbyCode'])
     userID = generateRandomString(10)
-    io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
     with io.session(sid) as session:
         session['userID'] = userID
         session['lobbyCode'] = data['lobbyCode']
-    if(data['lobbyCode'] in lobbyList):
-        lobbyList[data['lobbyCode']][io.get_session(sid)['userID']] = Player(data['username'])
-        io.emit('playerJoin', {'username' : lobbyList[data['lobbyCode']][io.get_session(sid)['userID']].username}, room=data['lobbyCode'])
-    else:
-        io.emit('error', {'error' : 'Lobby does not exists'}, room=sid)
+    io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
+    io.enter_room(sid, data['lobbyCode'])
+    result = lobbyHandler.joinLobby(data['lobbyCode'], userID, data['username'])
+    if(result == 200):
+        io.emit('playerJoin', {'username' : data['username']}, room=data['lobbyCode'])
+    io.emit('ack', {'type' : 'lobbyJoined', 'result' : result,'lobbyCode': data['lobbyCode']}, room=sid)
 
 @io.on('createLobby')
 def createLobby(sid, data):
     lobbyCode = generateRandomString(4)
-    io.enter_room(sid, lobbyCode)
-    io.emit('lobbyCreated', {'lobbyCode': lobbyCode}, room=sid)
     userID = generateRandomString(10)
-    io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
     with io.session(sid) as session:
         session['userID'] = userID
         session['lobbyCode'] = lobbyCode
-    lobbyList[lobbyCode] = {userID: Player(data['username'])}
+    io.enter_room(sid, lobbyCode)
+    io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
+    lobbyHandler.createLobby(lobbyCode)
+    result = lobbyHandler.joinLobby(lobbyCode, userID, data['username'])
+    io.emit('ack', {'type' : 'lobbyCreated', 'result' : result,'lobbyCode': lobbyCode}, room=sid)
 
 @io.on('auth')
 def auth(sid, data):
@@ -65,6 +63,7 @@ def requestInfo(sid, data):
     'getPlayerList' : sendPlayerList
     }
     options[data['request']](sid)
+
 # @io.on('disconnect')
 # def disconnect(sid):
 #     io.session_save()
