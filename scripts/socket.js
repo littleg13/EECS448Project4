@@ -6,6 +6,7 @@ function lobbySetup() {
 };
 
 function joinLobby() {
+  // Comment
   lobbyCode = document.getElementById('lobbyCode').value;
   name = document.getElementById('username').value;
   socket.emit('joinLobby', {lobbyCode : lobbyCode, username : name});
