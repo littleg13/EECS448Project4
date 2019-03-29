@@ -1,5 +1,6 @@
 body {
   color: white;
+  margin: 0px;
 }
 
 #wrapper {
@@ -33,4 +34,19 @@ button {
 
 body {
   background-image: url("images/wild_oliva.png")
+}
+
+.footer {
+  position:fixed;
+  bottom: 15px;
+  width: 100%;
+  margin: auto;
+
+}
+.footer > * {
+  width: 25%;
+  box-sizing: border-box;
+  margin-left: 12.445%;
+  margin-right: 12.445%;
+  display: inline;
 }

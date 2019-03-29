@@ -56,6 +56,8 @@ def auth(sid, data):
         session['userID'] = data['userID']
         session['lobbyCode'] = data['lobbyCode']
     io.enter_room(sid, data['lobbyCode'])
+    if((not lobbyHandler.getLobby(data['lobbyCode']).getGameStarted()) and (data['page'] != 'lobby.html')):
+        io.emit('redirect', {'page' : 'lobby.html'}, room=sid)
 
 @io.on('requestInfo')
 def requestInfo(sid, data):
@@ -64,6 +66,9 @@ def requestInfo(sid, data):
     }
     options[data['request']](sid)
 
+@io.on('logout')
+def logout(sid, data):
+    lobbyHandler.getLobby(data['lobbyCode']).removePlayer(data['userID'])
 # @io.on('disconnect')
 # def disconnect(sid):
 #     io.session_save()

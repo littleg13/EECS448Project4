@@ -29,3 +29,9 @@ class Lobby:
     def startGame(self):
         if(not self.gameStarted):
             self.gameStarted = True
+
+    def removePlayer(self, userID):
+        if(self.checkForPlayer(userID)):
+            del self.players[userID]
+            return True
+        return False

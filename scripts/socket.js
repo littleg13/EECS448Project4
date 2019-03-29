@@ -1,4 +1,4 @@
-let socket = io('https://448.cuzzo.net');
+let socket = io('http://localhost:3000');
 
 function lobbySetup() {
   document.getElementById('lobbyCode').innerHTML = localStorage.lobbyCode;
@@ -16,6 +16,13 @@ function createLobby() {
   name = document.getElementById('username').value;
   socket.emit('createLobby', {username : name});
 };
+
+function logout() {
+  socket.emit('logout', {lobbyCode : localStorage.lobbyCode, userID : localStorage.userID})
+  localStorage.removeItem('lobbyCode');
+  localStorage.removeItem('userID');
+  window.location.href = 'index.html';
+}
 
 socket.on('message', function (data) {
     console.log(data);
@@ -50,12 +57,18 @@ socket.on('setID', function (data) {
 socket.on('connect', function (data) {
   console.log("authing server")
   if(localStorage.userID){
-    socket.emit('auth', {userID : localStorage.userID, lobbyCode : localStorage.lobbyCode});
+    let url = window.location.pathname;
+    url = url.substring(url.lastIndexOf('/')+1);
+    socket.emit('auth', {userID : localStorage.userID, lobbyCode : localStorage.lobbyCode, page : url});
   }
 });
 
 socket.on('error', function (data) {
   console.log(data);
+});
+
+socket.on('redirect', function (data) {
+  window.location.href = data['page'];
 });
 
 socket.on('playerJoin', function (data) {
