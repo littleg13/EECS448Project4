@@ -79,6 +79,7 @@ socket.on('playerJoin', function (data) {
 
 socket.on('playerList', function (data) {
   console.log("Player list: " + data);
+  document.getElementById('loadingTag').style.display = "none";
   for (let i = 0; i < data.length; i++) {
     newPlayer = document.createElement("h3");
     newPlayer.innerHTML = data[i];
