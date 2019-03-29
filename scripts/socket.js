@@ -1,4 +1,4 @@
-let socket = io('http://localhost:3000');
+let socket = io('https://448.cuzzo.net');
 
 function lobbySetup() {
   document.getElementById('lobbyCode').innerHTML = localStorage.lobbyCode;
@@ -19,8 +19,7 @@ function createLobby() {
 
 function logout() {
   socket.emit('logout', {lobbyCode : localStorage.lobbyCode, userID : localStorage.userID})
-  localStorage.removeItem('lobbyCode');
-  localStorage.removeItem('userID');
+  localStorage.clear();
   window.location.href = 'index.html';
 }
 
