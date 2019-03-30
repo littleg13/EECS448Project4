@@ -1,0 +1,52 @@
+body {
+  color: white;
+  margin: 0px;
+}
+
+#wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin: auto;
+  width: 50%;
+  text-align: center;
+  padding-top: 30px;
+}
+
+#title {
+  color: white;
+}
+
+#playerName {
+  color: white;
+}
+
+button {
+  display: block;
+  margin: 5px;
+  padding: 30px;
+  width: 400px;
+  border: none;
+  background-color: grey;
+  font-size: 15px;
+  border-radius: 5px;
+}
+
+body {
+  background-image: url("images/wild_oliva.png")
+}
+
+.footer {
+  position:fixed;
+  bottom: 15px;
+  width: 100%;
+  margin: auto;
+
+}
+.footer > * {
+  width: 25%;
+  box-sizing: border-box;
+  margin-left: 12.445%;
+  margin-right: 12.445%;
+  display: inline;
+}
