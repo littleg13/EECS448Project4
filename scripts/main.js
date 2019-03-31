@@ -85,6 +85,7 @@ var fire = function() {
 }
 
 var renderPlayer = function() {
+  ctx.save();
   ctx.fillStyle = "red";
   ctx.fillRect( Math.floor(player.xPos) * delta, Math.floor(player.yPos) * delta, 30, 30 );
   ctx.translate( delta * (player.xPos + 0.5), delta * (player.yPos + 0.5) );
@@ -94,11 +95,12 @@ var renderPlayer = function() {
   ctx.fillRect( 5, -15, 10, 30 );
   ctx.fillStyle = 'red';
   ctx.fillRect( -5, -15, 10, 30 );
-  ctx.setTransform();
+  ctx.restore();
 }
 
 var renderTanks = function() {
   tanks.map( function(tank) {
+    ctx.save();
     ctx.fillStyle = "green";
     ctx.fillRect( Math.floor(tank.xPos) * delta, Math.floor(tank.yPos) * delta, 30, 30 );
     ctx.translate( delta * (tank.xPos + 0.5), delta * (tank.yPos + 0.5) );
@@ -108,7 +110,7 @@ var renderTanks = function() {
     ctx.fillRect( 5, -15, 10, 30 );
     ctx.fillStyle = 'green';
     ctx.fillRect( -5, -15, 10, 30 );
-    ctx.setTransform();
+    ctx.restore();
   } );
 }
 
@@ -176,12 +178,13 @@ var loop = function() {
     temp.xPos += Math.sin( temp.dir ) * 0.5;
     temp.yPos -= Math.cos( temp.dir ) * 0.5;
     checkCollision( temp );
+    ctx.save();
     ctx.fillStyle = 'red';
     ctx.fillRect( Math.floor(temp.xPos) * delta, Math.floor(temp.yPos) * delta, 30, 30 );
     ctx.fillStyle = 'purple';
     ctx.translate( temp.xPos * delta, temp.yPos * delta );
     ctx.fillRect( 0, 0, 10, 10 );
-    ctx.resetTransform();
+    ctx.restore();
   }
 }
 
