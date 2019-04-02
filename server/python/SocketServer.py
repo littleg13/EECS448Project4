@@ -58,6 +58,10 @@ def auth(sid, data):
     io.enter_room(sid, data['lobbyCode'])
     if((not lobbyHandler.getLobby(data['lobbyCode']).getGameStarted()) and (data['page'] != 'lobby.html')):
         io.emit('redirect', {'page' : 'lobby.html'}, room=sid)
+    else:
+        if (not lobbyHandler.getLobby(data['lobbyCode']).updateSeen(data['userID'])):
+            pass
+
 
 @io.on('requestInfo')
 def requestInfo(sid, data):
@@ -75,7 +79,9 @@ def logout(sid, data):
 
 @io.on('gameEvent')
 def gameEvent(sid, data):
+    print("Got game update. Type is: " + data['type'] + ".");
     if('lobbyCode' in io.get_session(sid)):
+        print("Session found")
         lobbyCode = io.get_session(sid)['lobbyCode']
         userID = io.get_session(sid)['userID']
         io.emit('gameUpdate', lobbyHandler.getLobby(lobbyCode).processGameEvent(userID, data), room=lobbyCode)

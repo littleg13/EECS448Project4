@@ -1,3 +1,5 @@
+from datetime import datetime
+
 class Lobby:
     def __init__(self, lobbyCode):
         self.gameStarted = False
@@ -35,3 +37,26 @@ class Lobby:
             del self.players[userID]
             return True
         return False
+
+    def updateSeen(self, userID):
+        if (players[userID]):
+            players[userID].setLastSeen(datetime.now)
+            return True
+        else:
+            return False
+
+    def startGame(self):
+        if (gameStarted):
+            return False
+        else:
+            gameStarted = True
+            return True
+
+    def processGameEvent(self, userID, data):
+        print("In processGameEvent")
+        if data['eventType'] == 'move':
+            print("Moving ID: " + userID);
+            pass
+        elif data['eventType'] == 'fire':
+            print("Firing ID: " + userID);
+            pass

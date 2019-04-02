@@ -101,7 +101,6 @@ class Game {
   }
 
   checkMapCollision(obj, linearVelocity, rotationalVelocity) {
-
     let increment = -linearVelocity;
     let map = this.map;
     // Straight distance between center of "Tank" corner of "Tank"
@@ -165,5 +164,9 @@ class Game {
     this.renderTanks();
     this.processInput();
     this.renderBullets();
+  }
+
+  getPlayerPos() {
+    return [this.tanks['localStorage.userID'].xPos, this.tanks['localStorage.userID'].yPos];
   }
 };

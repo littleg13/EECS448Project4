@@ -7,6 +7,7 @@ class LobbyHandler:
 
     def createLobby(self, lobbyCode):
         self.lobbyList[lobbyCode] = Lobby(lobbyCode)
+        
     def joinLobby(self, lobbyCode, userID, username):
         result = 0
         if(self.isLobby(lobbyCode)):
@@ -17,7 +18,9 @@ class LobbyHandler:
             else:
                 result = 1
         return result
+
     def getLobby(self, lobbyCode):
         return self.lobbyList[lobbyCode]
+
     def isLobby(self, lobbyCode):
         return(lobbyCode in self.lobbyList)
