@@ -10,6 +10,7 @@ class Game {
     this.gridBoxDim;
     this.bullets = [];
     this.keys = [];
+    this.movedSinceLastTransmit = false;
     this.init();
   }
 
@@ -134,23 +135,27 @@ class Game {
     if( this.keys["ArrowLeft"] ) {
       if(this.checkMapCollision(player, 0, -0.1) == true) {
         player.direction -= 0.1;
+        this.movedSinceLastTransmit = true;
       }
     }
     if( this.keys["ArrowRight"] ) {
       if(this.checkMapCollision(player, 0, 0.1) == true) {
         player.direction += 0.1;
+        this.movedSinceLastTransmit = true;
       }
     }
     if( this.keys["ArrowUp"] ) {
       if(this.checkMapCollision(player, .1, 0) == true) {
         player.xPos += Math.sin( player.direction ) * 0.1;
         player.yPos -= Math.cos( player.direction ) * 0.1;
+        this.movedSinceLastTransmit = true;
       }
     }
     if( this.keys["ArrowDown"] ) {
       if(this.checkMapCollision(player, -.1, 0) == true) {
         player.xPos -= Math.sin( player.direction ) * 0.1;
         player.yPos += Math.cos( player.direction ) * 0.1;
+        this.movedSinceLastTransmit = true;
       }
     }
     if( this.keys[" "] ) {
@@ -166,7 +171,12 @@ class Game {
     this.renderBullets();
   }
 
+  playerMoved() {
+    return this.movedSinceLastTransmit;
+  }
+
   getPlayerPos() {
+    this.movedSinceLastTransmit = False;
     return [this.tanks['localStorage.userID'].xPos, this.tanks['localStorage.userID'].yPos];
   }
 };

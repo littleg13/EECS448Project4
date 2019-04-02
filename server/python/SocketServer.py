@@ -56,6 +56,9 @@ def auth(sid, data):
         session['userID'] = data['userID']
         session['lobbyCode'] = data['lobbyCode']
     io.enter_room(sid, data['lobbyCode'])
+    if (not lobbyHandler.isLobby(data['lobbyCode'])):
+        io.emit('clearStorage', {}, room=data['lobbyCode']);
+        return
     if((not lobbyHandler.getLobby(data['lobbyCode']).getGameStarted()) and (data['page'] != 'lobby.html')):
         io.emit('redirect', {'page' : 'lobby.html'}, room=sid)
     else:

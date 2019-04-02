@@ -2,7 +2,7 @@
 class Player:
     def __init__(self, username):
         self.username = username
-        self.lastSeen;
+        self.lastSeen = 0;
         print("Created player with name: " + self.username)
 
     def __str__(self):

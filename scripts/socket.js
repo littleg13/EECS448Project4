@@ -1,4 +1,4 @@
-let socket = io('https://448.cuzzo.net');
+let socket = io('http://localhost:3000');
 
 function lobbySetup() {
   document.getElementById('lobbyCode').innerHTML = localStorage.lobbyCode;
@@ -69,6 +69,12 @@ socket.on('error', function (data) {
 socket.on('redirect', function (data) {
   window.location.href = data['page'];
 });
+
+socket.on('clearStorage', function (data) {
+  localStorage.clear();
+  window.location.href = 'index.html';
+});
+
 
 socket.on('playerJoin', function (data) {
   console.log("Player joined: " + data)

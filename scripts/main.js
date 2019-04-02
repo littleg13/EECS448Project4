@@ -13,6 +13,15 @@ socket.on('connect', function (data) {
   }
 });
 
+socket.on('redirect', function (data) {
+  window.location.href = data['page'];
+});
+
+socket.on('clearStorage', function (data) {
+  localStorage.clear();
+  window.location.href = 'index.html';
+});
+
 socket.on('gameUpdate', function (data) {
   switch(data['eventType']) {
     case 'playerMove':
@@ -44,9 +53,9 @@ function mainLoop() {
 }
 
 function sendServerUpdate() {
-  if (myTurn) {
+  if (myTurn && game.playerMoved()) {
     myPos = game.getPlayerPos();
     console.log(myPos);
-    socket.emit('gameEvent', {type: 'move', })
+    socket.emit('gameEvent', {type: 'move', newPos: myPos});
   }
 }

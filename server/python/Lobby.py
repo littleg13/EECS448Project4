@@ -39,11 +39,7 @@ class Lobby:
         return False
 
     def updateSeen(self, userID):
-        if (players[userID]):
-            players[userID].setLastSeen(datetime.now)
-            return True
-        else:
-            return False
+        this.players[userID].setLastSeen(datetime.now)
 
     def startGame(self):
         if (gameStarted):
@@ -53,10 +49,14 @@ class Lobby:
             return True
 
     def processGameEvent(self, userID, data):
-        print("In processGameEvent")
-        if data['eventType'] == 'move':
+        print("In processGameEvent. Data is: ")
+        print(data)
+        if data['type'] == 'move':
             print("Moving ID: " + userID);
+            # Check that move is legal
+            # Change player pos on server side
+            # Return new data packet to be broadcast
             pass
-        elif data['eventType'] == 'fire':
+        elif data['type'] == 'fire':
             print("Firing ID: " + userID);
             pass
