@@ -73,7 +73,14 @@ def logout(sid, data):
 # def disconnect(sid):
 #     io.session_save()
 
+@io.on('gameEvent')
+def gameEvent(sid, data):
+    if('lobbyCode' in io.get_session(sid)):
+        lobbyCode = io.get_session(sid)['lobbyCode']
+        userID = io.get_session(sid)['userID']
+        io.emit('gameUpdate', lobbyHandler.getLobby(lobbyCode).processGameEvent(userID, data), room=lobbyCode)
+    else:
+        io.emit('error', {'errorType': 'Unknown lobbycode given in gameEvent'})
+
 if __name__ == '__main__':
     eventlet.wsgi.server(eventlet.listen(('', 3000)), app)
-
-# json.dumps(list(map(lambda x:lobbyList[data['lobbyCode']][x].__dict__,lobbyList[data['lobbyCode']])))
