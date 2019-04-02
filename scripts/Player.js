@@ -1,7 +1,7 @@
 var Player = function() {
   this.xPos;
   this.yPos;
-  this.dir; // Degree in radians from straight up
+  this.direction; // Direction in radians from straight up
   this.health;
 
   this.render() {
