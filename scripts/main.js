@@ -18,9 +18,12 @@ socket.on('connect', function (data) {
 socket.on('playerList', function (data) {
   if (game) {
     for(let userID in data) {
+      let tank = data[userID]
       if(userID != localStorage.userID) {
-        let tank = data[userID]
-        game.addTank(userID, tank['username'], tank['xPos'], tank['yPos'], tank['direction'], 'blue')
+        game.addTank(userID, tank['username'], tank['xPos'], tank['yPos'], tank['direction'], tank['distanceLeft'],'blue')
+      }
+      else{
+        game.addTank(userID, tank['username'], tank['xPos'], tank['yPos'], tank['direction'], tank['distanceLeft'], 'green')
       }
     }
   }
@@ -43,6 +46,7 @@ socket.on('gameUpdate', function (data) {
       }
       break;
     case 'playerFire':
+      game.fire(data['userID'], 0, 0);
       break;
     case 'advanceTurn':
       game.advanceTurn(data['userID']);
@@ -57,9 +61,7 @@ var handleKeyDown = function (evt) {
 }
 
 var handleKeyUp = function (evt) {
-  if (game.turn == localStorage.userID) {
     game.keys[ evt.key ] = false;
-  }
 }
 
 window.addEventListener('keydown', handleKeyDown, true);

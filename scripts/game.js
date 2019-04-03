@@ -19,7 +19,6 @@ class Game {
   init() {
     this.initCanvas();
     this.initMap();
-    this.addTank(localStorage.userID, 'buttplug', 5, 5, 90 * Math.PI / 180, 'green');
   }
 
   initCanvas() {
@@ -57,8 +56,8 @@ class Game {
     }
   }
 
-  addTank(userID, username, xPos, yPos, direction, color) {
-    this.tanks[userID] = new Tank(username ,xPos, yPos, direction, color);
+  addTank(userID, username, xPos, yPos, direction, distanceLeft, color) {
+    this.tanks[userID] = new Tank(username ,xPos, yPos, direction, distanceLeft, color);
   }
 
   updateTankPosition(userID, newXPos, newYPos, newDirection) {
@@ -83,7 +82,7 @@ class Game {
     this.ctx.rotate( tank.direction );
 
     // Movement Radius
-    if(userID == localStorage.userID && tank.distanceLeft > 0){
+    if(userID == localStorage.userID && this.turn == userID && tank.distanceLeft > 0){
       this.ctx.beginPath();
       this.ctx.arc( 0, 0, ( tank.distanceLeft + 0.5 ) * this.gridBoxDim , 0, Math.PI * 2 );
       this.ctx.fillStyle = 'rgba( 196, 196, 64, 0.5 )';
@@ -117,10 +116,11 @@ class Game {
 
   fire(shooterID, power, curve) {
     let shooter = this.tanks[shooterID];
-    var proj = { xPos: shooter.xPos, yPos: shooter.yPos, direction: shooter.direction };
-    this.bullets.push(proj);
-    this.playerShot = true;
-    this.reloading = true;
+    if(shooter.canShoot){
+      var proj = { xPos: shooter.xPos, yPos: shooter.yPos, direction: shooter.direction };
+      this.bullets.push(proj);
+      this.tanks[shooterID].canShoot = false;
+    }
   }
 
   checkMapCollision(obj, linearVelocity, rotationalVelocity) {
@@ -167,8 +167,10 @@ class Game {
       }
     }
     if( this.keys[" "] ) {
-      if(this.turn == localStorage.userID && !this.reloading){
+      if(this.turn == localStorage.userID && player.canShoot){
+        this.playerShot = true;
         this.fire(localStorage.userID);
+        player.canShoot = false;
       }
     }
 
@@ -203,9 +205,7 @@ class Game {
 
   advanceTurn(userID) {
     this.turn = userID;
-    if(localStorage.userID == userID){
-      this.reloading = false;
-    }
+    this.tanks[userID].canShoot = true;
     this.tanks[userID].distanceLeft = 5;
   }
 
