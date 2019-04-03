@@ -163,7 +163,6 @@ class Game {
     if( this.keys[" "] ) {
       this.fire('localStorage.userID');
     }
-    this.tanks['localStorage.userID'] = player;
   }
 
   gameTick() {
