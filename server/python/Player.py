@@ -27,3 +27,4 @@ class Player:
         output['xPos'] = self.xPos
         output['yPos'] = self.yPos
         output['direction'] = self.direction
+        return output
