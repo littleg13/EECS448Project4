@@ -72,9 +72,11 @@ class Lobby:
                 if player.distanceLeft > 0:
                     player.xPos = data['newPos'][0]
                     player.yPos = data['newPos'][1]
+                    player.direction = data['newDir']
                     outboundData['type'] = 'playerMove'
                     outboundData['userID'] = userID
                     outboundData['newPos'] = data['newPos']
+                    outboundData['newDir'] = data['newDir']
                 else:
                     print("no mas mover para ti")
             print("Moving ID: " + userID)
@@ -86,3 +88,4 @@ class Lobby:
         elif data['type'] == 'fire':
             print("Firing ID: " + userID);
             pass
+        return outboundData
