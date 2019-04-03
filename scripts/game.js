@@ -68,6 +68,7 @@ class Game {
   }
 
   renderTank(tank) {
+    this.ctx.save();
     this.ctx.fillStyle = tank.color;
     this.ctx.fillRect( Math.round(tank.xPos) * this.gridBoxDim, Math.round(tank.yPos) * this.gridBoxDim, 30, 30 );
     this.ctx.translate( this.gridBoxDim * (tank.xPos + 0.5), this.gridBoxDim * (tank.yPos + 0.5) );
@@ -77,7 +78,7 @@ class Game {
     this.ctx.fillRect( 5, -15, 10, 30 );
     this.ctx.fillStyle = tank.color;
     this.ctx.fillRect( -5.5, -20, 11, 35 );
-    this.ctx.setTransform();
+    this.ctx.restore();
   }
 
   renderBullets() {
@@ -86,12 +87,13 @@ class Game {
       bullet.xPos += Math.sin( bullet.direction ) * 0.5;
       bullet.yPos -= Math.cos( bullet.direction ) * 0.5;
       //checkCollision( bullet );
+      this.ctx.save();
       this.ctx.fillStyle = 'red';
       this.ctx.fillRect( Math.round(bullet.xPos) * this.gridBoxDim, Math.round(bullet.yPos) * this.gridBoxDim, 30, 30 );
       this.ctx.fillStyle = 'purple';
       this.ctx.translate( bullet.xPos * this.gridBoxDim, bullet.yPos * this.gridBoxDim );
       this.ctx.fillRect( 0, 0, 10, 10 );
-      this.ctx.resetTransform();
+      this.ctx.restore();
     }
   }
 

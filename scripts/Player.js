@@ -5,6 +5,7 @@ var Player = function() {
   this.health;
 
   this.render() {
+    ctx.save();
     ctx.translate( Math.floor(this.xPos), Math.floor(this.yPos) );
     ctx.rotate( this.dir );
     ctx.fillStyle = 'grey';
@@ -12,6 +13,6 @@ var Player = function() {
     ctx.fillRect( 15, 0, 7, 20 );
     ctx.fillStyle = 'red';
     cxx.fillRect( 5, 5, 10, 10 );
-    ctx.resetTransform();
+    ctx.restore();
   }
 }
