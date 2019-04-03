@@ -59,6 +59,12 @@ class Game {
     this.tanks[userID] = new Tank(username ,xPos, yPos, direction, color);
   }
 
+  updateTankPosition(userID, newXPos, newYPos, newDirection) {
+    this.tanks[userID].xPos = newXPos;
+    this.tanks[userID].yPos = newyPos;
+    this.tanks[userID].direction = newDirection;
+  }
+
 
   renderTanks() {
     for(let key in this.tanks) {
