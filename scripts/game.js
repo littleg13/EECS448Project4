@@ -12,6 +12,7 @@ class Game {
     this.bullets = [];
     this.keys = [];
     this.movedSinceLastTransmit = false;
+    this.playerShot = false;
     this.init();
   }
 
@@ -62,7 +63,7 @@ class Game {
 
   updateTankPosition(userID, newXPos, newYPos, newDirection) {
     this.tanks[userID].xPos = newXPos;
-    this.tanks[userID].yPos = newyPos;
+    this.tanks[userID].yPos = newYPos;
     this.tanks[userID].direction = newDirection;
   }
 
@@ -118,6 +119,8 @@ class Game {
     let shooter = this.tanks[shooterID];
     var proj = { xPos: shooter.xPos, yPos: shooter.yPos, direction: shooter.direction };
     this.bullets.push(proj);
+    this.playerShot = true;
+    this.reloading = true;
   }
 
   checkMapCollision(obj, linearVelocity, rotationalVelocity) {
@@ -164,7 +167,9 @@ class Game {
       }
     }
     if( this.keys[" "] ) {
-      this.fire(localStorage.userID);
+      if(this.turn == localStorage.userID && !this.reloading){
+        this.fire(localStorage.userID);
+      }
     }
 
     if( player.distanceLeft <= 0 ) return;                // Cancel if no more moving
@@ -196,8 +201,23 @@ class Game {
     this.renderBullets();
   }
 
+  advanceTurn(userID) {
+    this.turn = userID;
+    if(localStorage.userID == userID){
+      this.reloading = false;
+    }
+    this.tanks[userID].distanceLeft = 5;
+  }
+
   playerMoved() {
     return this.movedSinceLastTransmit;
+  }
+  getPlayerShot() {
+    return this.playerShot;
+  }
+
+  resetPlayerShot() {
+    this.playerShot = false;
   }
 
   getPlayerPos() {

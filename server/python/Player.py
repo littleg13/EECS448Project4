@@ -20,7 +20,8 @@ class Player:
 
     def getLastSeen(self):
         return lastSeen
-
+    def resetDistance(self):
+        self.distanceLeft = 5
     def toDictionary(self):
         output = {}
         output['username'] = self.username

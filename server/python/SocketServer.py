@@ -28,6 +28,9 @@ def sendPlayerList(sid, data):
     else:
         playerList = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getPlayerList()
     io.emit('playerList', playerList, room=sid)
+def sendTurn(sid, data):
+    turn = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getTurn()
+    io.emit('gameUpdate', {'eventType' : 'advanceTurn', 'userID' : turn}, room=sid)
 
 @io.on('joinLobby')
 def joinLobby(sid, data):
@@ -75,7 +78,8 @@ def auth(sid, data):
 @io.on('requestInfo')
 def requestInfo(sid, data):
     options = {
-    'getPlayerList' : sendPlayerList
+    'getPlayerList' : sendPlayerList,
+    'getTurn' : sendTurn
     }
     options[data['request']](sid, data)
 
@@ -99,7 +103,11 @@ def gameEvent(sid, data):
         print("Session found")
         lobbyCode = io.get_session(sid)['lobbyCode']
         userID = io.get_session(sid)['userID']
-        io.emit('gameUpdate', lobbyHandler.getLobby(lobbyCode).processGameEvent(userID, data), room=lobbyCode)
+        gameUpdate = lobbyHandler.getLobby(lobbyCode).processGameEvent(userID, data)
+        io.emit('gameUpdate', gameUpdate , room=lobbyCode)
+        if('eventType' in gameUpdate):
+            if(gameUpdate['eventType'] == 'playerFire'):
+                io.emit('gameUpdate', {'eventType' : 'advanceTurn', 'userID' :  lobbyHandler.getLobby(lobbyCode).getTurn()})
     else:
         io.emit('error', {'errorType': 'Unknown lobbycode given in gameEvent'})
 

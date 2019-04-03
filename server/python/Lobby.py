@@ -44,6 +44,12 @@ class Lobby:
     def updateSeen(self, userID):
         #self.players[userID].setLastSeen(datetime.now)
         pass
+    def advanceTurn(self):
+        self.turn = (self.turn + 1) % len(self.order)
+        self.players[self.order[self.turn]].resetDistance()
+
+    def getTurn(self):
+        return self.order[self.turn]
 
     def startGame(self):
         if (self.gameStarted):
@@ -65,26 +71,28 @@ class Lobby:
         outboundData = {}
         # print("In processGameEvent. Data is: ")
         # print(data)
-        if data['eventType'] == 'move':
-            if userID == self.order[self.turn]:
+        if userID == self.order[self.turn]:
+            if data['eventType'] == 'playerMove':
                 distance = math.sqrt((player.xPos-data['newPos'][0])**2 + (player.yPos-data['newPos'][1])**2)
                 player.distanceLeft  -= distance
                 if player.distanceLeft > 0:
                     player.xPos = data['newPos'][0]
                     player.yPos = data['newPos'][1]
                     player.direction = data['newDir']
-                    outboundData['type'] = 'playerMove'
+                    outboundData['eventType'] = 'playerMove'
                     outboundData['userID'] = userID
                     outboundData['newPos'] = data['newPos']
                     outboundData['newDir'] = data['newDir']
                 else:
                     print("no mas mover para ti")
-            print("Moving ID: " + userID)
-            print(data['newPos'])
+                print("Moving ID: " + userID)
+                print(data['newPos'])
             # Check that move is legal
             # Change player pos on server side
             # Return new data packet to be broadcast
-            pass
-        elif data['type'] == 'fire':
-            print("Firing ID: " + userID);
+            elif data['eventType'] == 'playerFire':
+                self.advanceTurn()
+                outboundData['eventType'] = 'playerFire'
+                outboundData['userID'] = userID
+        print(outboundData)
         return outboundData
