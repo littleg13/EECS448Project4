@@ -38,7 +38,7 @@ socket.on('gameUpdate', function (data) {
   switch(data['eventType']) {
     case 'playerMove':
       if (localStorage.userID != data['userID']) {
-
+        game.updateTankPosition(data['userID'], data['newPos'][0], data['newPos'][1], data['newDir'])
       }
       break;
     case 'playerFire':
@@ -72,7 +72,6 @@ function sendServerUpdate() {
     myPos = game.getPlayerPos();
     myDir = game.getPlayerDir();
     game.resetLastMoved();
-    console.log(myPos);
     socket.emit('gameEvent', {eventType: 'move', newPos: myPos, newDir: myDir});
   }
 }
