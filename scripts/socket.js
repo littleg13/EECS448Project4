@@ -28,6 +28,7 @@ socket.on('message', function (data) {
 });
 
 socket.on('ack', function (data) {
+  console.log("fuclkkk")
   switch (data['type']) {
     case 'lobbyCreated':
       break;
@@ -92,3 +93,7 @@ socket.on('playerList', function (data) {
     document.getElementById('wrapper').appendChild(newPlayer);
   };
 });
+
+function startGame() {
+  socket.emit('startGame', {});
+}

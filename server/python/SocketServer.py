@@ -39,6 +39,7 @@ def joinLobby(sid, data):
 
 @io.on('createLobby')
 def createLobby(sid, data):
+    print('fuck')
     lobbyCode = generateRandomString(4)
     userID = generateRandomString(10)
     with io.session(sid) as session:
@@ -79,6 +80,12 @@ def logout(sid, data):
 # @io.on('disconnect')
 # def disconnect(sid):
 #     io.session_save()
+
+@io.on('startGame')
+def startGame(sid, data):
+    lobbyCode = io.get_session(sid)['lobbyCode']
+    lobbyHandler.getLobby(lobbyCode).startGame()
+    io.emit('redirect', {'page': 'game.html'})
 
 @io.on('gameEvent')
 def gameEvent(sid, data):

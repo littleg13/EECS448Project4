@@ -39,7 +39,8 @@ class Lobby:
         return False
 
     def updateSeen(self, userID):
-        this.players[userID].setLastSeen(datetime.now)
+        #self.players[userID].setLastSeen(datetime.now)
+        pass
 
     def startGame(self):
         if (gameStarted):
@@ -52,7 +53,8 @@ class Lobby:
         print("In processGameEvent. Data is: ")
         print(data)
         if data['type'] == 'move':
-            print("Moving ID: " + userID);
+            print("Moving ID: " + userID)
+            print(newPos)
             # Check that move is legal
             # Change player pos on server side
             # Return new data packet to be broadcast

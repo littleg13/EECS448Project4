@@ -176,7 +176,7 @@ class Game {
   }
 
   getPlayerPos() {
-    this.movedSinceLastTransmit = False;
+    this.movedSinceLastTransmit = false;
     return [this.tanks['localStorage.userID'].xPos, this.tanks['localStorage.userID'].yPos];
   }
 };
