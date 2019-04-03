@@ -2,7 +2,7 @@ let socket = io('http://localhost:3000');
 
 function lobbySetup() {
   document.getElementById('lobbyCode').innerHTML = localStorage.lobbyCode;
-  socket.emit('requestInfo', {request : "getPlayerList"});
+  socket.emit('requestInfo', {request : "getPlayerList", fullInfo : false});
 };
 
 function joinLobby() {

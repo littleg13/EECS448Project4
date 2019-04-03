@@ -6,10 +6,22 @@ let myTurn = true;
 
 socket.on('connect', function (data) {
   console.log("authing server")
-  if(localStorage.userID){
+  if(localStorage.userID) {
     let url = window.location.pathname;
     url = url.substring(url.lastIndexOf('/')+1);
     socket.emit('auth', {userID : localStorage.userID, lobbyCode : localStorage.lobbyCode, page : url});
+    socket.emit('requestInfo', {request : 'getPlayerList', fullInfo : true});
+  }
+});
+
+socket.on('playerList', function (data) {
+  if (game) {
+    for(let userID in data) {
+      if(userID != localStorage.userID) {
+        let tank = data['userID']
+        game.addTank(userID, tank['username'], tank['xPos'], tank['yPos'], tank['direction'], 'blue')
+      }
+    }
   }
 });
 
@@ -25,6 +37,9 @@ socket.on('clearStorage', function (data) {
 socket.on('gameUpdate', function (data) {
   switch(data['eventType']) {
     case 'playerMove':
+      if (localStorage.userID != data['userID']) {
+
+      }
       break;
     case 'playerFire':
       break;

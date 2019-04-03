@@ -20,8 +20,13 @@ io = socketio.Server()
 app = socketio.WSGIApp(io)
 
 
-def sendPlayerList(sid):
-    playerList = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getPlayerList()
+def sendPlayerList(sid, data):
+    fullInfo = data['fullInfo']
+    playerList = None
+    if fullInfo:
+        playerList = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getPlayersInfo()
+    else:
+        playerList = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getPlayerList()
     io.emit('playerList', playerList, room=sid)
 
 @io.on('joinLobby')
@@ -72,7 +77,7 @@ def requestInfo(sid, data):
     options = {
     'getPlayerList' : sendPlayerList
     }
-    options[data['request']](sid)
+    options[data['request']](sid, data)
 
 @io.on('logout')
 def logout(sid, data):

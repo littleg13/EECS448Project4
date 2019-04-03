@@ -1,3 +1,4 @@
+import math
 from datetime import datetime
 
 class Lobby:
@@ -6,6 +7,8 @@ class Lobby:
         self.players = {}
         self.lobbyCode = lobbyCode
         print("Created Lobby with code: " + self.lobbyCode)
+        self.order = []
+        self.turn = 0
 
     def appendPlayer(self, userID, playerObject):
         self.players[userID] = playerObject
@@ -43,18 +46,39 @@ class Lobby:
         pass
 
     def startGame(self):
-        if (gameStarted):
+        if (self.gameStarted):
             return False
         else:
-            gameStarted = True
+            self.gameStarted = True
+            for playerID, playerObject in self.players.items():
+                self.order.append(playerID)
             return True
 
+    def getPlayersInfo(self):
+        output = {}
+        for playerID, playerObject in self.players.items():
+            output[playerID] = playerObject.toDictionary()
+        return output
+
     def processGameEvent(self, userID, data):
-        print("In processGameEvent. Data is: ")
-        print(data)
+        player = self.players[userID]
+        outboundData = {}
+        # print("In processGameEvent. Data is: ")
+        # print(data)
         if data['type'] == 'move':
+            if userID == self.order[self.turn]:
+                distance = math.sqrt((player.xPos-data['newPos'][0])**2 + (player.yPos-data['newPos'][1])**2)
+                player.distanceLeft  -= distance
+                if player.distanceLeft > 0:
+                    player.xPos = data['newPos'][0]
+                    player.yPos = data['newPos'][1]
+                    outboundData['type'] = 'playerMove'
+                    outboundData['userID'] = userID
+                    outboundData['newPos'] = data['newPos']
+                else:
+                    print("no mas mover para ti")
             print("Moving ID: " + userID)
-            print(newPos)
+            print(data['newPos'])
             # Check that move is legal
             # Change player pos on server side
             # Return new data packet to be broadcast
