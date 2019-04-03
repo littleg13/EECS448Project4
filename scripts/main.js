@@ -18,7 +18,7 @@ socket.on('playerList', function (data) {
   if (game) {
     for(let userID in data) {
       if(userID != localStorage.userID) {
-        let tank = data['userID']
+        let tank = data[userID]
         game.addTank(userID, tank['username'], tank['xPos'], tank['yPos'], tank['direction'], 'blue')
       }
     }

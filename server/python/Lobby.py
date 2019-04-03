@@ -65,7 +65,7 @@ class Lobby:
         outboundData = {}
         # print("In processGameEvent. Data is: ")
         # print(data)
-        if data['type'] == 'move':
+        if data['eventType'] == 'move':
             if userID == self.order[self.turn]:
                 distance = math.sqrt((player.xPos-data['newPos'][0])**2 + (player.yPos-data['newPos'][1])**2)
                 player.distanceLeft  -= distance
