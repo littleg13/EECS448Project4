@@ -6,6 +6,7 @@ class Game {
     this.mapDim = mapDim;
     this.tanks = {};
     this.turn = '';
+    this.distLeftThisTurn = 5;
     this.player;
     this.gridBoxDim;
     this.bullets = [];
@@ -73,6 +74,14 @@ class Game {
     this.ctx.fillRect( Math.round(tank.xPos) * this.gridBoxDim, Math.round(tank.yPos) * this.gridBoxDim, 30, 30 );
     this.ctx.translate( this.gridBoxDim * (tank.xPos + 0.5), this.gridBoxDim * (tank.yPos + 0.5) );
     this.ctx.rotate( tank.direction );
+
+    // Movement Radius
+    this.ctx.beginPath();
+    this.ctx.arc( 0, 0, ( this.distLeftThisTurn + 0.5 ) * this.gridBoxDim , 0, Math.PI * 2 );
+    this.ctx.fillStyle = 'rgba( 196, 196, 64, 0.5 )';
+    this.ctx.fill();
+    this.ctx.stroke();
+
     this.ctx.fillStyle = 'grey';
     this.ctx.fillRect( -15, -15, 10, 30 );
     this.ctx.fillRect( 5, -15, 10, 30 );
@@ -146,23 +155,30 @@ class Game {
         this.movedSinceLastTransmit = true;
       }
     }
+    if( this.keys[" "] ) {
+      this.fire('localStorage.userID');
+    }
+
+    if( this.distLeftThisTurn <= 0 ) return;                // Cancel if no more moving
+    let deltaPos = Math.min( this.distLeftThisTurn, 0.1 );  // Constrain movement w/in dist limit
+
     if( this.keys["ArrowUp"] ) {
-      if(this.checkMapCollision(player, .1, 0) == true) {
-        player.xPos += Math.sin( player.direction ) * 0.1;
-        player.yPos -= Math.cos( player.direction ) * 0.1;
+      if(this.checkMapCollision(player, 0.1, 0) == true) {
+        player.xPos += Math.sin( player.direction ) * deltaPos;
+        player.yPos -= Math.cos( player.direction ) * deltaPos;
+        this.distLeftThisTurn -= deltaPos;
         this.movedSinceLastTransmit = true;
       }
     }
     if( this.keys["ArrowDown"] ) {
-      if(this.checkMapCollision(player, -.1, 0) == true) {
-        player.xPos -= Math.sin( player.direction ) * 0.1;
-        player.yPos += Math.cos( player.direction ) * 0.1;
+      if(this.checkMapCollision(player, -0.1, 0) == true) {
+        player.xPos -= Math.sin( player.direction ) * deltaPos;
+        player.yPos += Math.cos( player.direction ) * deltaPos;
+        this.distLeftThisTurn -= deltaPos;
         this.movedSinceLastTransmit = true;
       }
     }
-    if( this.keys[" "] ) {
-      this.fire('localStorage.userID');
-    }
+    this.distLeftThisTurn = Math.max( 0.0, this.distLeftThisTurn );
   }
 
   gameTick() {
@@ -181,7 +197,7 @@ class Game {
   }
 
   getPlayerDir() {
-    return (this.tanks['localStorage.userID'].direction)%(Math.PI * 2);
+    return (this.tanks['localStorage.userID'].direction) % (Math.PI * 2);
   }
 
   resetLastMoved() {
