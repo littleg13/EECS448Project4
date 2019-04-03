@@ -176,7 +176,14 @@ class Game {
   }
 
   getPlayerPos() {
-    this.movedSinceLastTransmit = false;
     return [this.tanks['localStorage.userID'].xPos, this.tanks['localStorage.userID'].yPos];
+  }
+
+  getPlayerDir() {
+    return (this.tanks['localStorage.userID'].direction)%(Math.PI * 2);
+  }
+
+  resetLastMoved() {
+    this.movedSinceLastTransmit = false;
   }
 };

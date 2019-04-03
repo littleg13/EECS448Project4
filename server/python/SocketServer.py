@@ -94,7 +94,7 @@ def startGame(sid, data):
 
 @io.on('gameEvent')
 def gameEvent(sid, data):
-    print("Got game update. Type is: " + data['type'] + ".");
+    print("Got game update. Type is: " + data['eventType'] + ".");
     if('lobbyCode' in io.get_session(sid)):
         print("Session found")
         lobbyCode = io.get_session(sid)['lobbyCode']

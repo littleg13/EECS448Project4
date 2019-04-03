@@ -70,7 +70,9 @@ function mainLoop() {
 function sendServerUpdate() {
   if (myTurn && game.playerMoved()) {
     myPos = game.getPlayerPos();
+    myDir = game.getPlayerDir();
+    game.resetLastMoved();
     console.log(myPos);
-    socket.emit('gameEvent', {type: 'move', newPos: myPos});
+    socket.emit('gameEvent', {eventType: 'move', newPos: myPos, newDir: myDir});
   }
 }
