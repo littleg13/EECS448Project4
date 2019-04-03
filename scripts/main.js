@@ -1,4 +1,4 @@
-let socket = io('http://localhost:3000');
+let socket = io('https://448.cuzzo.net');
 let game = new Game(20);
 let gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
 let sendServerUpdateInt = setInterval(sendServerUpdate, 40);
