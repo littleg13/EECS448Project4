@@ -18,7 +18,7 @@ class Game {
   init() {
     this.initCanvas();
     this.initMap();
-    this.addTank('localStorage.userID', 'buttplug', 5, 5, 90 * Math.PI / 180, 'green');
+    this.addTank(localStorage.userID, 'buttplug', 5, 5, 90 * Math.PI / 180, 'green');
   }
 
   initCanvas() {
@@ -70,11 +70,11 @@ class Game {
   renderTanks() {
     for(let key in this.tanks) {
       let tank = this.tanks[key];
-      this.renderTank(tank);
+      this.renderTank(key, tank);
     }
   }
 
-  renderTank(tank) {
+  renderTank(userID, tank) {
     this.ctx.save();
     this.ctx.fillStyle = tank.color;
     this.ctx.fillRect( Math.round(tank.xPos) * this.gridBoxDim, Math.round(tank.yPos) * this.gridBoxDim, 30, 30 );
@@ -82,11 +82,13 @@ class Game {
     this.ctx.rotate( tank.direction );
 
     // Movement Radius
-    this.ctx.beginPath();
-    this.ctx.arc( 0, 0, ( this.distLeftThisTurn + 0.5 ) * this.gridBoxDim , 0, Math.PI * 2 );
-    this.ctx.fillStyle = 'rgba( 196, 196, 64, 0.5 )';
-    this.ctx.fill();
-    this.ctx.stroke();
+    if(userID == localStorage.userID && tank.distanceLeft > 0){
+      this.ctx.beginPath();
+      this.ctx.arc( 0, 0, ( tank.distanceLeft + 0.5 ) * this.gridBoxDim , 0, Math.PI * 2 );
+      this.ctx.fillStyle = 'rgba( 196, 196, 64, 0.5 )';
+      this.ctx.fill();
+      this.ctx.stroke();
+    }
 
     this.ctx.fillStyle = 'grey';
     this.ctx.fillRect( -15, -15, 10, 30 );
@@ -148,7 +150,7 @@ class Game {
   }
 
   processInput() {
-    let player = this.tanks['localStorage.userID'];
+    let player = this.tanks[localStorage.userID];
     if( this.keys["ArrowLeft"] ) {
       if(this.checkMapCollision(player, 0, -0.1) == true) {
         player.direction -= 0.1;
@@ -162,17 +164,17 @@ class Game {
       }
     }
     if( this.keys[" "] ) {
-      this.fire('localStorage.userID');
+      this.fire(localStorage.userID);
     }
 
-    if( this.distLeftThisTurn <= 0 ) return;                // Cancel if no more moving
-    let deltaPos = Math.min( this.distLeftThisTurn, 0.1 );  // Constrain movement w/in dist limit
+    if( player.distanceLeft <= 0 ) return;                // Cancel if no more moving
+    let deltaPos = Math.min( player.distanceLeft, 0.1 );  // Constrain movement w/in dist limit
 
     if( this.keys["ArrowUp"] ) {
       if(this.checkMapCollision(player, 0.1, 0) == true) {
         player.xPos += Math.sin( player.direction ) * deltaPos;
         player.yPos -= Math.cos( player.direction ) * deltaPos;
-        this.distLeftThisTurn -= deltaPos;
+        player.distanceLeft -= deltaPos;
         this.movedSinceLastTransmit = true;
       }
     }
@@ -180,11 +182,11 @@ class Game {
       if(this.checkMapCollision(player, -0.1, 0) == true) {
         player.xPos -= Math.sin( player.direction ) * deltaPos;
         player.yPos += Math.cos( player.direction ) * deltaPos;
-        this.distLeftThisTurn -= deltaPos;
+        player.distanceLeft -= deltaPos;
         this.movedSinceLastTransmit = true;
       }
     }
-    this.distLeftThisTurn = Math.max( 0.0, this.distLeftThisTurn );
+    player.distanceLeft = Math.max( 0.0, player.distanceLeft );
   }
 
   gameTick() {
@@ -199,11 +201,11 @@ class Game {
   }
 
   getPlayerPos() {
-    return [this.tanks['localStorage.userID'].xPos, this.tanks['localStorage.userID'].yPos];
+    return [this.tanks[localStorage.userID].xPos, this.tanks[localStorage.userID].yPos];
   }
 
   getPlayerDir() {
-    return (this.tanks['localStorage.userID'].direction) % (Math.PI * 2);
+    return (this.tanks[localStorage.userID].direction) % (Math.PI * 2);
   }
 
   resetLastMoved() {

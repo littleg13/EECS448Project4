@@ -87,5 +87,4 @@ class Lobby:
             pass
         elif data['type'] == 'fire':
             print("Firing ID: " + userID);
-            pass
         return outboundData
