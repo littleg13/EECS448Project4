@@ -8,13 +8,20 @@ function lobbySetup() {
 function joinLobby() {
   lobbyCode = document.getElementById('lobbyCode').value;
   name = document.getElementById('username').value;
-  socket.emit('joinLobby', {lobbyCode : lobbyCode, username : name});
-
+  if (lobbyCode == '' || name == '') {
+    alert("Name or lobby code cannot be blank, please try again.")
+  } else {
+    socket.emit('joinLobby', {lobbyCode : lobbyCode.toUpperCase(), username : name.toUpperCase()});
+  }
 };
 
 function createLobby() {
   name = document.getElementById('username').value;
-  socket.emit('createLobby', {username : name});
+  if (name == '') {
+    alert("Name cannot be blank, please try again.")
+  } else {
+    socket.emit('createLobby', {username : name.toUpperCase()});
+  }
 };
 
 function logout() {

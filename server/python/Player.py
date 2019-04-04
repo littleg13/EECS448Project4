@@ -22,6 +22,9 @@ class Player:
     def getLastSeen(self):
         return lastSeen
 
+    def getPos(self):
+        return {'xPos': self.xPos, 'yPos': self.yPos, 'direction': self.direction}
+
     def setColor(self, color):
         self.color = color
         print("Player with name " + self.username + " is now color: " + self.color)

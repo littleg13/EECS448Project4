@@ -94,7 +94,7 @@ def logout(sid, data):
 def startGame(sid, data):
     lobbyCode = io.get_session(sid)['lobbyCode']
     lobbyHandler.getLobby(lobbyCode).startGame()
-    io.emit('redirect', {'page': 'game.html'})
+    io.emit('redirect', {'page': 'game.html'}, room=io.get_session(sid)['lobbyCode'])
 
 @io.on('gameEvent')
 def gameEvent(sid, data):
