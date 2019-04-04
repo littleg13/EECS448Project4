@@ -11,9 +11,7 @@ class Lobby:
         self.order = []
         self.turn = 0
         self.colorList = ['blue', 'limeGreen', 'blueViolet', 'deepPink', 'darkOrange', 'gold', 'red', 'deepSkyBlue']
-        print(self.colorList)
         random.shuffle(self.colorList)
-        print(self.colorList)
 
     def appendPlayer(self, userID, playerObject):
         self.players[userID] = playerObject
@@ -103,6 +101,3 @@ class Lobby:
                 outboundData['userID'] = userID
         print(outboundData)
         return outboundData
-
-
-['blue', 'limeGreen', 'blueViolet', 'deepPink', 'darkOrange', 'gold', 'red', 'deepSkyBlue']
