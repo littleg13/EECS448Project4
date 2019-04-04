@@ -6,7 +6,7 @@ function lobbySetup() {
 };
 
 function joinLobby() {
-  lobbyCode = document.getElementById('lobbyCode').value;
+  lobbyCode = document.getElementById('lobbyCode').value.toUpperCase();
   name = document.getElementById('username').value;
   if (lobbyCode == '' || name == '') {
     alert("Name or lobby code cannot be blank, please try again.")

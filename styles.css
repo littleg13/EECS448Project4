@@ -1,6 +1,7 @@
 body {
   color: white;
   margin: 0px;
+  overflow: hidden;
 }
 
 #wrapper {
