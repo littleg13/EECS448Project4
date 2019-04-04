@@ -1,4 +1,4 @@
-let socket = io('https://448.cuzzo.net');
+let socket = io('http://localhost:3000');
 let game = new Game(20);
 let gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
 let sendServerUpdateInt = setInterval(sendServerUpdate, 40);
@@ -16,14 +16,15 @@ socket.on('connect', function (data) {
 });
 
 socket.on('playerList', function (data) {
+  console.log(data);
   if (game) {
     for(let userID in data) {
       let tank = data[userID]
       if(userID != localStorage.userID) {
-        game.addTank(userID, tank['username'], tank['xPos'], tank['yPos'], tank['direction'], tank['distanceLeft'],'blue')
+        game.addTank(userID, tank['username'], tank['xPos'], tank['yPos'], tank['direction'], tank['distanceLeft'], tank['color'])
       }
       else{
-        game.addTank(userID, tank['username'], tank['xPos'], tank['yPos'], tank['direction'], tank['distanceLeft'], 'green')
+        game.addTank(userID, tank['username'], tank['xPos'], tank['yPos'], tank['direction'], tank['distanceLeft'], tank['color'])
       }
     }
   }

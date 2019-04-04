@@ -1,4 +1,4 @@
-let socket = io('https://448.cuzzo.net');
+let socket = io('http://localhost:3000');
 
 function lobbySetup() {
   document.getElementById('lobbyCode').innerHTML = localStorage.lobbyCode;

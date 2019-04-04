@@ -77,7 +77,7 @@ class Game {
   renderTank(userID, tank) {
     this.ctx.save();
     this.ctx.fillStyle = tank.color;
-    this.ctx.fillRect( Math.round(tank.xPos) * this.gridBoxDim, Math.round(tank.yPos) * this.gridBoxDim, 30, 30 );
+    this.ctx.fillRect( Math.round(tank.xPos) * this.gridBoxDim + 1, Math.round(tank.yPos) * this.gridBoxDim + 1, this.gridBoxDim-2, this.gridBoxDim-2);
     this.ctx.translate( this.gridBoxDim * (tank.xPos + 0.5), this.gridBoxDim * (tank.yPos + 0.5) );
     this.ctx.rotate( tank.direction );
 
@@ -85,14 +85,20 @@ class Game {
     if(userID == localStorage.userID && this.turn == userID && tank.distanceLeft > 0){
       this.ctx.beginPath();
       this.ctx.arc( 0, 0, ( tank.distanceLeft + 0.5 ) * this.gridBoxDim , 0, Math.PI * 2 );
-      this.ctx.fillStyle = 'rgba( 196, 196, 64, 0.5 )';
+      this.ctx.fillStyle = 'rgba( 238, 255, 0, 0.5 )';
       this.ctx.fill();
+      this.ctx.lineWidth = 3;
       this.ctx.stroke();
     }
 
+    this.ctx.fillStyle = 'black';
+    this.ctx.fillRect( -17, -17, 34, 34 );
+    this.ctx.fillRect( 5, -15, 10, 30 );
     this.ctx.fillStyle = 'grey';
     this.ctx.fillRect( -15, -15, 10, 30 );
     this.ctx.fillRect( 5, -15, 10, 30 );
+    this.ctx.fillStyle = 'black';
+    this.ctx.fillRect( -7.5, -22, 15, 39 );
     this.ctx.fillStyle = tank.color;
     this.ctx.fillRect( -5.5, -20, 11, 35 );
     this.ctx.restore();
@@ -106,7 +112,7 @@ class Game {
       //checkCollision( bullet );
       this.ctx.save();
       this.ctx.fillStyle = 'red';
-      this.ctx.fillRect( Math.round(bullet.xPos) * this.gridBoxDim, Math.round(bullet.yPos) * this.gridBoxDim, 30, 30 );
+      this.ctx.fillRect( Math.round(bullet.xPos) * this.gridBoxDim, Math.round(bullet.yPos) * this.gridBoxDim, this.gridBoxDim, this.gridBoxDim );
       this.ctx.fillStyle = 'purple';
       this.ctx.translate( bullet.xPos * this.gridBoxDim, bullet.yPos * this.gridBoxDim );
       this.ctx.fillRect( 0, 0, 10, 10 );

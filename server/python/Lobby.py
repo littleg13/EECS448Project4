@@ -1,4 +1,5 @@
 import math
+import random
 from datetime import datetime
 
 class Lobby:
@@ -9,9 +10,14 @@ class Lobby:
         print("Created Lobby with code: " + self.lobbyCode)
         self.order = []
         self.turn = 0
+        self.colorList = ['blue', 'limeGreen', 'blueViolet', 'deepPink', 'darkOrange', 'gold', 'red', 'deepSkyBlue']
+        print(self.colorList)
+        random.shuffle(self.colorList)
+        print(self.colorList)
 
     def appendPlayer(self, userID, playerObject):
         self.players[userID] = playerObject
+        self.players[userID].setColor(self.colorList.pop())
 
     def checkForPlayer(self, userID):
         return(userID in self.players)
@@ -37,6 +43,7 @@ class Lobby:
 
     def removePlayer(self, userID):
         if(self.checkForPlayer(userID)):
+            colorList += self.players[userID].color
             del self.players[userID]
             return True
         return False
@@ -96,3 +103,6 @@ class Lobby:
                 outboundData['userID'] = userID
         print(outboundData)
         return outboundData
+
+
+['blue', 'limeGreen', 'blueViolet', 'deepPink', 'darkOrange', 'gold', 'red', 'deepSkyBlue']

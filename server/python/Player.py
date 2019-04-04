@@ -7,6 +7,7 @@ class Player:
         self.yPos = 5
         self.distanceLeft = 5
         self.direction = 0
+        self.color = 'black';
         print("Created player with name: " + self.username)
 
     def __str__(self):
@@ -20,8 +21,14 @@ class Player:
 
     def getLastSeen(self):
         return lastSeen
+
+    def setColor(self, color):
+        self.color = color
+        print("Player with name " + self.username + " is now color: " + self.color)
+
     def resetDistance(self):
         self.distanceLeft = 5
+
     def toDictionary(self):
         output = {}
         output['username'] = self.username
@@ -29,4 +36,5 @@ class Player:
         output['yPos'] = self.yPos
         output['direction'] = self.direction
         output['distanceLeft'] = self.distanceLeft
+        output['color'] = self.color
         return output
