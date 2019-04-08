@@ -153,6 +153,9 @@ socket.on('gameUpdate', function (data) {
     case 'advanceTurn':
       game.advanceTurn(data['userID']);
       break;
+    case 'gameOver':
+      game.endGame(data.userID);
+      break;
   }
 });
 

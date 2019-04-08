@@ -307,4 +307,9 @@ class Game {
   resetLastMoved() {
     this.movedSinceLastTransmit = false;
   }
+
+  //TODO make end game
+  endGame(winningUserID) {
+    console.log("Game over. Winner is: " + winningUserID);
+  }
 };
