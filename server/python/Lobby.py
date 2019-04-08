@@ -113,7 +113,8 @@ class Lobby:
                     newHealth = self.players[collidedWith].health - 20
                     if(newHealth <= 0):
                         newHealth = 0
-                        self.removePlayer(self.players[collidedWith])
+                        self.order.remove(self.players[collidedWith])
+                        self.players[collidedWith].alive = False
                     self.players[collidedWith].health = newHealth
                     outboundData['playerHit'] = collidedWith
                     outboundData['newHealth'] = newHealth

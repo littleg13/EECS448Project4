@@ -10,6 +10,7 @@ class Tank {
     this.username = username;
     this.canShoot = false;
     this.health = 100;
+    this.alive = True;
   }
 
 }

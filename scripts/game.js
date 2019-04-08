@@ -111,13 +111,15 @@ class Game {
   }
 
   killTank( userID ) {
-    this.tanks[userID];
+    this.tanks[userID].alive = False;
   }
 
   renderTanks() {
     for( let key in this.tanks ) {
       let tank = this.tanks[key];
-      this.renderTank( key, tank );
+      if (tank.alive) {
+        this.renderTank( key, tank );
+      }
     }
   }
 
