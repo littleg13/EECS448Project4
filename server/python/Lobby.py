@@ -59,8 +59,8 @@ class Lobby:
         #self.players[userID].setLastSeen(datetime.now)
         pass
 
-    def advanceTurn(self):
-        self.turn = (self.turn + 1) % len(self.order)
+    def advanceTurn(self, numOfTurns):
+        self.turn = (self.turn + numOfTurns) % len(self.order)
         self.players[self.order[self.turn]].resetDistance()
 
     def getTurn(self):
@@ -107,6 +107,7 @@ class Lobby:
             # Return new data packet to be broadcast
             elif data['eventType'] == 'playerFire':
                 collidedWith = self.checkBulletCollision(userID, player, 0, 0)
+                turnsToAdvance = 1
                 if(collidedWith is 'map'):
                     outboundData['mapUpdate'] = self.map
                 elif(collidedWith != 'edge'):
@@ -116,11 +117,12 @@ class Lobby:
                         print(collidedWith)
                         print(self.order)
                         self.order.remove(collidedWith)
+                        turnsToAdvance = 0
                         self.players[collidedWith].alive = False
                     self.players[collidedWith].health = newHealth
                     outboundData['playerHit'] = collidedWith
                     outboundData['newHealth'] = newHealth
-                self.advanceTurn()
+                self.advanceTurn(turnsToAdvance)
                 outboundData['eventType'] = 'playerFire'
                 outboundData['userID'] = userID
         print(outboundData)
