@@ -1,15 +1,85 @@
-<html>
+<!doctype html>
+
+<html lang="en">
   <head>
     <title>Tanks</title>
+    <meta charset="utf-8">
     <link rel="stylesheet" href="styles.css">
     <script src="scripts/socket.io.js"></script>
-    <script src="scripts/socket.js"></script>
+    <script src="scripts/tank.js"></script>
+    <script src="scripts/game.js"></script>
+    <script src="scripts/main.js" defer></script>
+    <script>
+    const delay = 10;
+    var resizeTaskId = null;
+
+    var handleResize = ( evt ) => {
+      if ( window.innerWidth < 800 || window.innerHeight < 800 ) {
+        let rect = document.getElementsByTagName("main")[0].getBoundingClientRect();
+        if( rect.width < 800 || rect.height < 800 ) {
+          canvas.width = rect.width;
+          canvas.height = rect.width;
+          game.gridBoxDim = rect.width / game.mapDim;
+          document.getElementsByTagName("main")[0].style.padding = "1em 0";
+        }
+      }
+    }
+
+    window.addEventListener("resize", (evt) => {
+      if( resizeTaskId !== null ) {
+        clearTimeout( resizeTaskId );
+      }
+
+      resizeTaskId = setTimeout( () => {
+        resizeTaskId = null;
+        handleResize( evt );
+      }, delay);
+    });
+
+    </script>
   </head>
   <body>
-    <div id='wrapper'>
-      <h1 id='title'>Welcome to tanks!</h1>
-      <button type='button' onclick="document.location.href='join.html'">Join a Lobby</button>
-      <button type='button' onclick="localStorage.clear();document.location.href='createLobby.html'">Create a Lobby</button>
-    </div>
+    <main id="wrapper">
+      <h1 id="title">Welcome to tanks!</h1>
+      <div id="splash" class="active">
+        <label for="username">Enter a username:</label><br>
+        <input type="text" id="username">
+        <button type="button" onclick="pickUsername()">Enter Username</button>
+      </div>
+
+      <div id="splash2">
+        <button type='button' onclick="loadJoin()">Join a Lobby</button>
+        <button type='button' onclick="createLobby()">Create a Lobby</button>
+      </div>
+
+      <div id="join">
+        <label for="lobbyCode">Enter a room code:</label><br>
+        <input type='text' id="lobbyCode"></input><br>
+        <button type='button' onclick="joinLobby()">Join Lobby</button>
+        <button type="button" onclick="wrapper.makeActive('splash2');">Back</button>
+      </div>
+
+      <div id="waiting">
+        <h1>Loading...</h1>
+      </div>
+
+      <div id="lobbyMenu">
+        <h3>Lobby Code: <span id="lobbyName"></span></h3>
+        <h3>Players:</h3>
+        <ul id="lobbyList">
+        </ul>
+        <button type="button" onclick="startGame()">Start Game</button>
+        <button type="button" onclick="logout()">Logout</button>
+      </div>
+
+      <div id="game">
+        <canvas id="canvas" width=800 height=800></canvas>
+        <div id="playerList">
+      </div>
+
+      <script>
+      localStorage.clear();
+      </script>
+    </main>
   </body>
 <html>

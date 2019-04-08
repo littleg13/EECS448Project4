@@ -13,12 +13,20 @@ class Game {
     this.keys = [];
     this.movedSinceLastTransmit = false;
     this.playerShot = false;
+    this.begun = false;
     this.init();
   }
 
   init() {
     this.initCanvas();
     this.initMap();
+  }
+
+  begin() {
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keyup', handleKeyUp, true);
+    gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
+    sendServerUpdateInt = setInterval(sendServerUpdate, 40);
   }
 
   initCanvas() {
@@ -218,6 +226,7 @@ class Game {
   playerMoved() {
     return this.movedSinceLastTransmit;
   }
+
   getPlayerShot() {
     return this.playerShot;
   }

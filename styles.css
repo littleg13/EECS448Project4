@@ -1,17 +1,46 @@
-body {
-  color: white;
-  margin: 0px;
-  overflow: hidden;
+* {
+  box-sizing: border-box;
 }
 
-#wrapper {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  margin: auto;
-  width: 50%;
+body {
+  color: white;
+  background-image: url("images/wild_oliva.png")
+}
+
+main, header, footer {
+  margin: 2em auto;
+  max-width: 900px;
   text-align: center;
-  padding-top: 30px;
+  background-color: rgba(127, 127, 127, 0.50);
+  border: 1px solid black;
+  border-radius: 1em;
+  padding: 2em;
+}
+
+main div {
+  display: none;
+}
+
+main div.active {
+  display: block;
+}
+
+footer > * {
+  width: 25%;
+  box-sizing: border-box;
+  margin-left: 12.4%;
+  margin-right: 12.4%;
+  display: inline;
+}
+
+div#playerList {
+
+}
+
+@media only screen and (max-width: 800px) {
+  main {
+    padding: 0 1em;
+  }
 }
 
 #title {
@@ -24,30 +53,12 @@ body {
 
 button {
   display: block;
-  margin: 5px;
-  padding: 30px;
-  width: 400px;
+  margin: 1em auto;
+  padding: 1em;
+  width: 100%;
+  max-width: 12em;
   border: none;
   background-color: grey;
   font-size: 15px;
   border-radius: 5px;
-}
-
-body {
-  background-image: url("images/wild_oliva.png")
-}
-
-.footer {
-  position:fixed;
-  bottom: 15px;
-  width: 100%;
-  margin: auto;
-
-}
-.footer > * {
-  width: 25%;
-  box-sizing: border-box;
-  margin-left: 12.4%;
-  margin-right: 12.4%;
-  display: inline;
 }
