@@ -106,6 +106,7 @@ socket.on( "playerJoin", ( data ) => {
 });
 
 socket.on( "gameStart" , ( data ) => {
+  socket.emit( "requestInfo", { request : "getTurn"} );
   wrapper.makeActive( "game" );
   game.begin();
 });
@@ -133,6 +134,7 @@ socket.on('clearStorage', function (data) {
 });
 
 socket.on('gameUpdate', function (data) {
+  console.log("Game update received");
   switch(data['eventType']) {
     case 'playerMove':
       if (localStorage.userID != data['userID']) {
