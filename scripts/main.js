@@ -1,4 +1,4 @@
-var socket = io( "http://" + ( window.location.hostname ) + ":3000" );
+var socket = io( "https://" + ( window.location.hostname ) + ":3000" );
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
