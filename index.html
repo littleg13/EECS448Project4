@@ -15,18 +15,19 @@
 
     var handleResize = ( evt ) => {
       if( game === null ) return;
-      let rect = wrapper.getBoundingClientRect();
-      if( rect.width < 800 || rect.height < 800 ) {
+      let rect = canvas.parent.getBoundingClientRect();
+      if( rect.width < 600 || rect.height < 600 ) {
         game.gridBoxDim = parseInt( Math.min( rect.width / game.mapDim, rect.height / game.mapDim ) );
-        canvas.width = game.gridBoxDim * game.mapDim;
-        canvas.height = game.gridBoxDim * game.mapDim;
-        game.scale = canvas.width / 800;
+        let canvasSize = game.gridBoxDim * game.mapDim;
+        canvas.width = canvasSize;
+        canvas.height = canvasSize;
+        game.scale = game.gridBoxDim / game.geometryDim;
         wrapper.style.padding = "1em 0";
       } else {
-        canvas.width = 800;
-        canvas.height = 800;
-        game.gridBoxDim = 40;
-        game.scale = 1.0;
+        canvas.width = 600;
+        canvas.height = 600;
+        game.gridBoxDim = parseInt( canvas.width / game.mapDim );
+        game.scale = game.gridBoxDim / game.geometryDim;
         wrapper.style.padding = "1em";
       }
     }
@@ -77,11 +78,11 @@
         <button type="button" onclick="startGame()">Start Game</button>
         <button type="button" onclick="logout()">Logout</button>
       </div>
-
-      <div id="game">
-        <canvas id="canvas" width=800 height=800></canvas>
-        <div id="playerList">
-      </div>
     </main>
+
+    <div id="game">
+      <canvas id="canvas" width=600 height=600></canvas>
+      <div id="playerList"></div>
+    </div>
   </body>
 <html>

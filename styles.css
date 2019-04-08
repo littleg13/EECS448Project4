@@ -34,8 +34,17 @@ main #lobbyList {
 
 }
 
+div#game {
+  margin: auto;
+  display: none;
+}
+
 canvas {
-  width: 100%;
+  margin: 4em auto;
+  display: block;
+  overflow: hidden;
+  border: 1px solid black;
+  border-radius: 2em;
 }
 
 footer > * {

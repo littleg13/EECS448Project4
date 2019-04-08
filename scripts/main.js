@@ -112,7 +112,8 @@ socket.on( "playerJoin", ( data ) => {
 
 socket.on( "gameStart" , ( data ) => {
   socket.emit( "requestInfo", { request : "getTurn" } );
-  wrapper.makeActive( "game" );
+  wrapper.style.display = "none";
+  document.getElementById( "game" ).style.display = "block";
   game.begin();
 });
 

@@ -3,12 +3,13 @@ class Game {
     this.ctx;
     this.map = [];
     this.mapDim = mapDim;
-    this.scale = 1.0;
+    this.scale;
     this.tanks = {};
     this.turn = '';
     this.distLeftThisTurn = 5;
     this.player;
     this.gridBoxDim;
+    this.geometryDim = 40;                // normalized tile size
     this.bullets = [];
     this.keys = [];
     this.movedSinceLastTransmit = false;
@@ -62,7 +63,8 @@ class Game {
     this.canvas = document.getElementById('canvas');
     this.width = canvas.width;
     this.height = canvas.height;
-    this.gridBoxDim = this.height / this.mapDim;
+    this.gridBoxDim = this.width / this.mapDim;
+    this.scale = this.gridBoxDim / this.geometryDim;
     console.log(this.mapDim);
     this.ctx = canvas.getContext('2d');
   }
@@ -81,13 +83,14 @@ class Game {
   }
 
   renderMap() {
+    this.ctx.save();
     this.ctx.fillStyle = "rgb(127, 255, 195)";
-    this.ctx.fillRect( 0, 0, this.gridBoxDim * this.mapDim, this.gridBoxDim * this.mapDim );
+    this.ctx.scale( this.scale, this.scale );
+    this.ctx.fillRect( 0, 0, this.geometryDim * this.mapDim, this.geometryDim * this.mapDim );
     for( let row = 0; row < this.map.length; row++ ) {
       for( let col = 0; col < this.map[row].length; col++ ) {
         this.ctx.save();
-        this.ctx.translate( col * this.gridBoxDim, row * this.gridBoxDim, this.gridBoxDim, this.gridBoxDim );
-        this.ctx.scale( this.scale, this.scale );
+        this.ctx.translate( col * this.geometryDim, row * this.geometryDim, this.geometryDim, this.geometryDim );
         if( this.map[row][col] == -1 ) {
           this.ctx.fillStyle = "#000000";
           this.ctx.fillRect( 0, 0, 40, 40 );
@@ -109,6 +112,7 @@ class Game {
         this.ctx.restore();
       }
     }
+    this.ctx.restore();
   }
 
   updateMap(map) {
@@ -148,16 +152,16 @@ class Game {
 
   renderTank(userID, tank) {
     this.ctx.save();
-    this.ctx.fillStyle = tank.color;
-    this.ctx.fillRect( Math.round(tank.xPos) * this.gridBoxDim + 1, Math.round(tank.yPos) * this.gridBoxDim + 1, this.gridBoxDim-2, this.gridBoxDim-2);
-    this.ctx.translate( this.gridBoxDim * (tank.xPos + 0.5), this.gridBoxDim * (tank.yPos + 0.5) );
     this.ctx.scale( this.scale, this.scale );
+    this.ctx.fillStyle = tank.color;
+    this.ctx.fillRect( Math.round(tank.xPos) * this.geometryDim + 1, Math.round(tank.yPos) * this.geometryDim + 1, this.geometryDim-2, this.geometryDim-2);
+    this.ctx.translate( this.geometryDim * (tank.xPos + 0.5), this.geometryDim * (tank.yPos + 0.5) );
     this.ctx.rotate( tank.direction );
 
     // Movement Radius
     if(userID == localStorage.userID && this.turn == userID && tank.distanceLeft > 0){
       this.ctx.beginPath();
-      this.ctx.arc( 0, 0, ( tank.distanceLeft + 0.5 ) * this.gridBoxDim , 0, Math.PI * 2 );
+      this.ctx.arc( 0, 0, ( tank.distanceLeft + 0.5 ) * this.geometryDim , 0, Math.PI * 2 );
       this.ctx.fillStyle = 'rgba( 238, 255, 0, 0.5 )';
       this.ctx.fill();
       this.ctx.lineWidth = 3;
@@ -178,6 +182,8 @@ class Game {
   }
 
   renderBullets() {
+    this.ctx.save();
+    this.ctx.scale( this.scale, this.scale );
     for(let i = 0; i < this.bullets.length; i++) {
       let bullet = this.bullets[i];
       bullet.xPos += Math.sin( bullet.direction ) * 0.5;
@@ -185,12 +191,13 @@ class Game {
       //checkCollision( bullet );
       this.ctx.save();
       this.ctx.fillStyle = 'red';
-      this.ctx.fillRect( Math.round(bullet.xPos) * this.gridBoxDim, Math.round(bullet.yPos) * this.gridBoxDim, this.gridBoxDim, this.gridBoxDim );
+      this.ctx.fillRect( Math.round(bullet.xPos) * this.geometryDim, Math.round(bullet.yPos) * this.geometryDim, this.geometryDim, this.geometryDim );
       this.ctx.fillStyle = 'purple';
-      this.ctx.translate( bullet.xPos * this.gridBoxDim, bullet.yPos * this.gridBoxDim );
+      this.ctx.translate( bullet.xPos * this.geometryDim, bullet.yPos * this.geometryDim );
       this.ctx.fillRect( 0, 0, 10, 10 );
       this.ctx.restore();
     }
+    this.ctx.restore();
   }
 
   fire(shooterID, power, curve) {
@@ -206,7 +213,7 @@ class Game {
     let increment = -linearVelocity;
     let map = this.map;
     // Straight distance between center of "Tank" corner of "Tank"
-    let dimension = obj.size/(2*this.gridBoxDim);
+    let dimension = obj.size/(2*this.geometryDim);
     let toReturn = true;
     let canvas = this.ctx;
     let corners = [[dimension, dimension+increment],
