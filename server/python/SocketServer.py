@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import socketio
 import eventlet
 import random
@@ -28,6 +30,7 @@ def sendPlayerList(sid, data):
     else:
         playerList = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getPlayerList()
     io.emit('playerList', playerList, room=sid)
+
 def sendTurn(sid, data):
     turn = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getTurn()
     io.emit('gameUpdate', {'eventType' : 'advanceTurn', 'userID' : turn}, room=sid)
@@ -43,7 +46,7 @@ def joinLobby(sid, data):
     result = lobbyHandler.joinLobby(data['lobbyCode'], userID, data['username'])
     if(result == 200):
         io.emit('playerJoin', {'username' : data['username']}, room=data['lobbyCode'])
-    io.emit('ack', {'type' : 'lobbyJoined', 'result' : result,'lobbyCode': data['lobbyCode']}, room=sid)
+    io.emit('moveToLobby', {'type' : 'lobbyJoined', 'result' : result,'lobbyCode': data['lobbyCode']}, room=sid)
 
 @io.on('createLobby')
 def createLobby(sid, data):
@@ -57,7 +60,7 @@ def createLobby(sid, data):
     io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
     lobbyHandler.createLobby(lobbyCode)
     result = lobbyHandler.joinLobby(lobbyCode, userID, data['username'])
-    io.emit('ack', {'type' : 'lobbyCreated', 'result' : result,'lobbyCode': lobbyCode}, room=sid)
+    io.emit('moveToLobby', {'type' : 'lobbyCreated', 'result' : result,'lobbyCode': lobbyCode}, room=sid)
 
 @io.on('auth')
 def auth(sid, data):
@@ -66,10 +69,10 @@ def auth(sid, data):
         session['lobbyCode'] = data['lobbyCode']
     io.enter_room(sid, data['lobbyCode'])
     if (not lobbyHandler.isLobby(data['lobbyCode'])):
-        io.emit('clearStorage', {}, room=data['lobbyCode']);
+        io.emit('clearStorage', {}, room=data['lobbyCode'])
         return
-    if((not lobbyHandler.getLobby(data['lobbyCode']).getGameStarted()) and (data['page'] != 'lobby.html')):
-        io.emit('redirect', {'page' : 'lobby.html'}, room=sid)
+    elif lobbyHandler.getLobby(data['lobbyCode']).getGameStarted():
+        io.emit('gameStart', {}, room=data['lobbyCode'])
     else:
         if (not lobbyHandler.getLobby(data['lobbyCode']).updateSeen(data['userID'])):
             pass
@@ -94,7 +97,7 @@ def logout(sid, data):
 def startGame(sid, data):
     lobbyCode = io.get_session(sid)['lobbyCode']
     lobbyHandler.getLobby(lobbyCode).startGame()
-    io.emit('redirect', {'page': 'game.html'}, room=io.get_session(sid)['lobbyCode'])
+    io.emit('gameStart', {}, room=io.get_session(sid)['lobbyCode'])
 
 @io.on('gameEvent')
 def gameEvent(sid, data):
@@ -112,4 +115,4 @@ def gameEvent(sid, data):
         io.emit('error', {'errorType': 'Unknown lobbycode given in gameEvent'})
 
 if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('', 3000)), app)
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 3000)), app)

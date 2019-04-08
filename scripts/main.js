@@ -1,37 +1,131 @@
-let socket = io('http://localhost:3000');
-let game = new Game(20);
-let gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
-let sendServerUpdateInt = setInterval(sendServerUpdate, 40);
+var socket = io( "http://" + ( window.location.hostname ) + ":3000" );
+var wrapper = document.getElementById("wrapper");
+var game = null;
+var gameTickUpdateInt, sendServerUpdateInt;
 
+wrapper.makeActive = ( id ) => {
+  Array.from( wrapper.getElementsByTagName( "div" )).map( ( elem ) => {
+    if( elem.id == id ) { elem.classList.add( "active" ) }
+    else { elem.classList.remove( "active" ); }
+  });
+};
+
+var pickUsername = () => {
+  let name = document.getElementById( "username" ).value;
+  if( name === "" ) { alert( "Name cannot be blank, please try again." ); return; }
+
+  localStorage.setItem( "username", document.getElementById( "username" ).value.toUpperCase() );
+  wrapper.makeActive( "splash2" );
+};
+
+var loadJoin = () => {
+  wrapper.children.title.innerHTML = "Join a Lobby";
+  wrapper.makeActive( "join" );
+};
+
+var createLobby = () => {
+  let name = localStorage.getItem( "username" );
+  socket.emit( "createLobby", { username : name.toUpperCase() } );
+
+  wrapper.makeActive( "waiting" );
+};
+
+var joinLobby = () => {
+  let lobbyCode = document.getElementById( "lobbyCode" ).value.toUpperCase();
+  let name = localStorage.getItem( "username" );
+
+  if( lobbyCode === "" ) { alert( "Lobby code cannot be blank!" ); return; }
+
+  socket.emit( "joinLobby", { lobbyCode : lobbyCode, username: name } );
+  wrapper.makeActive( "waiting" );
+};
+
+var startGame = () => {
+  wrapper.makeActive( "waiting" );
+  socket.emit( "startGame", {} );
+};
+
+var logout = () => {
+  socket.emit( "logout", { lobbyCode : localStorage.getItem("lobbyCode"), userID : localStorage.getItem("userID") });
+  localStorage.clear();
+  window.location.reload();
+};
+
+var setupLobbyMenu = () => {
+  document.getElementById( "lobbyName" ).innerHTML = localStorage["lobbyCode"];
+  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+}
+
+var updateLists = () => {
+  if( game === null ) return;
+
+  var lobbyList = document.getElementById("lobbyList");
+  lobbyList.innerHTML = "";
+  for( userID in game.tanks ) {
+    let newListItem = document.createElement( "li" );
+    newListItem.innerHTML = game.tanks[userID].username;
+    lobbyList.appendChild( newListItem );
+  }
+}
+
+socket.on( "setID", (data) => {
+  console.log( "Setting ID" );
+  localStorage.setItem( "userID", data["userID"] );
+  localStorage.setItem( "username", data["username"] );
+})
+
+socket.on( "moveToLobby", ( data ) => {
+  if( data["type"] == "lobbyJoined" ) {
+    if( data["result"] == 0 ) {
+      alert( "The lobby you tried to join does not exist." );
+      wrapper.makeActive( "join" );
+      return;
+    } else if( data["result"] == 1 ) {
+      alert( "The lobby you tried to join has already started the game" );
+      wrapper.makeActive( "join" );
+      return;
+    }
+  }
+  console.log( "Lobby created/joined: " + data );
+  game = new Game( 20 );
+  localStorage.setItem( "lobbyCode", data["lobbyCode"] );
+  setupLobbyMenu();
+  wrapper.makeActive( "lobbyMenu" );
+  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+});
+
+socket.on( "playerList", function (data) {
+  console.log(data);
+  if (game) {
+    for(let user in data) {
+      let userData = data[user];
+      game.addTank(user, userData['username'], userData['xPos'], userData['yPos'], userData['direction'], userData['distanceLeft'], userData['color']);
+    }
+  }
+  updateLists();
+});
+
+socket.on( "playerJoin", ( data ) => {
+  console.log( "Player Joined: " + data );
+  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+});
+
+socket.on( "gameStart" , ( data ) => {
+  socket.emit( "requestInfo", { request : "getTurn" } );
+  wrapper.style.display = "none";
+  document.getElementById( "game" ).style.display = "block";
+  game.startGame();
+});
+
+socket.on( "error", ( data ) => { console.log( data ); } );
 
 socket.on('connect', function (data) {
   console.log("authing server")
-  if(localStorage.userID) {
+  if( localStorage.userID ) {
     let url = window.location.pathname;
     url = url.substring(url.lastIndexOf('/')+1);
     socket.emit('auth', {userID : localStorage.userID, lobbyCode : localStorage.lobbyCode, page : url});
-    socket.emit('requestInfo', {request : 'getPlayerList', fullInfo : true});
-    socket.emit('requestInfo', {request : 'getTurn'});
   }
-});
-
-socket.on('playerList', function (data) {
-  console.log(data);
-  if (game) {
-    for(let userID in data) {
-      let tank = data[userID]
-      if(userID != localStorage.userID) {
-        game.addTank(userID, tank['username'], tank['xPos'], tank['yPos'], tank['direction'], tank['distanceLeft'], tank['color'])
-      }
-      else{
-        game.addTank(userID, tank['username'], tank['xPos'], tank['yPos'], tank['direction'], tank['distanceLeft'], tank['color'])
-      }
-    }
-  }
-});
-
-socket.on('redirect', function (data) {
-  window.location.href = data['page'];
 });
 
 socket.on('clearStorage', function (data) {
@@ -40,6 +134,7 @@ socket.on('clearStorage', function (data) {
 });
 
 socket.on('gameUpdate', function (data) {
+  console.log("Game update received");
   switch(data['eventType']) {
     case 'playerMove':
       if (localStorage.userID != data['userID']) {
@@ -71,8 +166,6 @@ var handleKeyUp = function (evt) {
     game.keys[ evt.key ] = false;
 }
 
-window.addEventListener('keydown', handleKeyDown, true);
-window.addEventListener('keyup', handleKeyUp, true);
 function mainLoop() {
   game.gameTick();
 }
@@ -91,5 +184,19 @@ function sendServerUpdate() {
       game.resetPlayerShot();
     }
   }
-
 }
+
+var main = () => {
+  if( !localStorage.username ) {
+    wrapper.makeActive( "splash" );
+    data = {};
+  } else if( !localStorage.lobbyCode || !localStorage.userID ) {
+    wrapper.makeActive( "splash2" );
+  } else {
+    game = new Game(20);
+    setupLobbyMenu();
+    wrapper.makeActive( "lobbyMenu" );
+  }
+};
+
+window.addEventListener("load", main);

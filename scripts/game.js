@@ -1,18 +1,20 @@
-
 class Game {
   constructor(mapDim) {
     this.ctx;
     this.map = [];
     this.mapDim = mapDim;
+    this.scale;
     this.tanks = {};
     this.turn = '';
     this.distLeftThisTurn = 5;
     this.player;
     this.gridBoxDim;
+    this.geometryDim = 40;                // normalized tile size
     this.bullets = [];
     this.keys = [];
     this.movedSinceLastTransmit = false;
     this.playerShot = false;
+    this.begun = false;
     this.init();
   }
 
@@ -21,21 +23,29 @@ class Game {
     this.initMap();
   }
 
+  startGame() {
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keyup', handleKeyUp, true);
+    gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
+    sendServerUpdateInt = setInterval(sendServerUpdate, 40);
+  }
+
   initCanvas() {
     this.canvas = document.getElementById('canvas');
     this.width = canvas.width;
     this.height = canvas.height;
-    this.gridBoxDim = this.height / this.mapDim;
+    this.gridBoxDim = this.width / this.mapDim;
+    this.scale = this.gridBoxDim / this.geometryDim;
     console.log(this.mapDim);
     this.ctx = canvas.getContext('2d');
   }
 
   initMap() {
-    for(let i=0;i<this.mapDim;i++){
+    for( let i = 0 ; i < this.mapDim; i++ ){
       this.map[i] = [];
-      for(let j=0;j<this.mapDim;j++){
+      for( let j = 0 ; j < this.mapDim; j++ ){
         let mapVal = 0;
-        if(i == 0 || i == this.mapDim-1 || j == 0 || j == this.mapDim-1){
+        if( i == 0 || i == this.mapDim - 1 || j == 0 || j == this.mapDim - 1 ) {
           mapVal = -1;
         }
         this.map[i][j] = mapVal;
@@ -44,16 +54,37 @@ class Game {
   }
 
   renderMap() {
+    this.ctx.save();
+    // Something other than green? Maybe grey?
+    this.ctx.fillStyle = "rgb(127, 255, 195)";
+    this.ctx.scale( this.scale, this.scale );
+    this.ctx.fillRect( 0, 0, this.geometryDim * this.mapDim, this.geometryDim * this.mapDim );
     for( let row = 0; row < this.map.length; row++ ) {
       for( let col = 0; col < this.map[row].length; col++ ) {
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect( col * this.gridBoxDim, row * this.gridBoxDim, this.gridBoxDim, this.gridBoxDim );
-        if( !this.map[row][col] ) {
-          this.ctx.fillStyle = "white";
-          this.ctx.fillRect( col * this.gridBoxDim + 1, row * this.gridBoxDim + 1, this.gridBoxDim - 2, this.gridBoxDim - 2 );
+        this.ctx.save();
+        this.ctx.translate( col * this.geometryDim, row * this.geometryDim, this.geometryDim, this.geometryDim );
+        if( this.map[row][col] == -1 ) {
+          this.ctx.fillStyle = "#000000";
+          this.ctx.fillRect( 0, 0, 40, 40 );
+          this.ctx.fillStyle = "#C0C0C0";
+          this.ctx.fillRect(  1,  2, 18, 7 );
+          this.ctx.fillRect( 21,  2, 18, 7 );
+          this.ctx.fillStyle = "#A0A0A0";
+          this.ctx.fillRect(  1, 11,  8, 7 );
+          this.ctx.fillRect( 11, 11, 18, 7 );
+          this.ctx.fillRect( 31, 11,  8, 7 );
+          this.ctx.fillStyle = "#909090";
+          this.ctx.fillRect(  1, 20, 18, 7 );
+          this.ctx.fillRect( 21, 20, 18, 7 );
+          this.ctx.fillStyle = "#606060";
+          this.ctx.fillRect(  1, 29,  8, 7 );
+          this.ctx.fillRect( 11, 29, 18, 7 );
+          this.ctx.fillRect( 31, 29,  8, 7 );
         }
+        this.ctx.restore();
       }
     }
+    this.ctx.restore();
   }
 
   updateMap(map) {
@@ -69,34 +100,44 @@ class Game {
     this.tanks[userID].yPos = newYPos;
     this.tanks[userID].direction = newDirection;
   }
-  updateTankhealth(userID, newHealth){
-    if(newHealth == 0){
-      this.killTank(userID)
+
+  updateTankhealth(userID, newHealth) {
+    if( newHealth == 0 ) {
+      this.killTank( userID );
     }
-      this.tanks[userID].health = newHealth;
+    let playerIcon = document.getElementById( "display-" + userID );
+    console.log( newHealth );
+    playerIcon.getElementsByTagName( "div" )[0].children[0].style.width = newHealth + "%";
+    this.tanks[userID].health = newHealth;
   }
-  killTank(userID){
-    delete this.tanks[userID];
+
+  killTank( userID ) {
+    this.tanks[userID];
   }
 
   renderTanks() {
-    for(let key in this.tanks) {
+    for( let key in this.tanks ) {
       let tank = this.tanks[key];
-      this.renderTank(key, tank);
+      this.renderTank( key, tank );
     }
   }
 
   renderTank(userID, tank) {
     this.ctx.save();
+    this.ctx.scale( this.scale, this.scale );
+    this.ctx.fillStyle = "black";
+    this.ctx.fillRect( tank.xPos * this.geometryDim, (tank.yPos + 1) * this.geometryDim + 10, this.geometryDim, 10 );
+    this.ctx.font = "15px Arial";
+    this.ctx.fillText(tank.username, tank.xPos * this.geometryDim + 2, (tank.yPos + 1) * this.geometryDim - 50);
     this.ctx.fillStyle = tank.color;
-    this.ctx.fillRect( Math.round(tank.xPos) * this.gridBoxDim + 1, Math.round(tank.yPos) * this.gridBoxDim + 1, this.gridBoxDim-2, this.gridBoxDim-2);
-    this.ctx.translate( this.gridBoxDim * (tank.xPos + 0.5), this.gridBoxDim * (tank.yPos + 0.5) );
+    this.ctx.fillRect( tank.xPos * this.geometryDim + 2, (tank.yPos + 1) * this.geometryDim + 12, ( this.geometryDim - 4 ) * ( tank.health / 100 ), 6 );
+    this.ctx.translate( this.geometryDim * (tank.xPos + 0.5), this.geometryDim * (tank.yPos + 0.5) );
     this.ctx.rotate( tank.direction );
 
     // Movement Radius
     if(userID == localStorage.userID && this.turn == userID && tank.distanceLeft > 0){
       this.ctx.beginPath();
-      this.ctx.arc( 0, 0, ( tank.distanceLeft + 0.5 ) * this.gridBoxDim , 0, Math.PI * 2 );
+      this.ctx.arc( 0, 0, ( tank.distanceLeft + 0.5 ) * this.geometryDim , 0, Math.PI * 2 );
       this.ctx.fillStyle = 'rgba( 238, 255, 0, 0.5 )';
       this.ctx.fill();
       this.ctx.lineWidth = 3;
@@ -117,6 +158,8 @@ class Game {
   }
 
   renderBullets() {
+    this.ctx.save();
+    this.ctx.scale( this.scale, this.scale );
     for(let i = 0; i < this.bullets.length; i++) {
       let bullet = this.bullets[i];
       bullet.xPos += Math.sin( bullet.direction ) * 0.5;
@@ -124,12 +167,24 @@ class Game {
       //checkCollision( bullet );
       this.ctx.save();
       this.ctx.fillStyle = 'red';
-      this.ctx.fillRect( Math.round(bullet.xPos) * this.gridBoxDim, Math.round(bullet.yPos) * this.gridBoxDim, this.gridBoxDim, this.gridBoxDim );
-      this.ctx.fillStyle = 'purple';
-      this.ctx.translate( bullet.xPos * this.gridBoxDim, bullet.yPos * this.gridBoxDim );
-      this.ctx.fillRect( 0, 0, 10, 10 );
+      this.ctx.fillRect( Math.round(bullet.xPos) * this.geometryDim, Math.round(bullet.yPos) * this.geometryDim, this.geometryDim, this.geometryDim );
+      this.ctx.fillStyle = 'grey';
+      this.ctx.strokeStyle = 'black';
+      this.ctx.translate( bullet.xPos * this.geometryDim, bullet.yPos * this.geometryDim );
+      this.ctx.rotate( bullet.direction );
+      this.ctx.beginPath();
+      this.ctx.moveTo( -5,  5 );
+      this.ctx.lineTo(  5,  5 );
+      this.ctx.lineTo(  5, -10 );
+      this.ctx.arc( 0, -10, 5, 0, Math.PI, true );
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.stroke();
+      this.ctx.fillStyle = '#303030';
+      this.ctx.fillRect( -4, 2, 8, 2 );
       this.ctx.restore();
     }
+    this.ctx.restore();
   }
 
   fire(shooterID, power, curve) {
@@ -145,7 +200,7 @@ class Game {
     let increment = -linearVelocity;
     let map = this.map;
     // Straight distance between center of "Tank" corner of "Tank"
-    let dimension = obj.size/(2*this.gridBoxDim);
+    let dimension = obj.size/(2*this.geometryDim);
     let toReturn = true;
     let canvas = this.ctx;
     let corners = [[dimension, dimension+increment],
@@ -172,6 +227,7 @@ class Game {
 
   processInput() {
     let player = this.tanks[localStorage.userID];
+    if( this.turn != localStorage.userID ) return;
     if( this.keys["ArrowLeft"] ) {
       if(this.checkMapCollision(player, 0, -0.1) == true) {
         player.direction -= 0.1;
@@ -185,7 +241,7 @@ class Game {
       }
     }
     if( this.keys[" "] ) {
-      if(this.turn == localStorage.userID && player.canShoot){
+      if( player.canShoot ){
         this.playerShot = true;
         this.fire(localStorage.userID);
         player.canShoot = false;
@@ -230,6 +286,7 @@ class Game {
   playerMoved() {
     return this.movedSinceLastTransmit;
   }
+
   getPlayerShot() {
     return this.playerShot;
   }
