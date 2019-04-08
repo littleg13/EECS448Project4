@@ -47,6 +47,12 @@ socket.on('gameUpdate', function (data) {
       }
       break;
     case 'playerFire':
+      if(data.mapUpdate){
+        game.updateMap(data.mapUpdate);
+      }
+      else if (data.playerHit) {
+        game.updateTankhealth(data.playerHit, data.newHealth)
+      }
       game.fire(data['userID'], 0, 0);
       break;
     case 'advanceTurn':

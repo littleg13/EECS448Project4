@@ -7,7 +7,8 @@ class Player:
         self.yPos = 5
         self.distanceLeft = 5
         self.direction = 0
-        self.color = 'black';
+        self.color = 'black'
+        self.health = 100
         print("Created player with name: " + self.username)
 
     def __str__(self):

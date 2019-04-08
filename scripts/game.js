@@ -56,6 +56,10 @@ class Game {
     }
   }
 
+  updateMap(map) {
+    this.map = map
+  }
+
   addTank(userID, username, xPos, yPos, direction, distanceLeft, color) {
     this.tanks[userID] = new Tank(username ,xPos, yPos, direction, distanceLeft, color);
   }
@@ -65,7 +69,15 @@ class Game {
     this.tanks[userID].yPos = newYPos;
     this.tanks[userID].direction = newDirection;
   }
-
+  updateTankhealth(userID, newHealth){
+    if(newHealth == 0){
+      this.killTank(userID)
+    }
+      this.tanks[userID].health = newHealth;
+  }
+  killTank(userID){
+    delete this.tanks[userID];
+  }
 
   renderTanks() {
     for(let key in this.tanks) {
