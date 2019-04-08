@@ -166,9 +166,20 @@ class Game {
       this.ctx.save();
       this.ctx.fillStyle = 'red';
       this.ctx.fillRect( Math.round(bullet.xPos) * this.geometryDim, Math.round(bullet.yPos) * this.geometryDim, this.geometryDim, this.geometryDim );
-      this.ctx.fillStyle = 'purple';
+      this.ctx.fillStyle = 'grey';
+      this.ctx.strokeStyle = 'black';
       this.ctx.translate( bullet.xPos * this.geometryDim, bullet.yPos * this.geometryDim );
-      this.ctx.fillRect( 0, 0, 10, 10 );
+      this.ctx.rotate( bullet.direction );
+      this.ctx.beginPath();
+      this.ctx.moveTo( -5,  5 );
+      this.ctx.lineTo(  5,  5 );
+      this.ctx.lineTo(  5, -10 );
+      this.ctx.arc( 0, -10, 5, 0, Math.PI, true );
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.stroke();
+      this.ctx.fillStyle = '#303030';
+      this.ctx.fillRect( -4, 2, 8, 2 );
       this.ctx.restore();
     }
     this.ctx.restore();
