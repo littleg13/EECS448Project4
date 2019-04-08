@@ -14,14 +14,20 @@
     var resizeTaskId = null;
 
     var handleResize = ( evt ) => {
-      if ( window.innerWidth < 800 || window.innerHeight < 800 ) {
-        let rect = document.getElementsByTagName("main")[0].getBoundingClientRect();
-        if( rect.width < 800 || rect.height < 800 ) {
-          canvas.width = rect.width;
-          canvas.height = rect.width;
-          game.gridBoxDim = rect.width / game.mapDim;
-          document.getElementsByTagName("main")[0].style.padding = "1em 0";
-        }
+      if( game === null ) return;
+      let rect = wrapper.getBoundingClientRect();
+      if( rect.width < 800 || rect.height < 800 ) {
+        game.gridBoxDim = parseInt( Math.min( rect.width / game.mapDim, rect.height / game.mapDim ) );
+        canvas.width = game.gridBoxDim * game.mapDim;
+        canvas.height = game.gridBoxDim * game.mapDim;
+        game.scale = canvas.width / 800;
+        wrapper.style.padding = "1em 0";
+      } else {
+        canvas.width = 800;
+        canvas.height = 800;
+        game.gridBoxDim = 40;
+        game.scale = 1.0;
+        wrapper.style.padding = "1em";
       }
     }
 

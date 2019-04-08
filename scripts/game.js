@@ -4,6 +4,7 @@ class Game {
     this.ctx;
     this.map = [];
     this.mapDim = mapDim;
+    this.scale = 1.0;
     this.tanks = {};
     this.turn = '';
     this.distLeftThisTurn = 5;
@@ -39,11 +40,11 @@ class Game {
   }
 
   initMap() {
-    for(let i=0;i<this.mapDim;i++){
+    for( let i = 0 ; i < this.mapDim; i++ ){
       this.map[i] = [];
-      for(let j=0;j<this.mapDim;j++){
+      for( let j = 0 ; j < this.mapDim; j++ ){
         let mapVal = 0;
-        if(i == 0 || i == this.mapDim-1 || j == 0 || j == this.mapDim-1){
+        if( i == 0 || i == this.mapDim - 1 || j == 0 || j == this.mapDim - 1 ) {
           mapVal = -1;
         }
         this.map[i][j] = mapVal;
@@ -52,14 +53,32 @@ class Game {
   }
 
   renderMap() {
+    this.ctx.fillStyle = "rgb(127, 255, 195)";
+    this.ctx.fillRect( 0, 0, this.gridBoxDim * this.mapDim, this.gridBoxDim * this.mapDim );
     for( let row = 0; row < this.map.length; row++ ) {
       for( let col = 0; col < this.map[row].length; col++ ) {
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect( col * this.gridBoxDim, row * this.gridBoxDim, this.gridBoxDim, this.gridBoxDim );
-        if( !this.map[row][col] ) {
-          this.ctx.fillStyle = "white";
-          this.ctx.fillRect( col * this.gridBoxDim + 1, row * this.gridBoxDim + 1, this.gridBoxDim - 2, this.gridBoxDim - 2 );
+        this.ctx.save();
+        this.ctx.translate( col * this.gridBoxDim, row * this.gridBoxDim, this.gridBoxDim, this.gridBoxDim );
+        this.ctx.scale( this.scale, this.scale );
+        if( this.map[row][col] == -1 ) {
+          this.ctx.fillStyle = "#000000";
+          this.ctx.fillRect( 0, 0, 40, 40 );
+          this.ctx.fillStyle = "#C0C0C0";
+          this.ctx.fillRect(  1,  2, 18, 7 );
+          this.ctx.fillRect( 21,  2, 18, 7 );
+          this.ctx.fillStyle = "#A0A0A0";
+          this.ctx.fillRect(  1, 11,  8, 7 );
+          this.ctx.fillRect( 11, 11, 18, 7 );
+          this.ctx.fillRect( 31, 11,  8, 7 );
+          this.ctx.fillStyle = "#909090";
+          this.ctx.fillRect(  1, 20, 18, 7 );
+          this.ctx.fillRect( 21, 20, 18, 7 );
+          this.ctx.fillStyle = "#606060";
+          this.ctx.fillRect(  1, 29,  8, 7 );
+          this.ctx.fillRect( 11, 29, 18, 7 );
+          this.ctx.fillRect( 31, 29,  8, 7 );
         }
+        this.ctx.restore();
       }
     }
   }
@@ -87,6 +106,7 @@ class Game {
     this.ctx.fillStyle = tank.color;
     this.ctx.fillRect( Math.round(tank.xPos) * this.gridBoxDim + 1, Math.round(tank.yPos) * this.gridBoxDim + 1, this.gridBoxDim-2, this.gridBoxDim-2);
     this.ctx.translate( this.gridBoxDim * (tank.xPos + 0.5), this.gridBoxDim * (tank.yPos + 0.5) );
+    this.ctx.scale( this.scale, this.scale );
     this.ctx.rotate( tank.direction );
 
     // Movement Radius

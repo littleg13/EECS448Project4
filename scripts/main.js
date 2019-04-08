@@ -1,7 +1,7 @@
-
-var socket = io( "https://" + ( window.location.hostname ) + ":3000" );
+var socket = io( "http://" + ( window.location.hostname ) + ":3000" );
 var wrapper = document.getElementById("wrapper");
-var game, gameTickUpdateInt, sendServerUpdateInt = null;
+var game = null;
+var gameTickUpdateInt, sendServerUpdateInt;
 
 wrapper.makeActive = ( id ) => {
   Array.from( wrapper.getElementsByTagName( "div" )).map( ( elem ) => {
