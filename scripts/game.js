@@ -107,7 +107,6 @@ class Game {
     }
     let playerIcon = document.getElementById( "display-" + userID );
     console.log( newHealth );
-    playerIcon.getElementsByTagName( "div" )[0].children[0].style.width = newHealth + "%";
     this.tanks[userID].health = newHealth;
   }
 
