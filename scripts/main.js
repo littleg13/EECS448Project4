@@ -152,6 +152,7 @@ socket.on('gameUpdate', function (data) {
       game.advanceTurn(data['userID']);
       break;
   }
+});
 
 var handleKeyDown = function (evt) {
   if (game.turn == localStorage.userID) {
