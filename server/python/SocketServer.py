@@ -28,6 +28,7 @@ def sendPlayerList(sid, data):
     else:
         playerList = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getPlayerList()
     io.emit('playerList', playerList, room=sid)
+
 def sendTurn(sid, data):
     turn = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getTurn()
     io.emit('gameUpdate', {'eventType' : 'advanceTurn', 'userID' : turn}, room=sid)
@@ -66,10 +67,10 @@ def auth(sid, data):
         session['lobbyCode'] = data['lobbyCode']
     io.enter_room(sid, data['lobbyCode'])
     if (not lobbyHandler.isLobby(data['lobbyCode'])):
-        io.emit('clearStorage', {}, room=data['lobbyCode']);
+        io.emit('clearStorage', {}, room=data['lobbyCode'])
         return
-    if((not lobbyHandler.getLobby(data['lobbyCode']).getGameStarted()) and (data['page'] != 'lobby.html')):
-        io.emit('redirect', {'page' : 'lobby.html'}, room=sid)
+    elif lobbyHandler.getLobby(data['lobbyCode']).getGameStarted():
+        io.emit('gameStart', {}, room=data['lobbyCode'])
     else:
         if (not lobbyHandler.getLobby(data['lobbyCode']).updateSeen(data['userID'])):
             pass
