@@ -114,7 +114,7 @@ socket.on( "gameStart" , ( data ) => {
   socket.emit( "requestInfo", { request : "getTurn" } );
   wrapper.style.display = "none";
   document.getElementById( "game" ).style.display = "block";
-  game.begin();
+  game.startGame();
 });
 
 socket.on( "error", ( data ) => { console.log( data ); } );

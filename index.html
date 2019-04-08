@@ -15,7 +15,7 @@
 
     var handleResize = ( evt ) => {
       if( game === null ) return;
-      let rect = canvas.parent.getBoundingClientRect();
+      let rect = document.getElementById("game").getBoundingClientRect();
       if( rect.width < 600 || rect.height < 600 ) {
         game.gridBoxDim = parseInt( Math.min( rect.width / game.mapDim, rect.height / game.mapDim ) );
         let canvasSize = game.gridBoxDim * game.mapDim;

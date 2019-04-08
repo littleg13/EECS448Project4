@@ -23,40 +23,11 @@ class Game {
     this.initMap();
   }
 
-  begin() {
+  startGame() {
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keyup', handleKeyUp, true);
     gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
     sendServerUpdateInt = setInterval(sendServerUpdate, 40);
-
-    let list = document.createElement( "ul" );
-    list.setAttribute( "id", "tankList" );
-    for( let userID in this.tanks ) {
-      let newItem = document.createElement( "li" );
-      let nameSpan = document.createElement( "span" );
-      let tankImg = document.createElement( "img" );
-      let healthBar = document.createElement( "div" );
-
-      newItem.classList.add( "playerSummary" );
-      newItem.setAttribute( "id", "display-" + userID );
-
-      nameSpan.classList.add( "playerName" );
-      nameSpan.innerHTML = this.tanks[userID].username;
-
-      tankImg.classList.add( "playerIcon" );
-      tankImg.setAttribute( "src", "images/tank.png" );
-
-      healthBar.classList.add( "healthBar" );
-      healthBar.appendChild( document.createElement("div") );
-      healthBar.children[0].style.backgroundColor = this.tanks[userID].color;
-
-      newItem.appendChild( nameSpan );
-      newItem.appendChild( tankImg );
-      newItem.appendChild( healthBar );
-
-      list.appendChild( newItem );
-    }
-    document.body.append(list);
   }
 
   initCanvas() {
@@ -153,8 +124,11 @@ class Game {
   renderTank(userID, tank) {
     this.ctx.save();
     this.ctx.scale( this.scale, this.scale );
+    this.ctx.fillStyle = "black";
+    this.ctx.fillRect( Math.round(tank.xPos) * this.geometryDim, Math.round(tank.yPos + 1) * this.geometryDim + 10, this.geometryDim, 10 );
     this.ctx.fillStyle = tank.color;
-    this.ctx.fillRect( Math.round(tank.xPos) * this.geometryDim + 1, Math.round(tank.yPos) * this.geometryDim + 1, this.geometryDim-2, this.geometryDim-2);
+    this.ctx.fillRect( Math.round(tank.xPos) * this.geometryDim + 1, Math.round(tank.yPos) * this.geometryDim + 1, this.geometryDim - 2, this.geometryDim - 2 );
+    this.ctx.fillRect( Math.round(tank.xPos) * this.geometryDim + 2, Math.round(tank.yPos + 1) * this.geometryDim + 12, ( this.geometryDim - 4 ) * ( tank.health / 100 ), 6 );
     this.ctx.translate( this.geometryDim * (tank.xPos + 0.5), this.geometryDim * (tank.yPos + 0.5) );
     this.ctx.rotate( tank.direction );
 
