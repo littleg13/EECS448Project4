@@ -51,6 +51,11 @@ var logout = () => {
   window.location.reload();
 };
 
+var setupLobbyMenu = () => {
+  document.getElementById( "lobbyName" ).innerHTML = localStorage["lobbyCode"];
+  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+}
+
 var updateLists = () => {
   if( game === null ) return;
 
@@ -58,7 +63,7 @@ var updateLists = () => {
   lobbyList.innerHTML = "";
   for( userID in game.tanks ) {
     let newListItem = document.createElement( "li" );
-    newListItem.innerHTML = game.tanks[ userID ].username;
+    newListItem.innerHTML = game.tanks[userID].username;
     lobbyList.appendChild( newListItem );
   }
 }
@@ -84,7 +89,7 @@ socket.on( "moveToLobby", ( data ) => {
   console.log( "Lobby created/joined: " + data );
   game = new Game( 20 );
   localStorage.setItem( "lobbyCode", data["lobbyCode"] );
-  document.getElementById("lobbyName").innerHTML = data["lobbyCode"];
+  setupLobbyMenu();
   wrapper.makeActive( "lobbyMenu" );
   socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
 });
@@ -106,7 +111,7 @@ socket.on( "playerJoin", ( data ) => {
 });
 
 socket.on( "gameStart" , ( data ) => {
-  socket.emit( "requestInfo", { request : "getTurn"} );
+  socket.emit( "requestInfo", { request : "getTurn" } );
   wrapper.makeActive( "game" );
   game.begin();
 });
@@ -115,17 +120,11 @@ socket.on( "error", ( data ) => { console.log( data ); } );
 
 socket.on('connect', function (data) {
   console.log("authing server")
-  if(localStorage.userID) {
+  if( localStorage.userID ) {
     let url = window.location.pathname;
     url = url.substring(url.lastIndexOf('/')+1);
     socket.emit('auth', {userID : localStorage.userID, lobbyCode : localStorage.lobbyCode, page : url});
-    socket.emit('requestInfo', {request : 'getPlayerList', fullInfo : true});
-    socket.emit('requestInfo', {request : 'getTurn'});
   }
-});
-
-socket.on('redirect', function (data) {
-  window.location.href = data['page'];
 });
 
 socket.on('clearStorage', function (data) {
@@ -185,3 +184,18 @@ function sendServerUpdate() {
     }
   }
 }
+
+var main = () => {
+  if( !localStorage.username ) {
+    wrapper.makeActive( "splash" );
+    data = {};
+  } else if( !localStorage.lobbyCode || !localStorage.userID ) {
+    wrapper.makeActive( "splash2" );
+  } else {
+    game = new Game(20);
+    setupLobbyMenu();
+    wrapper.makeActive( "lobbyMenu" );
+  }
+};
+
+window.addEventListener("load", main);

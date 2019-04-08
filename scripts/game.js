@@ -27,6 +27,35 @@ class Game {
     window.addEventListener('keyup', handleKeyUp, true);
     gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
     sendServerUpdateInt = setInterval(sendServerUpdate, 40);
+
+    let list = document.createElement( "ul" );
+    list.setAttribute( "id", "tankList" );
+    for( let userID in this.tanks ) {
+      let newItem = document.createElement( "li" );
+      let nameSpan = document.createElement( "span" );
+      let tankImg = document.createElement( "img" );
+      let healthBar = document.createElement( "div" );
+
+      newItem.classList.add( "playerSummary" );
+      newItem.setAttribute( "id", "display-" + userID );
+
+      nameSpan.classList.add( "playerName" );
+      nameSpan.innerHTML = this.tanks[userID].username;
+
+      tankImg.classList.add( "playerIcon" );
+      tankImg.setAttribute( "src", "images/tank.png" );
+
+      healthBar.classList.add( "healthBar" );
+      healthBar.appendChild( document.createElement("div") );
+      healthBar.children[0].style.backgroundColor = this.tanks[userID].color;
+
+      newItem.appendChild( nameSpan );
+      newItem.appendChild( tankImg );
+      newItem.appendChild( healthBar );
+
+      list.appendChild( newItem );
+    }
+    document.body.append(list);
   }
 
   initCanvas() {
@@ -100,11 +129,14 @@ class Game {
     if( newHealth == 0 ) {
       this.killTank( userID );
     }
+    let playerIcon = document.getElementById( "display-" + userID );
+    console.log( newHealth );
+    playerIcon.getElementsByTagName( "div" )[0].children[0].style.width = newHealth + "%";
     this.tanks[userID].health = newHealth;
   }
 
   killTank( userID ) {
-    delete this.tanks[userID];
+    this.tanks[userID];
   }
 
   renderTanks() {
@@ -201,6 +233,7 @@ class Game {
 
   processInput() {
     let player = this.tanks[localStorage.userID];
+    if( this.turn != localStorage.userID ) return;
     if( this.keys["ArrowLeft"] ) {
       if(this.checkMapCollision(player, 0, -0.1) == true) {
         player.direction -= 0.1;
@@ -214,7 +247,7 @@ class Game {
       }
     }
     if( this.keys[" "] ) {
-      if(this.turn == localStorage.userID && player.canShoot){
+      if( player.canShoot ){
         this.playerShot = true;
         this.fire(localStorage.userID);
         player.canShoot = false;
