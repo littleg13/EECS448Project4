@@ -111,7 +111,7 @@ class Game {
   }
 
   killTank( userID ) {
-    this.tanks[userID].alive = False;
+    this.tanks[userID].alive = false;
   }
 
   renderTanks() {

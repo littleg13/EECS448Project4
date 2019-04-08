@@ -113,7 +113,9 @@ class Lobby:
                     newHealth = self.players[collidedWith].health - 20
                     if(newHealth <= 0):
                         newHealth = 0
-                        self.order.remove(self.players[collidedWith])
+                        print(collidedWith)
+                        print(self.order)
+                        self.order.remove(collidedWith)
                         self.players[collidedWith].alive = False
                     self.players[collidedWith].health = newHealth
                     outboundData['playerHit'] = collidedWith
@@ -126,6 +128,7 @@ class Lobby:
 
 
     def checkBulletCollision(self, userID, player, power, spin):
+        print("Checking bullet collision for: " + userID)
         position = [player.xPos, player.yPos]
         increment = 0.1
         collided = False
@@ -147,7 +150,8 @@ class Lobby:
         return collidedWith
 
     def isPositionInPlayerBounds(self, position):
-        for playerID, player in self.players.items():
+        for playerID in self.order:
+            player = self.players[playerID]
             x = (position[0] - player.xPos)*math.sin(player.direction) + (position[1] - player.yPos)*math.cos(player.direction)
             y = (position[0] - player.xPos)*math.cos(player.direction) - (position[1] - player.yPos)*math.sin(player.direction)
             if -1/2 <= x <= 1/2:
