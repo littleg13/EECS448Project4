@@ -55,6 +55,7 @@ class Game {
 
   renderMap() {
     this.ctx.save();
+    // Something other than green? Maybe grey?
     this.ctx.fillStyle = "rgb(127, 255, 195)";
     this.ctx.scale( this.scale, this.scale );
     this.ctx.fillRect( 0, 0, this.geometryDim * this.mapDim, this.geometryDim * this.mapDim );
@@ -125,10 +126,11 @@ class Game {
     this.ctx.save();
     this.ctx.scale( this.scale, this.scale );
     this.ctx.fillStyle = "black";
-    this.ctx.fillRect( Math.round(tank.xPos) * this.geometryDim, Math.round(tank.yPos + 1) * this.geometryDim + 10, this.geometryDim, 10 );
+    this.ctx.fillRect( tank.xPos * this.geometryDim, (tank.yPos + 1) * this.geometryDim + 10, this.geometryDim, 10 );
+    this.ctx.font = "15px Arial";
+    this.ctx.fillText(tank.username, tank.xPos * this.geometryDim + 2, (tank.yPos + 1) * this.geometryDim - 50);
     this.ctx.fillStyle = tank.color;
-    this.ctx.fillRect( Math.round(tank.xPos) * this.geometryDim + 1, Math.round(tank.yPos) * this.geometryDim + 1, this.geometryDim - 2, this.geometryDim - 2 );
-    this.ctx.fillRect( Math.round(tank.xPos) * this.geometryDim + 2, Math.round(tank.yPos + 1) * this.geometryDim + 12, ( this.geometryDim - 4 ) * ( tank.health / 100 ), 6 );
+    this.ctx.fillRect( tank.xPos * this.geometryDim + 2, (tank.yPos + 1) * this.geometryDim + 12, ( this.geometryDim - 4 ) * ( tank.health / 100 ), 6 );
     this.ctx.translate( this.geometryDim * (tank.xPos + 0.5), this.geometryDim * (tank.yPos + 0.5) );
     this.ctx.rotate( tank.direction );
 
