@@ -313,7 +313,7 @@ class Game {
   }
 
   //TODO make end game
-  endGame(winningUserID) {
-    alert("Game over. Winner is: " + winningUserID);
+  endGame( winningUserID ) {
+    alert( "Game over. Winner is: " + game.tanks[winningUserID].username );
   }
 };
