@@ -1,4 +1,5 @@
-var socket = io( "https://" + ( window.location.hostname ) + ":3000" );
+//var socket = io( "https://" + ( window.location.hostname ) + ":3000" );
+let socket = io('http://localhost:3000');
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -148,7 +149,10 @@ socket.on('gameUpdate', function (data) {
       else if (data.playerHit) {
         game.updateTankhealth(data.playerHit, data.newHealth)
       }
-      game.fire(data['userID'], 0, 0);
+      if(data.userID == localStorage.userID){
+        game.resetPlayerShot();
+      }
+      game.fire(data['userID'], 0, 0, data.distance);
       break;
     case 'advanceTurn':
       game.advanceTurn(data['userID']);
@@ -181,7 +185,7 @@ function sendServerUpdate() {
     }
     else if (game.getPlayerShot()) {
       socket.emit('gameEvent', {eventType: 'playerFire'});
-      game.resetPlayerShot();
+      ;
     }
   }
 }

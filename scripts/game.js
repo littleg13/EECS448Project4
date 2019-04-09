@@ -163,33 +163,39 @@ class Game {
       let bullet = this.bullets[i];
       bullet.xPos += Math.sin( bullet.direction ) * 0.5;
       bullet.yPos -= Math.cos( bullet.direction ) * 0.5;
-      //checkCollision( bullet );
-      this.ctx.save();
-      this.ctx.fillStyle = 'red';
-      this.ctx.fillRect( Math.round(bullet.xPos) * this.geometryDim, Math.round(bullet.yPos) * this.geometryDim, this.geometryDim, this.geometryDim );
-      this.ctx.fillStyle = 'grey';
-      this.ctx.strokeStyle = 'black';
-      this.ctx.translate( bullet.xPos * this.geometryDim, bullet.yPos * this.geometryDim );
-      this.ctx.rotate( bullet.direction );
-      this.ctx.beginPath();
-      this.ctx.moveTo( -5,  5 );
-      this.ctx.lineTo(  5,  5 );
-      this.ctx.lineTo(  5, -10 );
-      this.ctx.arc( 0, -10, 5, 0, Math.PI, true );
-      this.ctx.closePath();
-      this.ctx.fill();
-      this.ctx.stroke();
-      this.ctx.fillStyle = '#303030';
-      this.ctx.fillRect( -4, 2, 8, 2 );
-      this.ctx.restore();
+
+      if(bullet.distanceTraveled <= bullet.distanceToTravel){
+        this.ctx.save();
+        this.ctx.fillStyle = 'red';
+        this.ctx.fillRect( Math.round(bullet.xPos) * this.geometryDim, Math.round(bullet.yPos) * this.geometryDim, this.geometryDim, this.geometryDim );
+        this.ctx.fillStyle = 'grey';
+        this.ctx.strokeStyle = 'black';
+        this.ctx.translate( bullet.xPos * this.geometryDim, bullet.yPos * this.geometryDim );
+        this.ctx.rotate( bullet.direction );
+        this.ctx.beginPath();
+        this.ctx.moveTo( -5,  5 );
+        this.ctx.lineTo(  5,  5 );
+        this.ctx.lineTo(  5, -10 );
+        this.ctx.arc( 0, -10, 5, 0, Math.PI, true );
+        this.ctx.closePath();
+        this.ctx.fill();
+        this.ctx.stroke();
+        this.ctx.fillStyle = '#303030';
+        this.ctx.fillRect( -4, 2, 8, 2 );
+        this.ctx.restore();
+      }
+      else{
+        this.bullets.pop(i);
+      }
+      bullet.distanceTraveled += 0.5;
     }
     this.ctx.restore();
   }
 
-  fire(shooterID, power, curve) {
+  fire(shooterID, power, curve, dist) {
     let shooter = this.tanks[shooterID];
     if(shooter.canShoot){
-      var proj = { xPos: shooter.xPos, yPos: shooter.yPos, direction: shooter.direction };
+      var proj = { xPos: shooter.xPos, yPos: shooter.yPos, direction: shooter.direction, distanceToTravel: dist, distanceTraveled: 0};
       this.bullets.push(proj);
       this.tanks[shooterID].canShoot = false;
     }
@@ -240,10 +246,8 @@ class Game {
       }
     }
     if( this.keys[" "] ) {
-      if( player.canShoot ){
+      if( player.canShoot && !this.playerShot ){
         this.playerShot = true;
-        this.fire(localStorage.userID);
-        player.canShoot = false;
       }
     }
 

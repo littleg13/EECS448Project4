@@ -106,18 +106,19 @@ class Lobby:
             # Change player pos on server side
             # Return new data packet to be broadcast
             elif data['eventType'] == 'playerFire':
-                collidedWith = self.checkBulletCollision(userID, player, 0, 0)
-                if(collidedWith is 'map'):
+                collisionData = self.checkBulletCollision(userID, player, 0, 0)
+                if(collisionData[0] is 'map'):
                     outboundData['mapUpdate'] = self.map
-                elif(collidedWith != 'edge'):
-                    newHealth = self.players[collidedWith].health - 20
+                elif(collisionData[0] != 'edge'):
+                    newHealth = self.players[collisionData[0]].health - 20
                     if(newHealth <= 0):
                         newHealth = 0
-                        self.removePlayer(self.players[collidedWith])
-                    self.players[collidedWith].health = newHealth
-                    outboundData['playerHit'] = collidedWith
+                        self.removePlayer(self.players[collisionData[0]])
+                    self.players[collisionData[0]].health = newHealth
+                    outboundData['playerHit'] = collisionData[0]
                     outboundData['newHealth'] = newHealth
                 self.advanceTurn()
+                outboundData['distance'] = collisionData[1]
                 outboundData['eventType'] = 'playerFire'
                 outboundData['userID'] = userID
         print(outboundData)
@@ -129,13 +130,16 @@ class Lobby:
         increment = 0.1
         collided = False
         collidedWith = ''
+        finalDistance = 0
         while(not collided):
             collidedPlayerUserID = self.isPositionInPlayerBounds(position)
             if collidedPlayerUserID and collidedPlayerUserID != userID:
                 collidedWith = collidedPlayerUserID
+                finalDistance = self.getDistanceToPlayer(position, player)
                 collided = True
             elif self.map[round(position[0])-1][round(position[1])-1] != 0:
                 collided = True
+                finalDistance = self.getDistanceToPlayer(position, player)
                 if(self.map[round(position[0])-1][round(position[1])-1] != -1):
                     self.map[round(position[0])-1][round(position[1])-1] -= 1
                     collidedWith = 'map'
@@ -143,27 +147,16 @@ class Lobby:
                     collidedWith = 'edge'
             position[0] =  math.sin(player.direction)*increment + position[0];
             position[1] =  -math.cos(player.direction)*increment + position[1];
-        return collidedWith
+        return [collidedWith, finalDistance]
 
+    def getDistanceToPlayer(self, position, player):
+        return math.sqrt(math.pow(position[0] - player.xPos, 2) + math.pow(position[1] - player.yPos, 2))
     def isPositionInPlayerBounds(self, position):
-        for playerID, player in self.players.items():
+        for playerID in self.order:
+            player = self.players[playerID]
             x = (position[0] - player.xPos)*math.sin(player.direction) + (position[1] - player.yPos)*math.cos(player.direction)
             y = (position[0] - player.xPos)*math.cos(player.direction) - (position[1] - player.yPos)*math.sin(player.direction)
             if -1/2 <= x <= 1/2:
                 if -1/2 <= y <= 1/2:
                     return playerID
         return False
-    # def checkBulletCollision(self, player):
-    #     print("Bullet starting at: ")
-    #     print(player.getPos())
-    #     movementDirection = player.direction
-    #     bulletPos = {'xPos': player.xPos, 'yPos': player.yPos}
-    #     movementDirectionNorm = (math.pi / 2) - movementDirection
-    #     print("X Delta: " + str(math.cos(movementDirectionNorm) * 1) + ". Y Delta: " + str(math.sin(movementDirectionNorm) * 1))
-    #     # HARD CODED VALUES, LOOK INTO FINDING BOARD DEMENTIONS SOMEHOW
-    #     while ((0 <= bulletPos['xPos'] <= 30) and (0 <= bulletPos['yPos'] <= 30)):
-    #         bulletPos['xPos'] += math.cos(movementDirectionNorm) * 1
-    #         bulletPos['xPos'] += math.sin(movementDirectionNorm) * 1
-    #         print("Bullet still on board: ")
-    #         print(bulletPos)
-    #     print(bulletPos)
