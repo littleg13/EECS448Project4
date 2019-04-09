@@ -15,20 +15,20 @@
 
     var handleResize = ( evt ) => {
       if( game === null ) return;
-      let rect = document.getElementById("game").getBoundingClientRect();
+      // 128 is subtracted to account for 4em margins, where 1em = 16px
+      // height has additional adjustment for Exit button ( 1em margins, 1em padding, 1em text)
+      let rect = { width : window.innerWidth - 128, height : window.innerHeight - 128 - 64 };
       if( rect.width < 600 || rect.height < 600 ) {
         game.gridBoxDim = parseInt( Math.min( rect.width / game.mapDim, rect.height / game.mapDim ) );
         let canvasSize = game.gridBoxDim * game.mapDim;
         canvas.width = canvasSize;
         canvas.height = canvasSize;
         game.scale = game.gridBoxDim / game.geometryDim;
-        wrapper.style.padding = "1em 0";
       } else {
         canvas.width = 600;
         canvas.height = 600;
         game.gridBoxDim = parseInt( canvas.width / game.mapDim );
         game.scale = game.gridBoxDim / game.geometryDim;
-        wrapper.style.padding = "1em";
       }
     }
 
@@ -45,7 +45,7 @@
 
     </script>
   </head>
-  <body>
+  <body onload="handleResize()">
     <main id="wrapper">
       <h1 id="title">Welcome to tanks!</h1>
       <div id="splash" class="active">
@@ -82,7 +82,7 @@
 
     <div id="game">
       <canvas id="canvas" width=600 height=600></canvas>
-      <div id="playerList"></div>
+      <button type="button" onclick="logout()">Exit</button>
     </div>
   </body>
 <html>
