@@ -147,6 +147,10 @@ socket.on('gameUpdate', function (data) {
       }
       else if (data.playerHit) {
         game.updateTankhealth(data.playerHit, data.newHealth)
+        if (data.gameOver) {
+          game.endGame(data.gameOver);
+          clearInterval(sendServerUpdateInt);
+        }
       }
       if(data.userID == localStorage.userID){
         game.resetPlayerShot();
@@ -155,10 +159,6 @@ socket.on('gameUpdate', function (data) {
       break;
     case 'advanceTurn':
       game.advanceTurn(data['userID']);
-      break;
-    case 'gameOver':
-      game.endGame(data.userID);
-      clearInterval(sendServerUpdateInt);
       break;
   }
 });

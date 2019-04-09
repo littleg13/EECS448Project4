@@ -118,7 +118,7 @@ class Lobby:
                         print(self.order)
                         self.order.remove(collisionData[0])
                         if (len(self.order) == 1):
-                            return self.endGame();
+                            outboundData['gameOver'] = userID
                         turnsToAdvance = 0
                         self.players[collisionData[0]].alive = False
                     self.players[collisionData[0]].health = newHealth
@@ -130,11 +130,6 @@ class Lobby:
                 outboundData['userID'] = userID
         print(outboundData)
         return outboundData
-
-    def endGame(self):
-        winner = self.order.pop()
-        print({'eventType': 'gameOver', 'userID': winner})
-        return {'eventType': 'gameOver', 'userID': winner}
 
     def checkBulletCollision(self, userID, player, power, spin):
         print("Checking bullet collision for: " + userID)
