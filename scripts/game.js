@@ -55,7 +55,7 @@ class Game {
 
   renderMap() {
     this.ctx.save();
-    this.ctx.fillStyle = "rgb(127, 255, 195)";
+    this.ctx.fillStyle = "#906030";
     this.ctx.scale( this.scale, this.scale );
     this.ctx.fillRect( 0, 0, this.geometryDim * this.mapDim, this.geometryDim * this.mapDim );
     let tank = this.tanks[ localStorage.userID ];
