@@ -55,10 +55,21 @@ class Game {
 
   renderMap() {
     this.ctx.save();
-    // Something other than green? Maybe grey?
     this.ctx.fillStyle = "rgb(127, 255, 195)";
     this.ctx.scale( this.scale, this.scale );
     this.ctx.fillRect( 0, 0, this.geometryDim * this.mapDim, this.geometryDim * this.mapDim );
+    let tank = this.tanks[ localStorage.userID ];
+    if( this.turn == localStorage.userID && tank.distanceLeft > 0 ) {
+      this.ctx.beginPath();
+      this.ctx.arc( ( tank.xPos + 0.5 ) * this.geometryDim,
+                    ( tank.yPos + 0.5 ) * this.geometryDim,
+                    ( tank.distanceLeft + 0.5 ) * this.geometryDim,
+                    0, Math.PI * 2 );
+      this.ctx.fillStyle = 'rgba( 238, 255, 0, 0.5 )';
+      this.ctx.fill();
+      this.ctx.lineWidth = 3;
+      this.ctx.stroke();
+    }
     for( let row = 0; row < this.map.length; row++ ) {
       for( let col = 0; col < this.map[row].length; col++ ) {
         this.ctx.save();
@@ -126,24 +137,18 @@ class Game {
   renderTank(userID, tank) {
     this.ctx.save();
     this.ctx.scale( this.scale, this.scale );
-    this.ctx.fillStyle = "black";
-    this.ctx.fillRect( tank.xPos * this.geometryDim, (tank.yPos + 1) * this.geometryDim + 10, this.geometryDim, 10 );
-    this.ctx.font = "15px Arial";
-    this.ctx.fillText(tank.username, tank.xPos * this.geometryDim + 2, (tank.yPos + 1) * this.geometryDim - 50);
-    this.ctx.fillStyle = tank.color;
-    this.ctx.fillRect( tank.xPos * this.geometryDim + 2, (tank.yPos + 1) * this.geometryDim + 12, ( this.geometryDim - 4 ) * ( tank.health / 100 ), 6 );
     this.ctx.translate( this.geometryDim * (tank.xPos + 0.5), this.geometryDim * (tank.yPos + 0.5) );
-    this.ctx.rotate( tank.direction );
 
-    // Movement Radius
-    if(userID == localStorage.userID && this.turn == userID && tank.distanceLeft > 0){
-      this.ctx.beginPath();
-      this.ctx.arc( 0, 0, ( tank.distanceLeft + 0.5 ) * this.geometryDim , 0, Math.PI * 2 );
-      this.ctx.fillStyle = 'rgba( 238, 255, 0, 0.5 )';
-      this.ctx.fill();
-      this.ctx.lineWidth = 3;
-      this.ctx.stroke();
-    }
+    // Health bar and username text
+    this.ctx.fillStyle = "black";
+    this.ctx.font = "15px Arial";
+    this.ctx.fillText( tank.username, - this.geometryDim / 2, 40);
+    this.ctx.fillRect( - this.geometryDim / 2, this.geometryDim + 10, this.geometryDim, 10 );
+    this.ctx.fillStyle = tank.color;
+    this.ctx.fillRect( - this.geometryDim / 2 + 2, this.geometryDim + 12, ( this.geometryDim - 4 ) * ( tank.health / 100 ), 6 );
+
+    // Tank icon, rotation for direction
+    this.ctx.rotate( tank.direction );
 
     this.ctx.fillStyle = 'black';
     this.ctx.fillRect( -17, -17, 34, 34 );
