@@ -146,10 +146,18 @@ socket.on('gameUpdate', function (data) {
         game.updateMap(data.mapUpdate);
       }
       else if (data.playerHit) {
-        game.updateTankhealth(data.playerHit, data.newHealth)
+        game.updateTankhealth( data.playerHit, data.newHealth )
         if (data.gameOver) {
-          game.endGame(data.gameOver);
-          clearInterval(sendServerUpdateInt);
+          game.endGame( data.gameOver );
+          clearInterval( sendServerUpdateInt );
+          delete game;
+          // clear game specific information
+          localStorage.removeItem( "lobbyCode" );
+          localStorage.removeItem( "userID" );
+          // change which elements are displayed
+          document.getElementById( "game" ).style.display = "none";
+          wrapper.makeActive( "splash2" );
+          wrapper.style.display = "block";
         }
       }
       if(data.userID == localStorage.userID){

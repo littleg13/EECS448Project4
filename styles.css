@@ -6,7 +6,6 @@ body {
   color: white;
   background-image: url("images/wild_oliva.png");
   light-height: 16px;
-  overflow: hidden;
 }
 
 main, header, footer {

@@ -173,11 +173,9 @@ class Game {
 
       if(bullet.distanceTraveled <= bullet.distanceToTravel){
         this.ctx.save();
-        this.ctx.fillStyle = 'red';
-        this.ctx.fillRect( Math.round(bullet.xPos) * this.geometryDim, Math.round(bullet.yPos) * this.geometryDim, this.geometryDim, this.geometryDim );
         this.ctx.fillStyle = 'grey';
         this.ctx.strokeStyle = 'black';
-        this.ctx.translate( bullet.xPos * this.geometryDim, bullet.yPos * this.geometryDim );
+        this.ctx.translate( (bullet.xPos + 0.5) * this.geometryDim, (bullet.yPos + 0.5) * this.geometryDim );
         this.ctx.rotate( bullet.direction );
         this.ctx.beginPath();
         this.ctx.moveTo( -5,  5 );
@@ -202,7 +200,10 @@ class Game {
   fire(shooterID, power, curve, dist) {
     let shooter = this.tanks[shooterID];
     if(shooter.canShoot){
-      var proj = { xPos: shooter.xPos, yPos: shooter.yPos, direction: shooter.direction, distanceToTravel: dist, distanceTraveled: 0};
+      var proj = { xPos: shooter.xPos,
+                   yPos: shooter.yPos,
+                   direction: shooter.direction,
+                   distanceToTravel: dist, distanceTraveled: 0 };
       this.bullets.push(proj);
       this.tanks[shooterID].canShoot = false;
     }
