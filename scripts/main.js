@@ -155,6 +155,7 @@ socket.on('gameUpdate', function (data) {
       break;
     case 'gameOver':
       game.endGame(data.userID);
+      clearInterval(sendServerUpdateInt);
       break;
   }
 });

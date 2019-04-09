@@ -310,6 +310,6 @@ class Game {
 
   //TODO make end game
   endGame(winningUserID) {
-    console.log("Game over. Winner is: " + winningUserID);
+    alert("Game over. Winner is: " + winningUserID);
   }
 };
