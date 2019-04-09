@@ -192,6 +192,7 @@ class Game {
       else{
         this.bullets.pop(i);
       }
+
     }
     this.ctx.restore();
   }

@@ -133,7 +133,7 @@ class Lobby:
 
     def checkBulletCollision(self, userID, player, power, spin):
         print("Checking bullet collision for: " + userID)
-        position = [player.xPos, player.yPos]
+        position = [player.xPos + 0.5, player.yPos + 0.5]
         increment = 0.1
         collided = False
         collidedWith = ''
@@ -145,6 +145,8 @@ class Lobby:
                 finalDistance = self.getDistanceToPlayer(position, player)
                 collided = True
             elif self.map[math.floor(position[1])][math.floor(position[0])] != 0:
+                print(position)
+                print(math.floor(position[0]), math.floor(position[1]))
                 collided = True
                 finalDistance = self.getDistanceToPlayer(position, player)
                 if(self.map[math.floor(position[1])][math.floor(position[0])] != -1):
@@ -157,12 +159,12 @@ class Lobby:
         return [collidedWith, finalDistance]
 
     def getDistanceToPlayer(self, position, player):
-        return math.sqrt(math.pow(position[0] - player.xPos, 2) + math.pow(position[1] - player.yPos, 2))
+        return math.sqrt(math.pow(position[0] - (player.xPos + 0.5), 2) + math.pow(position[1] - (player.yPos+0.5), 2))
     def isPositionInPlayerBounds(self, position):
         for playerID in self.order:
             player = self.players[playerID]
-            x = (position[0] - player.xPos)*math.sin(player.direction) + (position[1] - player.yPos)*math.cos(player.direction)
-            y = (position[0] - player.xPos)*math.cos(player.direction) - (position[1] - player.yPos)*math.sin(player.direction)
+            x = (position[0] - (player.xPos + 0.5))*math.sin(player.direction) + (position[1] - (player.yPos + 0.5))*math.cos(player.direction)
+            y = (position[0] - (player.xPos + 0.5))*math.cos(player.direction) - (position[1] - (player.yPos + 0.5))*math.sin(player.direction)
             if -1/2 <= x <= 1/2:
                 if -1/2 <= y <= 1/2:
                     return playerID
