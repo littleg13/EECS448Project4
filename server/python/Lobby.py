@@ -59,8 +59,8 @@ class Lobby:
         #self.players[userID].setLastSeen(datetime.now)
         pass
 
-    def advanceTurn(self):
-        self.turn = (self.turn + 1) % len(self.order)
+    def advanceTurn(self, numOfTurns):
+        self.turn = (self.turn + numOfTurns) % len(self.order)
         self.players[self.order[self.turn]].resetDistance()
 
     def getTurn(self):
@@ -107,25 +107,37 @@ class Lobby:
             # Return new data packet to be broadcast
             elif data['eventType'] == 'playerFire':
                 collisionData = self.checkBulletCollision(userID, player, 0, 0)
+                turnsToAdvance = 1
                 if(collisionData[0] is 'map'):
                     outboundData['mapUpdate'] = self.map
                 elif(collisionData[0] != 'edge'):
                     newHealth = self.players[collisionData[0]].health - 20
                     if(newHealth <= 0):
                         newHealth = 0
-                        self.removePlayer(self.players[collisionData[0]])
+                        print(collisionData[0])
+                        print(self.order)
+                        self.order.remove(collisionData[0])
+                        if (len(self.order) == 1):
+                            return self.endGame();
+                        turnsToAdvance = 0
+                        self.players[collisionData[0]].alive = False
                     self.players[collisionData[0]].health = newHealth
                     outboundData['playerHit'] = collisionData[0]
                     outboundData['newHealth'] = newHealth
-                self.advanceTurn()
+                self.advanceTurn(turnsToAdvance)
                 outboundData['distance'] = collisionData[1]
                 outboundData['eventType'] = 'playerFire'
                 outboundData['userID'] = userID
         print(outboundData)
         return outboundData
 
+    def endGame(self):
+        winner = self.order.pop()
+        print({'eventType': 'gameOver', 'userID': winner})
+        return {'eventType': 'gameOver', 'userID': winner}
 
     def checkBulletCollision(self, userID, player, power, spin):
+        print("Checking bullet collision for: " + userID)
         position = [player.xPos, player.yPos]
         increment = 0.1
         collided = False

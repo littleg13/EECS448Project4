@@ -1,5 +1,4 @@
-//var socket = io( "https://" + ( window.location.hostname ) + ":3000" );
-let socket = io('http://localhost:3000');
+var socket = io( "https://448.cuzzo.net" );
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -156,6 +155,10 @@ socket.on('gameUpdate', function (data) {
       break;
     case 'advanceTurn':
       game.advanceTurn(data['userID']);
+      break;
+    case 'gameOver':
+      game.endGame(data.userID);
+      clearInterval(sendServerUpdateInt);
       break;
   }
 });

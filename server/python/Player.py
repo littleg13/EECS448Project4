@@ -9,6 +9,7 @@ class Player:
         self.direction = 0
         self.color = 'black'
         self.health = 100
+        self.alive = True
         print("Created player with name: " + self.username)
 
     def __str__(self):

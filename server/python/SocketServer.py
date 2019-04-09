@@ -103,7 +103,7 @@ def startGame(sid, data):
 def gameEvent(sid, data):
     print("Got game update. Type is: " + data['eventType'] + ".");
     if('lobbyCode' in io.get_session(sid)):
-        print("Session found")
+        print("Game update from player with active session")
         lobbyCode = io.get_session(sid)['lobbyCode']
         userID = io.get_session(sid)['userID']
         gameUpdate = lobbyHandler.getLobby(lobbyCode).processGameEvent(userID, data)
@@ -112,6 +112,7 @@ def gameEvent(sid, data):
             if(gameUpdate['eventType'] == 'playerFire'):
                 io.emit('gameUpdate', {'eventType' : 'advanceTurn', 'userID' :  lobbyHandler.getLobby(lobbyCode).getTurn()})
     else:
+        print("Game update from player with no active session")
         io.emit('error', {'errorType': 'Unknown lobbycode given in gameEvent'})
 
 if __name__ == '__main__':

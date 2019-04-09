@@ -111,13 +111,15 @@ class Game {
   }
 
   killTank( userID ) {
-    this.tanks[userID];
+    this.tanks[userID].alive = false;
   }
 
   renderTanks() {
     for( let key in this.tanks ) {
       let tank = this.tanks[key];
-      this.renderTank( key, tank );
+      if (tank.alive) {
+        this.renderTank( key, tank );
+      }
     }
   }
 
@@ -308,5 +310,10 @@ class Game {
 
   resetLastMoved() {
     this.movedSinceLastTransmit = false;
+  }
+
+  //TODO make end game
+  endGame(winningUserID) {
+    alert("Game over. Winner is: " + winningUserID);
   }
 };
