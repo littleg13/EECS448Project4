@@ -165,7 +165,7 @@ class Game {
       let bullet = this.bullets[i];
       bullet.xPos += Math.sin( bullet.direction ) * 0.5;
       bullet.yPos -= Math.cos( bullet.direction ) * 0.5;
-
+      bullet.distanceTraveled += 0.5;
       if(bullet.distanceTraveled <= bullet.distanceToTravel){
         this.ctx.save();
         this.ctx.fillStyle = 'red';
@@ -189,7 +189,6 @@ class Game {
       else{
         this.bullets.pop(i);
       }
-      bullet.distanceTraveled += 0.5;
     }
     this.ctx.restore();
   }

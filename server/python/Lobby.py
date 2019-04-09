@@ -144,11 +144,11 @@ class Lobby:
                 collidedWith = collidedPlayerUserID
                 finalDistance = self.getDistanceToPlayer(position, player)
                 collided = True
-            elif self.map[round(position[0])-1][round(position[1])-1] != 0:
+            elif self.map[math.floor(position[1])][math.floor(position[0])] != 0:
                 collided = True
                 finalDistance = self.getDistanceToPlayer(position, player)
-                if(self.map[round(position[0])-1][round(position[1])-1] != -1):
-                    self.map[round(position[0])-1][round(position[1])-1] -= 1
+                if(self.map[math.floor(position[1])][math.floor(position[0])] != -1):
+                    self.map[math.floor(position[1])][math.floor(position[0])] -= 1
                     collidedWith = 'map'
                 else:
                     collidedWith = 'edge'
