@@ -5,6 +5,8 @@
 body {
   color: white;
   background-image: url("images/wild_oliva.png");
+  light-height: 16px;
+  overflow: hidden;
 }
 
 main, header, footer {
@@ -16,7 +18,6 @@ main, header, footer {
   border: 1px solid black;
   border-radius: 1em;
   padding: 1em 0 1em 0;
-  overflow: hidden;
 }
 
 main div {
@@ -35,7 +36,6 @@ main #lobbyList {
 }
 
 div#game {
-  height: 100%;
   margin: auto;
   display: none;
 }

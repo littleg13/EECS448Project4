@@ -15,20 +15,19 @@
 
     var handleResize = ( evt ) => {
       if( game === null ) return;
-      let rect = document.getElementById("game").getBoundingClientRect();
+      // 128 is subtracted to account for 2em margins, where 1em = 16px
+      let rect = { width : window.innerWidth - 128, height : window.innerHeight - 128 };
       if( rect.width < 600 || rect.height < 600 ) {
         game.gridBoxDim = parseInt( Math.min( rect.width / game.mapDim, rect.height / game.mapDim ) );
         let canvasSize = game.gridBoxDim * game.mapDim;
         canvas.width = canvasSize;
         canvas.height = canvasSize;
         game.scale = game.gridBoxDim / game.geometryDim;
-        wrapper.style.padding = "1em 0";
       } else {
         canvas.width = 600;
         canvas.height = 600;
         game.gridBoxDim = parseInt( canvas.width / game.mapDim );
         game.scale = game.gridBoxDim / game.geometryDim;
-        wrapper.style.padding = "1em";
       }
     }
 
