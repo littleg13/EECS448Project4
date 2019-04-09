@@ -133,7 +133,7 @@ class Lobby:
 
     def checkBulletCollision(self, userID, player, power, spin):
         print("Checking bullet collision for: " + userID)
-        position = [player.xPos, player.yPos]
+        position = [player.xPos + 0.5, player.yPos]
         increment = 0.1
         collided = False
         collidedWith = ''
