@@ -20,7 +20,6 @@ class Game {
 
   init() {
     this.initCanvas();
-    this.initMap();
   }
 
   startGame() {
@@ -40,18 +39,6 @@ class Game {
     this.ctx = canvas.getContext('2d');
   }
 
-  initMap() {
-    for( let i = 0 ; i < this.mapDim; i++ ){
-      this.map[i] = [];
-      for( let j = 0 ; j < this.mapDim; j++ ){
-        let mapVal = 0;
-        if( i == 0 || i == this.mapDim - 1 || j == 0 || j == this.mapDim - 1 ) {
-          mapVal = -1;
-        }
-        this.map[i][j] = mapVal;
-      }
-    }
-  }
 
   renderMap() {
     this.ctx.save();
@@ -74,7 +61,7 @@ class Game {
       for( let col = 0; col < this.map[row].length; col++ ) {
         this.ctx.save();
         this.ctx.translate( col * this.geometryDim, row * this.geometryDim, this.geometryDim, this.geometryDim );
-        if( this.map[row][col] == -1 ) {
+        if( this.map[row][col] != -0 ) {
           this.ctx.fillStyle = "#000000";
           this.ctx.fillRect( 0, 0, 40, 40 );
           this.ctx.fillStyle = "#C0C0C0";

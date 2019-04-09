@@ -23,12 +23,17 @@ class Lobby:
             for j in range(0, self.boardDimensions):
                 if i is 0 or j is 0 or i is self.boardDimensions-1 or j is self.boardDimensions-1:
                     self.map[i].append(-1)
+                elif(((i is 4 or i is 15) and (4 <= j <=8 or 11 <= j <= 15)) or ((j is 4 or j is 15) and (4 <= i <=8 or 11 <= i <= 15)) ):
+                    self.map[i].append(1)
                 else:
                     self.map[i].append(0)
 
     def appendPlayer(self, userID, playerObject):
         self.players[userID] = playerObject
         self.players[userID].setColor(self.colorList.pop())
+
+    def getMap(self):
+        return self.map
 
     def checkForPlayer(self, userID):
         return(userID in self.players)

@@ -35,6 +35,9 @@ def sendTurn(sid, data):
     turn = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getTurn()
     io.emit('gameUpdate', {'eventType' : 'advanceTurn', 'userID' : turn}, room=sid)
 
+def sendMap(sid, data):
+    io.emit('mapUpdate', {'map' : lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getMap()}, room=sid)
+
 @io.on('joinLobby')
 def joinLobby(sid, data):
     userID = generateRandomString(10)
@@ -82,7 +85,8 @@ def auth(sid, data):
 def requestInfo(sid, data):
     options = {
     'getPlayerList' : sendPlayerList,
-    'getTurn' : sendTurn
+    'getTurn' : sendTurn,
+    'getMap' : sendMap
     }
     options[data['request']](sid, data)
 

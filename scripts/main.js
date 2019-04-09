@@ -1,4 +1,5 @@
-var socket = io( "https://448.cuzzo.net" );
+let socket = io( "https://448.cuzzo.net" );
+//var socket = io( "http://localhost:3000" );
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -112,9 +113,15 @@ socket.on( "playerJoin", ( data ) => {
 
 socket.on( "gameStart" , ( data ) => {
   socket.emit( "requestInfo", { request : "getTurn" } );
+  socket.emit( "requestInfo", { request : "getMap" } );
   wrapper.style.display = "none";
   document.getElementById( "game" ).style.display = "block";
   game.startGame();
+});
+
+socket.on('mapUpdate', function (data) {
+  game.updateMap(data.map)
+  console.log('Got Map')
 });
 
 socket.on( "error", ( data ) => { console.log( data ); } );
@@ -146,18 +153,10 @@ socket.on('gameUpdate', function (data) {
         game.updateMap(data.mapUpdate);
       }
       else if (data.playerHit) {
-        game.updateTankhealth( data.playerHit, data.newHealth )
+        game.updateTankhealth(data.playerHit, data.newHealth)
         if (data.gameOver) {
-          game.endGame( data.gameOver );
-          clearInterval( sendServerUpdateInt );
-          delete game;
-          // clear game specific information
-          localStorage.removeItem( "lobbyCode" );
-          localStorage.removeItem( "userID" );
-          // change which elements are displayed
-          document.getElementById( "game" ).style.display = "none";
-          wrapper.makeActive( "splash2" );
-          wrapper.style.display = "block";
+          game.endGame(data.gameOver);
+          clearInterval(sendServerUpdateInt);
         }
       }
       if(data.userID == localStorage.userID){
