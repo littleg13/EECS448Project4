@@ -1,5 +1,6 @@
 import math
 import random
+from Player import Player
 from datetime import datetime
 
 class Lobby:
@@ -13,8 +14,10 @@ class Lobby:
         self.map = []
         self.boardDimensions = 20
         self.colorList = ['blue', 'limeGreen', 'blueViolet', 'deepPink', 'darkOrange', 'gold', 'red', 'deepSkyBlue']
+        self.spawnPosList = [{'x': 2, 'y': 3}, {'x': 5,'y': 5}, {'x': 9,'y': 4}, {'x': 9,'y': 15}, {'x': 4,'y': 10}, {'x': 15,'y': 10}, {'x': 2,'y': 16}, {'x': 17,'y': 3}, {'x': 10,'y': 10}]
         self.blockSize = 30
         random.shuffle(self.colorList)
+        random.shuffle(self.spawnPosList)
         self.initMap()
 
     def initMap(self):
@@ -28,8 +31,8 @@ class Lobby:
                 else:
                     self.map[i].append(0)
 
-    def appendPlayer(self, userID, playerObject):
-        self.players[userID] = playerObject
+    def appendPlayer(self, userID, username):
+        self.players[userID] = Player(username, self.spawnPosList.pop())
         self.players[userID].setColor(self.colorList.pop())
 
     def getMap(self):
@@ -56,6 +59,7 @@ class Lobby:
     def removePlayer(self, userID):
         if(self.checkForPlayer(userID)):
             colorList += self.players[userID].color
+            spawnPosList += {'x': self.players[userID].xPos, 'y': self.players[userID].yPos}
             del self.players[userID]
             return True
         return False

@@ -1,9 +1,9 @@
 class Player:
-    def __init__(self, username):
+    def __init__(self, username, pos):
         self.username = username
         self.lastSeen = 0
-        self.xPos = 5
-        self.yPos = 5
+        self.xPos = pos['x']
+        self.yPos = pos['y']
         self.distanceLeft = 5
         self.direction = 0
         self.color = 'black'
