@@ -1,4 +1,3 @@
-from Player import Player
 from Lobby import Lobby
 
 class LobbyHandler:
@@ -18,7 +17,7 @@ class LobbyHandler:
         if(self.isLobby(lobbyCode)):
             lobby = self.lobbyList[lobbyCode]
             if(not lobby.getGameStarted()):
-                lobby.appendPlayer(userID, Player(username))
+                lobby.appendPlayer(userID, username)
                 result = 200
             else:
                 result = 1
