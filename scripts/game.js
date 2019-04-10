@@ -276,8 +276,8 @@ class Game {
   }
 
   advanceTurn(userID) {
+    this.tanks[userID].canShoot = true;
     if(this.turn != ''){
-      this.tanks[userID].canShoot = true;
       this.tanks[userID].distanceLeft = 5;
     }
     this.turn = userID;
