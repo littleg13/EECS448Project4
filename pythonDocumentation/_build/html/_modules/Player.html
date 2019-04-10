@@ -1,0 +1,134 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Player &#8212; TanksGame  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Player</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="Player"><a class="viewcode-back" href="../Player.html#Player.Player">[docs]</a><span></span><span class="k">class</span> <span class="nc">Player</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastSeen</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distanceLeft</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">health</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alive</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span>
+
+<div class="viewcode-block" id="Player.getUserName"><a class="viewcode-back" href="../Player.html#Player.Player.getUserName">[docs]</a>    <span class="k">def</span> <span class="nf">getUserName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span></div>
+
+<div class="viewcode-block" id="Player.setLastSeen"><a class="viewcode-back" href="../Player.html#Player.Player.setLastSeen">[docs]</a>    <span class="k">def</span> <span class="nf">setLastSeen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastSeen</span> <span class="o">=</span> <span class="n">time</span></div>
+
+<div class="viewcode-block" id="Player.getLastSeen"><a class="viewcode-back" href="../Player.html#Player.Player.getLastSeen">[docs]</a>    <span class="k">def</span> <span class="nf">getLastSeen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">lastSeen</span></div>
+
+<div class="viewcode-block" id="Player.getPos"><a class="viewcode-back" href="../Player.html#Player.Player.getPos">[docs]</a>    <span class="k">def</span> <span class="nf">getPos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;xPos&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">xPos</span><span class="p">,</span> <span class="s1">&#39;yPos&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">yPos</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Player.setColor"><a class="viewcode-back" href="../Player.html#Player.Player.setColor">[docs]</a>    <span class="k">def</span> <span class="nf">setColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Player with name &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">+</span> <span class="s2">&quot; is now color: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Player.resetDistance"><a class="viewcode-back" href="../Player.html#Player.Player.resetDistance">[docs]</a>    <span class="k">def</span> <span class="nf">resetDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distanceLeft</span> <span class="o">=</span> <span class="mi">5</span></div>
+
+<div class="viewcode-block" id="Player.toDictionary"><a class="viewcode-back" href="../Player.html#Player.Player.toDictionary">[docs]</a>    <span class="k">def</span> <span class="nf">toDictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts all of the player information into a dictionary</span>
+
+<span class="sd">        Takes all of the member variables of a player and collects them all into</span>
+<span class="sd">        a dictionary that can be passed and accessed easily</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            output (dictionary): Dictionary with all of the player information</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">output</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span>
+        <span class="n">output</span><span class="p">[</span><span class="s1">&#39;xPos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xPos</span>
+        <span class="n">output</span><span class="p">[</span><span class="s1">&#39;yPos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">yPos</span>
+        <span class="n">output</span><span class="p">[</span><span class="s1">&#39;direction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span>
+        <span class="n">output</span><span class="p">[</span><span class="s1">&#39;distanceLeft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distanceLeft</span>
+        <span class="n">output</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span>
+        <span class="k">return</span> <span class="n">output</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Marcuzzo, Ian Hierl, Grady Wright, Cameron Kientz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
