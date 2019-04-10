@@ -1,0 +1,250 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SocketServer &#8212; TanksGame  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SocketServer</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="kn">import</span> <span class="nn">socketio</span>
+<span class="kn">import</span> <span class="nn">eventlet</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">from</span> <span class="nn">Player</span> <span class="k">import</span> <span class="n">Player</span>
+<span class="kn">from</span> <span class="nn">Lobby</span> <span class="k">import</span> <span class="n">Lobby</span>
+<span class="kn">from</span> <span class="nn">LobbyHandler</span> <span class="k">import</span> <span class="n">LobbyHandler</span>
+
+<span class="n">lobbyHandler</span> <span class="o">=</span> <span class="n">LobbyHandler</span><span class="p">()</span>
+
+<div class="viewcode-block" id="generateRandomString"><a class="viewcode-back" href="../SocketServer.html#SocketServer.generateRandomString">[docs]</a><span class="k">def</span> <span class="nf">generateRandomString</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+        <span class="n">letter</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">+=</span> <span class="n">letter</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+<span class="c1"># create a Socket.IO server</span>
+<span class="n">io</span> <span class="o">=</span> <span class="n">socketio</span><span class="o">.</span><span class="n">Server</span><span class="p">()</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">socketio</span><span class="o">.</span><span class="n">WSGIApp</span><span class="p">(</span><span class="n">io</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="sendPlayerList"><a class="viewcode-back" href="../SocketServer.html#SocketServer.sendPlayerList">[docs]</a><span class="k">def</span> <span class="nf">sendPlayerList</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emits a message that contains the list of players</span>
+
+<span class="sd">        Given the lobbyCode, this function generates a the entire list of players</span>
+<span class="sd">        in a lobby</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sid (string): Unique ID of every Websocket</span>
+<span class="sd">            data (data): Dictionary of all of the data necessary to obtain the</span>
+<span class="sd">                         list of players</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="n">fullInfo</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;fullInfo&#39;</span><span class="p">]</span>
+    <span class="n">playerList</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">fullInfo</span><span class="p">:</span>
+        <span class="n">playerList</span> <span class="o">=</span> <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">getLobby</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">sid</span><span class="p">)[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">getPlayersInfo</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">playerList</span> <span class="o">=</span> <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">getLobby</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">sid</span><span class="p">)[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">getPlayerList</span><span class="p">()</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;playerList&#39;</span><span class="p">,</span> <span class="n">playerList</span><span class="p">,</span> <span class="n">room</span><span class="o">=</span><span class="n">sid</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="sendTurn"><a class="viewcode-back" href="../SocketServer.html#SocketServer.sendTurn">[docs]</a><span class="k">def</span> <span class="nf">sendTurn</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">turn</span> <span class="o">=</span> <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">getLobby</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">sid</span><span class="p">)[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">getTurn</span><span class="p">()</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;gameUpdate&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;eventType&#39;</span> <span class="p">:</span> <span class="s1">&#39;advanceTurn&#39;</span><span class="p">,</span> <span class="s1">&#39;userID&#39;</span> <span class="p">:</span> <span class="n">turn</span><span class="p">},</span> <span class="n">room</span><span class="o">=</span><span class="n">sid</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="sendMap"><a class="viewcode-back" href="../SocketServer.html#SocketServer.sendMap">[docs]</a><span class="k">def</span> <span class="nf">sendMap</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;mapUpdate&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;map&#39;</span> <span class="p">:</span> <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">getLobby</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">sid</span><span class="p">)[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">getMap</span><span class="p">()},</span> <span class="n">room</span><span class="o">=</span><span class="n">sid</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="joinLobby"><a class="viewcode-back" href="../SocketServer.html#SocketServer.joinLobby">[docs]</a><span class="nd">@io</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;joinLobby&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">joinLobby</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adds a user to a lobby upon request</span>
+
+<span class="sd">        Creates a user ID, and creates a socket connection between the server</span>
+<span class="sd">        and the new user</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sid (string): Unique ID of every Websocket</span>
+<span class="sd">            data (data): Dictionary of all of the data necessary to add the user</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="n">userID</span> <span class="o">=</span> <span class="n">generateRandomString</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">session</span><span class="p">(</span><span class="n">sid</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;userID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">userID</span>
+        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">]</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;setID&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;userID&#39;</span> <span class="p">:</span> <span class="n">userID</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span> <span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]},</span> <span class="n">room</span><span class="o">=</span><span class="n">sid</span><span class="p">)</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">enter_room</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">joinLobby</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">],</span> <span class="n">userID</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">])</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">result</span> <span class="o">==</span> <span class="mi">200</span><span class="p">):</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;playerJoin&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;username&#39;</span> <span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]},</span> <span class="n">room</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;moveToLobby&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;lobbyJoined&#39;</span><span class="p">,</span> <span class="s1">&#39;result&#39;</span> <span class="p">:</span> <span class="n">result</span><span class="p">,</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">]},</span> <span class="n">room</span><span class="o">=</span><span class="n">sid</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="createLobby"><a class="viewcode-back" href="../SocketServer.html#SocketServer.createLobby">[docs]</a><span class="nd">@io</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;createLobby&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">createLobby</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates a lobby upon user request</span>
+
+<span class="sd">        Creates a lobby and populates it with the user that created the lobby,</span>
+<span class="sd">        then emits a message with the lobby information</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sid (string): Unique ID of every Websocket</span>
+<span class="sd">            data (data): Dictionary of all of the data necessary to add the user</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="n">lobbyCode</span> <span class="o">=</span> <span class="n">generateRandomString</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">userID</span> <span class="o">=</span> <span class="n">generateRandomString</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">session</span><span class="p">(</span><span class="n">sid</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;userID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">userID</span>
+        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lobbyCode</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">enter_room</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">lobbyCode</span><span class="p">)</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;setID&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;userID&#39;</span> <span class="p">:</span> <span class="n">userID</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span> <span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]},</span> <span class="n">room</span><span class="o">=</span><span class="n">sid</span><span class="p">)</span>
+    <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">createLobby</span><span class="p">(</span><span class="n">lobbyCode</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">joinLobby</span><span class="p">(</span><span class="n">lobbyCode</span><span class="p">,</span> <span class="n">userID</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">])</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;moveToLobby&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;lobbyCreated&#39;</span><span class="p">,</span> <span class="s1">&#39;result&#39;</span> <span class="p">:</span> <span class="n">result</span><span class="p">,</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">:</span> <span class="n">lobbyCode</span><span class="p">},</span> <span class="n">room</span><span class="o">=</span><span class="n">sid</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="auth"><a class="viewcode-back" href="../SocketServer.html#SocketServer.auth">[docs]</a><span class="nd">@io</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">auth</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Checks to see if a user is already in a game, and sends them back to it</span>
+
+<span class="sd">        This sends the player back to the page they belong in if they refresh</span>
+<span class="sd">        during the game, or sends them back to the title screen if there is no</span>
+<span class="sd">        game for them</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sid (string): Unique ID of every Websocket</span>
+<span class="sd">            data (data): Dictionary of all of the data necessary to add the user</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">session</span><span class="p">(</span><span class="n">sid</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;userID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;userID&#39;</span><span class="p">]</span>
+        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">]</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">enter_room</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">isLobby</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])):</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;clearStorage&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">room</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span>
+        <span class="k">return</span>
+    <span class="k">elif</span> <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">getLobby</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">getGameStarted</span><span class="p">():</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;gameStart&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">room</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">getLobby</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">updateSeen</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;userID&#39;</span><span class="p">])):</span>
+            <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="requestInfo"><a class="viewcode-back" href="../SocketServer.html#SocketServer.requestInfo">[docs]</a><span class="nd">@io</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;requestInfo&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">requestInfo</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;getPlayerList&#39;</span> <span class="p">:</span> <span class="n">sendPlayerList</span><span class="p">,</span>
+    <span class="s1">&#39;getTurn&#39;</span> <span class="p">:</span> <span class="n">sendTurn</span><span class="p">,</span>
+    <span class="s1">&#39;getMap&#39;</span> <span class="p">:</span> <span class="n">sendMap</span>
+    <span class="p">}</span>
+    <span class="n">options</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">]](</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="logout"><a class="viewcode-back" href="../SocketServer.html#SocketServer.logout">[docs]</a><span class="nd">@io</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;logout&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">logout</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">getLobby</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">removePlayer</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;userID&#39;</span><span class="p">])</span></div>
+<span class="c1"># @io.on(&#39;disconnect&#39;)</span>
+<span class="c1"># def disconnect(sid):</span>
+<span class="c1">#     io.session_save()</span>
+
+<div class="viewcode-block" id="startGame"><a class="viewcode-back" href="../SocketServer.html#SocketServer.startGame">[docs]</a><span class="nd">@io</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;startGame&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">startGame</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">lobbyCode</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">sid</span><span class="p">)[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">]</span>
+    <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">getLobby</span><span class="p">(</span><span class="n">lobbyCode</span><span class="p">)</span><span class="o">.</span><span class="n">startGame</span><span class="p">()</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;gameStart&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">room</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">sid</span><span class="p">)[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="gameEvent"><a class="viewcode-back" href="../SocketServer.html#SocketServer.gameEvent">[docs]</a><span class="nd">@io</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;gameEvent&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">gameEvent</span><span class="p">(</span><span class="n">sid</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Updates the current state of the game on the server side.</span>
+
+<span class="sd">        Calls processGameEvent, which returns the information needed to update</span>
+<span class="sd">        the game accurately, and then emits a message to all the sockets(users)</span>
+<span class="sd">        connected to a lobby with the updated game information</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sid (string): Unique ID of every Websocket</span>
+<span class="sd">            data (data): Dictionary of all of the data necessary to add the user</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">if</span><span class="p">(</span><span class="s1">&#39;lobbyCode&#39;</span> <span class="ow">in</span> <span class="n">io</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">sid</span><span class="p">)):</span>
+        <span class="n">lobbyCode</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">sid</span><span class="p">)[</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">]</span>
+        <span class="n">userID</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">sid</span><span class="p">)[</span><span class="s1">&#39;userID&#39;</span><span class="p">]</span>
+        <span class="n">gameUpdate</span> <span class="o">=</span> <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">getLobby</span><span class="p">(</span><span class="n">lobbyCode</span><span class="p">)</span><span class="o">.</span><span class="n">processGameEvent</span><span class="p">(</span><span class="n">userID</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;gameUpdate&#39;</span><span class="p">,</span> <span class="n">gameUpdate</span> <span class="p">,</span> <span class="n">room</span><span class="o">=</span><span class="n">lobbyCode</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="s1">&#39;eventType&#39;</span> <span class="ow">in</span> <span class="n">gameUpdate</span><span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">gameUpdate</span><span class="p">[</span><span class="s1">&#39;eventType&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;playerFire&#39;</span><span class="p">):</span>
+                <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;gameUpdate&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;eventType&#39;</span> <span class="p">:</span> <span class="s1">&#39;advanceTurn&#39;</span><span class="p">,</span> <span class="s1">&#39;userID&#39;</span> <span class="p">:</span>  <span class="n">lobbyHandler</span><span class="o">.</span><span class="n">getLobby</span><span class="p">(</span><span class="n">lobbyCode</span><span class="p">)</span><span class="o">.</span><span class="n">getTurn</span><span class="p">()})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;errorType&#39;</span><span class="p">:</span> <span class="s1">&#39;Unknown lobbycode given in gameEvent&#39;</span><span class="p">})</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">eventlet</span><span class="o">.</span><span class="n">wsgi</span><span class="o">.</span><span class="n">server</span><span class="p">(</span><span class="n">eventlet</span><span class="o">.</span><span class="n">listen</span><span class="p">((</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)),</span> <span class="n">app</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Marcuzzo, Ian Hierl, Grady Wright, Cameron Kientz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

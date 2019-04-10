@@ -9,11 +9,7 @@
 * @param{string} color the color assigned to the tank
   */
 class Tank {
-  constructor(username, xPos, yPos, direction, distanceLeft, color) {
-      /**
-        * the starting horizontal position, in tile widths.
-        * @type{number}
-        */
+  constructor(username, xPos, yPos, direction, distanceLeft, color, health) {
     this.xPos = xPos;
     /**
       * the starting vertical position, in tile widths.
@@ -49,7 +45,7 @@ class Tank {
       * the health value of the player. constrained between 0 and 100
       * @type{number}
       */
-    this.health = 100;
+    this.health = health;
     /**
       * a boolean which controls whether or not the user's tank is rendered
       * @type{bool}

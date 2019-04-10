@@ -23,6 +23,16 @@ app = socketio.WSGIApp(io)
 
 
 def sendPlayerList(sid, data):
+    """Emits a message that contains the list of players
+
+        Given the lobbyCode, this function generates a the entire list of players
+        in a lobby
+
+        Args:
+            sid (string): Unique ID of every Websocket
+            data (data): Dictionary of all of the data necessary to obtain the
+                         list of players
+        """
     fullInfo = data['fullInfo']
     playerList = None
     if fullInfo:
@@ -40,6 +50,15 @@ def sendMap(sid, data):
 
 @io.on('joinLobby')
 def joinLobby(sid, data):
+    """Adds a user to a lobby upon request
+
+        Creates a user ID, and creates a socket connection between the server
+        and the new user
+
+        Args:
+            sid (string): Unique ID of every Websocket
+            data (data): Dictionary of all of the data necessary to add the user
+        """
     userID = generateRandomString(10)
     with io.session(sid) as session:
         session['userID'] = userID
@@ -53,7 +72,15 @@ def joinLobby(sid, data):
 
 @io.on('createLobby')
 def createLobby(sid, data):
-    print('fuck')
+    """Creates a lobby upon user request
+
+        Creates a lobby and populates it with the user that created the lobby,
+        then emits a message with the lobby information
+
+        Args:
+            sid (string): Unique ID of every Websocket
+            data (data): Dictionary of all of the data necessary to add the user
+        """
     lobbyCode = generateRandomString(4)
     userID = generateRandomString(10)
     with io.session(sid) as session:
@@ -67,6 +94,16 @@ def createLobby(sid, data):
 
 @io.on('auth')
 def auth(sid, data):
+    """Checks to see if a user is already in a game, and sends them back to it
+
+        This sends the player back to the page they belong in if they refresh
+        during the game, or sends them back to the title screen if there is no
+        game for them
+
+        Args:
+            sid (string): Unique ID of every Websocket
+            data (data): Dictionary of all of the data necessary to add the user
+        """
     with io.session(sid) as session:
         session['userID'] = data['userID']
         session['lobbyCode'] = data['lobbyCode']
@@ -105,9 +142,17 @@ def startGame(sid, data):
 
 @io.on('gameEvent')
 def gameEvent(sid, data):
-    print("Got game update. Type is: " + data['eventType'] + ".");
+    """Updates the current state of the game on the server side.
+
+        Calls processGameEvent, which returns the information needed to update
+        the game accurately, and then emits a message to all the sockets(users)
+        connected to a lobby with the updated game information
+
+        Args:
+            sid (string): Unique ID of every Websocket
+            data (data): Dictionary of all of the data necessary to add the user
+        """
     if('lobbyCode' in io.get_session(sid)):
-        print("Game update from player with active session")
         lobbyCode = io.get_session(sid)['lobbyCode']
         userID = io.get_session(sid)['userID']
         gameUpdate = lobbyHandler.getLobby(lobbyCode).processGameEvent(userID, data)
@@ -116,7 +161,6 @@ def gameEvent(sid, data):
             if(gameUpdate['eventType'] == 'playerFire'):
                 io.emit('gameUpdate', {'eventType' : 'advanceTurn', 'userID' :  lobbyHandler.getLobby(lobbyCode).getTurn()})
     else:
-        print("Game update from player with no active session")
         io.emit('error', {'errorType': 'Unknown lobbycode given in gameEvent'})
 
 if __name__ == '__main__':

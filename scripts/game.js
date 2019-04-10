@@ -91,8 +91,8 @@ class Game {
     this.map = map
   }
 
-  addTank(userID, username, xPos, yPos, direction, distanceLeft, color) {
-    this.tanks[userID] = new Tank(username ,xPos, yPos, direction, distanceLeft, color);
+  addTank(userID, username, xPos, yPos, direction, distanceLeft, color, health) {
+    this.tanks[userID] = new Tank(username ,xPos, yPos, direction, distanceLeft, color, health);
   }
 
   updateTankPosition(userID, newXPos, newYPos, newDirection) {
@@ -278,9 +278,11 @@ class Game {
   }
 
   advanceTurn(userID) {
-    this.turn = userID;
     this.tanks[userID].canShoot = true;
-    this.tanks[userID].distanceLeft = 5;
+    if(this.turn != ''){
+      this.tanks[userID].distanceLeft = 5;
+    }
+    this.turn = userID;
   }
 
   playerMoved() {
