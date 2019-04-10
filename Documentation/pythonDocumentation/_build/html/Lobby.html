@@ -1,0 +1,275 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Lobby &#8212; TanksGame  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-Lobby">
+<span id="lobby"></span><h1>Lobby<a class="headerlink" href="#module-Lobby" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="Lobby.Lobby">
+<em class="property">class </em><code class="descclassname">Lobby.</code><code class="descname">Lobby</code><span class="sig-paren">(</span><em>lobbyCode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection of players and all of their interactions</p>
+<p>The lobby contains a dictionary of players, and handles all of the game logic,
+and game state information.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lobbyCode</strong> (<em>string</em>) – Code required to enter a particular lobby</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="Lobby.Lobby.advanceTurn">
+<code class="descname">advanceTurn</code><span class="sig-paren">(</span><em>numOfTurns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.advanceTurn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.advanceTurn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.appendPlayer">
+<code class="descname">appendPlayer</code><span class="sig-paren">(</span><em>userID</em>, <em>playerObject</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.appendPlayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.appendPlayer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.checkBulletCollision">
+<code class="descname">checkBulletCollision</code><span class="sig-paren">(</span><em>userID</em>, <em>player</em>, <em>power</em>, <em>spin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.checkBulletCollision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.checkBulletCollision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the collision of bullets</p>
+<p>Checks if the bullet will collide with either a wall or a player, and
+generates updated game information</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>userID</strong> (<em>string</em>) – Unique key generated for the player that fired</li>
+<li><strong>player</strong> (<em>object</em>) – The entire player object of the player that fired</li>
+<li><strong>power</strong> (<em>int</em>) – Power of the projectile fired(set to
+zero in first release)</li>
+<li><strong>spin</strong> (<em>int</em>) – Spin of the projectile fired(set to zero in first release)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>first element is the ID of the player that was collided with,</dt>
+<dd><p class="first last">or false if there was no collision. Second element is the
+distance from the player who shot to whatever it collided with</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array [string, float]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.checkForPlayer">
+<code class="descname">checkForPlayer</code><span class="sig-paren">(</span><em>userID</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.checkForPlayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.checkForPlayer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.getDistanceToPlayer">
+<code class="descname">getDistanceToPlayer</code><span class="sig-paren">(</span><em>position</em>, <em>player</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getDistanceToPlayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getDistanceToPlayer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.getGameStarted">
+<code class="descname">getGameStarted</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getGameStarted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getGameStarted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.getLobbyCody">
+<code class="descname">getLobbyCody</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getLobbyCody"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getLobbyCody" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.getMap">
+<code class="descname">getMap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getMap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.getPlayerByID">
+<code class="descname">getPlayerByID</code><span class="sig-paren">(</span><em>userID</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getPlayerByID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getPlayerByID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.getPlayerList">
+<code class="descname">getPlayerList</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getPlayerList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getPlayerList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.getPlayersInfo">
+<code class="descname">getPlayersInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getPlayersInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getPlayersInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.getTurn">
+<code class="descname">getTurn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getTurn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getTurn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.initMap">
+<code class="descname">initMap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.initMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.initMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the Map</p>
+<p>Initializes values of the map array to create walls and borders</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>boardDimensions</strong> (<em>int</em>) – Dimensions of the board</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.isPositionInPlayerBounds">
+<code class="descname">isPositionInPlayerBounds</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.isPositionInPlayerBounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.isPositionInPlayerBounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks to see if the given position is inside another player</p>
+<p>Checks to see if the position will result in a collision between the
+object at the position, and any player on the board</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>position</strong> (<em>arrray</em>) – Contains the x and y coordinates of the object
+given</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>returns the player ID of the player that</dt>
+<dd>experienced the collision, or false if there was
+no collision.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">playerID (string)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.processGameEvent">
+<code class="descname">processGameEvent</code><span class="sig-paren">(</span><em>userID</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.processGameEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.processGameEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles Game Events</p>
+<p>Updates the information of every player after ones moves or fires</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>userID</strong> (<em>string</em>) – Unique key generated for the player that performed
+the action</li>
+<li><strong>data</strong> (<em>dictionary</em>) – contains the type of event, and all of the details
+involved in that event.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">contains the updated information of the game</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">outBoundData (dictionary)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.removePlayer">
+<code class="descname">removePlayer</code><span class="sig-paren">(</span><em>userID</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.removePlayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.removePlayer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.startGame">
+<code class="descname">startGame</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.startGame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.startGame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.updateSeen">
+<code class="descname">updateSeen</code><span class="sig-paren">(</span><em>userID</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.updateSeen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.updateSeen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Marcuzzo, Ian Hierl, Grady Wright, Cameron Kientz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/Lobby.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

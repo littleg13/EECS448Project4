@@ -100,7 +100,7 @@ socket.on( "playerList", function (data) {
   if (game) {
     for(let user in data) {
       let userData = data[user];
-      game.addTank(user, userData['username'], userData['xPos'], userData['yPos'], userData['direction'], userData['distanceLeft'], userData['color']);
+      game.addTank(user, userData['username'], userData['xPos'], userData['yPos'], userData['direction'], userData['distanceLeft'], userData['color'], userData['health']);
     }
   }
   updateLists();

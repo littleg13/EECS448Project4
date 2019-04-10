@@ -1,6 +1,11 @@
 from Lobby import Lobby
 
 class LobbyHandler:
+    """Central Spot to handle lobbies on the server
+
+    Deals with creation of lobbies and players joining lobbies using the lobby
+    code
+    """
     def __init__(self):
         self.lobbyList = {}
 
