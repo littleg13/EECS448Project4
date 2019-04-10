@@ -41,4 +41,5 @@ class Player:
         output['direction'] = self.direction
         output['distanceLeft'] = self.distanceLeft
         output['color'] = self.color
+        output['health'] = self.health
         return output
