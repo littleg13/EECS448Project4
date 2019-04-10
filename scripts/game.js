@@ -35,7 +35,6 @@ class Game {
     this.height = canvas.height;
     this.gridBoxDim = this.width / this.mapDim;
     this.scale = this.gridBoxDim / this.geometryDim;
-    console.log(this.mapDim);
     this.ctx = canvas.getContext('2d');
   }
 
@@ -104,7 +103,6 @@ class Game {
       this.killTank( userID );
     }
     let playerIcon = document.getElementById( "display-" + userID );
-    console.log( newHealth );
     this.tanks[userID].health = newHealth;
   }
 
