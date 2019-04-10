@@ -9,7 +9,6 @@ class Player:
         self.color = 'black'
         self.health = 100
         self.alive = True
-        print("Created player with name: " + self.username)
 
     def __str__(self):
         return self.username
@@ -34,6 +33,14 @@ class Player:
         self.distanceLeft = 5
 
     def toDictionary(self):
+        """Converts all of the player information into a dictionary
+
+        Takes all of the member variables of a player and collects them all into
+        a dictionary that can be passed and accessed easily
+
+        Returns:
+            output (dictionary): Dictionary with all of the player information
+        """
         output = {}
         output['username'] = self.username
         output['xPos'] = self.xPos

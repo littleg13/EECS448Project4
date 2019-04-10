@@ -1,0 +1,219 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SocketServer &#8212; TanksGame  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-SocketServer">
+<span id="socketserver"></span><h1>SocketServer<a class="headerlink" href="#module-SocketServer" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="SocketServer.auth">
+<code class="descclassname">SocketServer.</code><code class="descname">auth</code><span class="sig-paren">(</span><em>sid</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SocketServer.html#auth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SocketServer.auth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks to see if a user is already in a game, and sends them back to it</p>
+<p>This sends the player back to the page they belong in if they refresh
+during the game, or sends them back to the title screen if there is no
+game for them</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sid</strong> (<em>string</em>) – Unique ID of every Websocket</li>
+<li><strong>data</strong> (<em>data</em>) – Dictionary of all of the data necessary to add the user</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SocketServer.createLobby">
+<code class="descclassname">SocketServer.</code><code class="descname">createLobby</code><span class="sig-paren">(</span><em>sid</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SocketServer.html#createLobby"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SocketServer.createLobby" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a lobby upon user request</p>
+<p>Creates a lobby and populates it with the user that created the lobby,
+then emits a message with the lobby information</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sid</strong> (<em>string</em>) – Unique ID of every Websocket</li>
+<li><strong>data</strong> (<em>data</em>) – Dictionary of all of the data necessary to add the user</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SocketServer.gameEvent">
+<code class="descclassname">SocketServer.</code><code class="descname">gameEvent</code><span class="sig-paren">(</span><em>sid</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SocketServer.html#gameEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SocketServer.gameEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the current state of the game on the server side.</p>
+<p>Calls processGameEvent, which returns the information needed to update
+the game accurately, and then emits a message to all the sockets(users)
+connected to a lobby with the updated game information</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sid</strong> (<em>string</em>) – Unique ID of every Websocket</li>
+<li><strong>data</strong> (<em>data</em>) – Dictionary of all of the data necessary to add the user</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SocketServer.generateRandomString">
+<code class="descclassname">SocketServer.</code><code class="descname">generateRandomString</code><span class="sig-paren">(</span><em>num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SocketServer.html#generateRandomString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SocketServer.generateRandomString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="SocketServer.joinLobby">
+<code class="descclassname">SocketServer.</code><code class="descname">joinLobby</code><span class="sig-paren">(</span><em>sid</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SocketServer.html#joinLobby"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SocketServer.joinLobby" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a user to a lobby upon request</p>
+<p>Creates a user ID, and creates a socket connection between the server
+and the new user</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sid</strong> (<em>string</em>) – Unique ID of every Websocket</li>
+<li><strong>data</strong> (<em>data</em>) – Dictionary of all of the data necessary to add the user</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SocketServer.logout">
+<code class="descclassname">SocketServer.</code><code class="descname">logout</code><span class="sig-paren">(</span><em>sid</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SocketServer.html#logout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SocketServer.logout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="SocketServer.requestInfo">
+<code class="descclassname">SocketServer.</code><code class="descname">requestInfo</code><span class="sig-paren">(</span><em>sid</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SocketServer.html#requestInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SocketServer.requestInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="SocketServer.sendMap">
+<code class="descclassname">SocketServer.</code><code class="descname">sendMap</code><span class="sig-paren">(</span><em>sid</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SocketServer.html#sendMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SocketServer.sendMap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="SocketServer.sendPlayerList">
+<code class="descclassname">SocketServer.</code><code class="descname">sendPlayerList</code><span class="sig-paren">(</span><em>sid</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SocketServer.html#sendPlayerList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SocketServer.sendPlayerList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emits a message that contains the list of players</p>
+<p>Given the lobbyCode, this function generates a the entire list of players
+in a lobby</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sid</strong> (<em>string</em>) – Unique ID of every Websocket</li>
+<li><strong>data</strong> (<em>data</em>) – Dictionary of all of the data necessary to obtain the
+list of players</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SocketServer.sendTurn">
+<code class="descclassname">SocketServer.</code><code class="descname">sendTurn</code><span class="sig-paren">(</span><em>sid</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SocketServer.html#sendTurn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SocketServer.sendTurn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="SocketServer.startGame">
+<code class="descclassname">SocketServer.</code><code class="descname">startGame</code><span class="sig-paren">(</span><em>sid</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SocketServer.html#startGame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#SocketServer.startGame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Marcuzzo, Ian Hierl, Grady Wright, Cameron Kientz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/SocketServer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

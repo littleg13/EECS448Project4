@@ -2,12 +2,17 @@ from Player import Player
 from Lobby import Lobby
 
 class LobbyHandler:
+    """Central Spot to handle lobbies on the server
+
+    Deals with creation of lobbies and players joining lobbies using the lobby
+    code
+    """
     def __init__(self):
         self.lobbyList = {}
 
     def createLobby(self, lobbyCode):
         self.lobbyList[lobbyCode] = Lobby(lobbyCode)
-        
+
     def joinLobby(self, lobbyCode, userID, username):
         result = 0
         if(self.isLobby(lobbyCode)):

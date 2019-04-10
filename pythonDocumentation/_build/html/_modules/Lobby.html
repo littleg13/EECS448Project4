@@ -1,0 +1,311 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Lobby &#8212; TanksGame  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Lobby</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+
+<div class="viewcode-block" id="Lobby"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby">[docs]</a><span class="k">class</span> <span class="nc">Lobby</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Collection of players and all of their interactions</span>
+
+<span class="sd">    The lobby contains a dictionary of players, and handles all of the game logic,</span>
+<span class="sd">    and game state information.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lobbyCode (string) : Code required to enter a particular lobby</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lobbyCode</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gameStarted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">players</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lobbyCode</span> <span class="o">=</span> <span class="n">lobbyCode</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Created Lobby with code: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobbyCode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boardDimensions</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colorList</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;limeGreen&#39;</span><span class="p">,</span> <span class="s1">&#39;blueViolet&#39;</span><span class="p">,</span> <span class="s1">&#39;deepPink&#39;</span><span class="p">,</span> <span class="s1">&#39;darkOrange&#39;</span><span class="p">,</span> <span class="s1">&#39;gold&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;deepSkyBlue&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blockSize</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colorList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initMap</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Lobby.initMap"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.initMap">[docs]</a>    <span class="k">def</span> <span class="nf">initMap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates the Map</span>
+
+<span class="sd">        Initializes values of the map array to create walls and borders</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            boardDimensions (int): Dimensions of the board</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">boardDimensions</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">boardDimensions</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">j</span> <span class="ow">is</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">i</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">boardDimensions</span><span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">j</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">boardDimensions</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">elif</span><span class="p">(((</span><span class="n">i</span> <span class="ow">is</span> <span class="mi">4</span> <span class="ow">or</span> <span class="n">i</span> <span class="ow">is</span> <span class="mi">15</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">4</span> <span class="o">&lt;=</span> <span class="n">j</span> <span class="o">&lt;=</span><span class="mi">8</span> <span class="ow">or</span> <span class="mi">11</span> <span class="o">&lt;=</span> <span class="n">j</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">))</span> <span class="ow">or</span> <span class="p">((</span><span class="n">j</span> <span class="ow">is</span> <span class="mi">4</span> <span class="ow">or</span> <span class="n">j</span> <span class="ow">is</span> <span class="mi">15</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">4</span> <span class="o">&lt;=</span> <span class="n">i</span> <span class="o">&lt;=</span><span class="mi">8</span> <span class="ow">or</span> <span class="mi">11</span> <span class="o">&lt;=</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">))</span> <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Lobby.appendPlayer"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.appendPlayer">[docs]</a>    <span class="k">def</span> <span class="nf">appendPlayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userID</span><span class="p">,</span> <span class="n">playerObject</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">[</span><span class="n">userID</span><span class="p">]</span> <span class="o">=</span> <span class="n">playerObject</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">[</span><span class="n">userID</span><span class="p">]</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colorList</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="Lobby.getMap"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.getMap">[docs]</a>    <span class="k">def</span> <span class="nf">getMap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span></div>
+
+<div class="viewcode-block" id="Lobby.checkForPlayer"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.checkForPlayer">[docs]</a>    <span class="k">def</span> <span class="nf">checkForPlayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userID</span><span class="p">):</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">userID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Lobby.getPlayerByID"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.getPlayerByID">[docs]</a>    <span class="k">def</span> <span class="nf">getPlayerByID</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userID</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">[</span><span class="n">userID</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Lobby.getLobbyCody"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.getLobbyCody">[docs]</a>    <span class="k">def</span> <span class="nf">getLobbyCody</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobbyCode</span></div>
+
+<div class="viewcode-block" id="Lobby.getPlayerList"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.getPlayerList">[docs]</a>    <span class="k">def</span> <span class="nf">getPlayerList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">playerID</span><span class="p">,</span> <span class="n">playerObject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">playerObject</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="Lobby.getGameStarted"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.getGameStarted">[docs]</a>    <span class="k">def</span> <span class="nf">getGameStarted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gameStarted</span></div>
+
+<div class="viewcode-block" id="Lobby.removePlayer"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.removePlayer">[docs]</a>    <span class="k">def</span> <span class="nf">removePlayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userID</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkForPlayer</span><span class="p">(</span><span class="n">userID</span><span class="p">)):</span>
+            <span class="n">colorList</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">[</span><span class="n">userID</span><span class="p">]</span><span class="o">.</span><span class="n">color</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">[</span><span class="n">userID</span><span class="p">]</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Lobby.updateSeen"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.updateSeen">[docs]</a>    <span class="k">def</span> <span class="nf">updateSeen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userID</span><span class="p">):</span>
+        <span class="c1">#self.players[userID].setLastSeen(datetime.now)</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Lobby.advanceTurn"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.advanceTurn">[docs]</a>    <span class="k">def</span> <span class="nf">advanceTurn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numOfTurns</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">turn</span> <span class="o">+</span> <span class="n">numOfTurns</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">turn</span><span class="p">]]</span><span class="o">.</span><span class="n">resetDistance</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Lobby.getTurn"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.getTurn">[docs]</a>    <span class="k">def</span> <span class="nf">getTurn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">turn</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Lobby.startGame"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.startGame">[docs]</a>    <span class="k">def</span> <span class="nf">startGame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gameStarted</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gameStarted</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">playerID</span><span class="p">,</span> <span class="n">playerObject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">playerID</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Lobby.getPlayersInfo"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.getPlayersInfo">[docs]</a>    <span class="k">def</span> <span class="nf">getPlayersInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">playerID</span><span class="p">,</span> <span class="n">playerObject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">playerID</span><span class="p">]</span> <span class="o">=</span> <span class="n">playerObject</span><span class="o">.</span><span class="n">toDictionary</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="Lobby.processGameEvent"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.processGameEvent">[docs]</a>    <span class="k">def</span> <span class="nf">processGameEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userID</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handles Game Events</span>
+
+<span class="sd">        Updates the information of every player after ones moves or fires</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            userID (string): Unique key generated for the player that performed</span>
+<span class="sd">                             the action</span>
+<span class="sd">            data (dictionary): contains the type of event, and all of the details</span>
+<span class="sd">                               involved in that event.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            outBoundData (dictionary): contains the updated information of the game</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">player</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">[</span><span class="n">userID</span><span class="p">]</span>
+        <span class="n">outboundData</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># print(&quot;In processGameEvent. Data is: &quot;)</span>
+        <span class="c1"># print(data)</span>
+        <span class="k">if</span> <span class="n">userID</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">turn</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;eventType&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;playerMove&#39;</span><span class="p">:</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">player</span><span class="o">.</span><span class="n">xPos</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;newPos&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">yPos</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;newPos&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">player</span><span class="o">.</span><span class="n">distanceLeft</span>  <span class="o">-=</span> <span class="n">distance</span>
+                <span class="k">if</span> <span class="n">player</span><span class="o">.</span><span class="n">distanceLeft</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">player</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;newPos&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">player</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;newPos&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">player</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;newDir&#39;</span><span class="p">]</span><span class="o">%</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">outboundData</span><span class="p">[</span><span class="s1">&#39;eventType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;playerMove&#39;</span>
+                    <span class="n">outboundData</span><span class="p">[</span><span class="s1">&#39;userID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">userID</span>
+                    <span class="n">outboundData</span><span class="p">[</span><span class="s1">&#39;newPos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;newPos&#39;</span><span class="p">]</span>
+                    <span class="n">outboundData</span><span class="p">[</span><span class="s1">&#39;newDir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;newDir&#39;</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;eventType&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;playerFire&#39;</span><span class="p">:</span>
+                <span class="n">collisionData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBulletCollision</span><span class="p">(</span><span class="n">userID</span><span class="p">,</span> <span class="n">player</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">turnsToAdvance</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">collisionData</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="s1">&#39;map&#39;</span><span class="p">):</span>
+                    <span class="n">outboundData</span><span class="p">[</span><span class="s1">&#39;mapUpdate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span>
+                <span class="k">elif</span><span class="p">(</span><span class="n">collisionData</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;edge&#39;</span><span class="p">):</span>
+                    <span class="n">newHealth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">[</span><span class="n">collisionData</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">health</span> <span class="o">-</span> <span class="mi">20</span>
+                    <span class="k">if</span><span class="p">(</span><span class="n">newHealth</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">newHealth</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">collisionData</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="n">outboundData</span><span class="p">[</span><span class="s1">&#39;gameOver&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">userID</span>
+                        <span class="n">turnsToAdvance</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">[</span><span class="n">collisionData</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">alive</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">[</span><span class="n">collisionData</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">health</span> <span class="o">=</span> <span class="n">newHealth</span>
+                    <span class="n">outboundData</span><span class="p">[</span><span class="s1">&#39;playerHit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collisionData</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">outboundData</span><span class="p">[</span><span class="s1">&#39;newHealth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newHealth</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">advanceTurn</span><span class="p">(</span><span class="n">turnsToAdvance</span><span class="p">)</span>
+                <span class="n">outboundData</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collisionData</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">outboundData</span><span class="p">[</span><span class="s1">&#39;eventType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;playerFire&#39;</span>
+                <span class="n">outboundData</span><span class="p">[</span><span class="s1">&#39;userID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">userID</span>
+        <span class="k">return</span> <span class="n">outboundData</span></div>
+
+<div class="viewcode-block" id="Lobby.checkBulletCollision"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.checkBulletCollision">[docs]</a>    <span class="k">def</span> <span class="nf">checkBulletCollision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userID</span><span class="p">,</span> <span class="n">player</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">spin</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handles the collision of bullets</span>
+
+<span class="sd">        Checks if the bullet will collide with either a wall or a player, and</span>
+<span class="sd">        generates updated game information</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            userID (string): Unique key generated for the player that fired</span>
+<span class="sd">            player (object): The entire player object of the player that fired</span>
+<span class="sd">            power (int) : Power of the projectile fired(set to</span>
+<span class="sd">                          zero in first release)</span>
+<span class="sd">            spin (int) : Spin of the projectile fired(set to zero in first release)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            array [string, float]: first element is the ID of the player that was collided with,</span>
+<span class="sd">                 or false if there was no collision. Second element is the</span>
+<span class="sd">                 distance from the player who shot to whatever it collided with</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking bullet collision for: &quot;</span> <span class="o">+</span> <span class="n">userID</span><span class="p">)</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="n">player</span><span class="o">.</span><span class="n">xPos</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">player</span><span class="o">.</span><span class="n">yPos</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">]</span>
+        <span class="n">increment</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">collided</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">collidedWith</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">finalDistance</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span><span class="p">(</span><span class="ow">not</span> <span class="n">collided</span><span class="p">):</span>
+            <span class="n">collidedPlayerUserID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isPositionInPlayerBounds</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">collidedPlayerUserID</span> <span class="ow">and</span> <span class="n">collidedPlayerUserID</span> <span class="o">!=</span> <span class="n">userID</span><span class="p">:</span>
+                <span class="n">collidedWith</span> <span class="o">=</span> <span class="n">collidedPlayerUserID</span>
+                <span class="n">finalDistance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDistanceToPlayer</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">player</span><span class="p">)</span>
+                <span class="n">collided</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])][</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">collided</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">finalDistance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDistanceToPlayer</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">player</span><span class="p">)</span>
+                <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])][</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])][</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="n">collidedWith</span> <span class="o">=</span> <span class="s1">&#39;map&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">collidedWith</span> <span class="o">=</span> <span class="s1">&#39;edge&#39;</span>
+            <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span>  <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">direction</span><span class="p">)</span><span class="o">*</span><span class="n">increment</span> <span class="o">+</span> <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+            <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span>  <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">direction</span><span class="p">)</span><span class="o">*</span><span class="n">increment</span> <span class="o">+</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">collidedWith</span><span class="p">,</span> <span class="n">finalDistance</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Lobby.getDistanceToPlayer"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.getDistanceToPlayer">[docs]</a>    <span class="k">def</span> <span class="nf">getDistanceToPlayer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">player</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">xPos</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">yPos</span><span class="o">+</span><span class="mf">0.5</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Lobby.isPositionInPlayerBounds"><a class="viewcode-back" href="../Lobby.html#Lobby.Lobby.isPositionInPlayerBounds">[docs]</a>    <span class="k">def</span> <span class="nf">isPositionInPlayerBounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Checks to see if the given position is inside another player</span>
+
+<span class="sd">        Checks to see if the position will result in a collision between the</span>
+<span class="sd">        object at the position, and any player on the board</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            position (arrray): Contains the x and y coordinates of the object</span>
+<span class="sd">                               given</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            playerID (string) : returns the player ID of the player that</span>
+<span class="sd">                                experienced the collision, or false if there was</span>
+<span class="sd">                                no collision.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">playerID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">:</span>
+            <span class="n">player</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">[</span><span class="n">playerID</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">xPos</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">))</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">direction</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">yPos</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">))</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">direction</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">xPos</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">))</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">direction</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">yPos</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">))</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">player</span><span class="o">.</span><span class="n">direction</span><span class="p">)</span>
+            <span class="k">if</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span>
+                <span class="k">if</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">playerID</span>
+        <span class="k">return</span> <span class="kc">False</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Marcuzzo, Ian Hierl, Grady Wright, Cameron Kientz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
