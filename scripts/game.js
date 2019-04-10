@@ -166,7 +166,6 @@ class Game {
       this.killTank( userID );
     }
     let playerIcon = document.getElementById( "display-" + userID );
-    console.log( newHealth );
     this.tanks[userID].health = newHealth;
   }
 

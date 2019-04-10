@@ -27,7 +27,6 @@ class Player:
 
     def setColor(self, color):
         self.color = color
-        print("Player with name " + self.username + " is now color: " + self.color)
 
     def resetDistance(self):
         self.distanceLeft = 5
