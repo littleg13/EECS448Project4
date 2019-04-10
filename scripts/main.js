@@ -70,7 +70,6 @@ var updateLists = () => {
 }
 
 socket.on( "setID", (data) => {
-  console.log( "Setting ID" );
   localStorage.setItem( "userID", data["userID"] );
   localStorage.setItem( "username", data["username"] );
 })
@@ -87,7 +86,6 @@ socket.on( "moveToLobby", ( data ) => {
       return;
     }
   }
-  console.log( "Lobby created/joined: " + data );
   game = new Game( 20 );
   localStorage.setItem( "lobbyCode", data["lobbyCode"] );
   setupLobbyMenu();
@@ -96,7 +94,6 @@ socket.on( "moveToLobby", ( data ) => {
 });
 
 socket.on( "playerList", function (data) {
-  console.log(data);
   if (game) {
     for(let user in data) {
       let userData = data[user];
@@ -107,7 +104,6 @@ socket.on( "playerList", function (data) {
 });
 
 socket.on( "playerJoin", ( data ) => {
-  console.log( "Player Joined: " + data );
   socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
 });
 
@@ -121,13 +117,11 @@ socket.on( "gameStart" , ( data ) => {
 
 socket.on('mapUpdate', function (data) {
   game.updateMap(data.map)
-  console.log('Got Map')
 });
 
 socket.on( "error", ( data ) => { console.log( data ); } );
 
 socket.on('connect', function (data) {
-  console.log("authing server")
   if( localStorage.userID ) {
     let url = window.location.pathname;
     url = url.substring(url.lastIndexOf('/')+1);
@@ -141,7 +135,6 @@ socket.on('clearStorage', function (data) {
 });
 
 socket.on('gameUpdate', function (data) {
-  console.log("Game update received");
   switch(data['eventType']) {
     case 'playerMove':
       if (localStorage.userID != data['userID']) {

@@ -16,7 +16,6 @@ class Lobby:
         self.gameStarted = False
         self.players = {}
         self.lobbyCode = lobbyCode
-        print("Created Lobby with code: " + self.lobbyCode)
         self.order = []
         self.turn = 0
         self.map = []
@@ -121,8 +120,6 @@ class Lobby:
         """
         player = self.players[userID]
         outboundData = {}
-        # print("In processGameEvent. Data is: ")
-        # print(data)
         if userID == self.order[self.turn]:
             if data['eventType'] == 'playerMove':
                 distance = math.sqrt((player.xPos-data['newPos'][0])**2 + (player.yPos-data['newPos'][1])**2)
@@ -177,7 +174,6 @@ class Lobby:
                  distance from the player who shot to whatever it collided with
 
         """
-        print("Checking bullet collision for: " + userID)
         position = [player.xPos + 0.5, player.yPos + 0.5]
         increment = 0.1
         collided = False
@@ -190,8 +186,6 @@ class Lobby:
                 finalDistance = self.getDistanceToPlayer(position, player)
                 collided = True
             elif self.map[math.floor(position[1])][math.floor(position[0])] != 0:
-                print(position)
-                print(math.floor(position[0]), math.floor(position[1]))
                 collided = True
                 finalDistance = self.getDistanceToPlayer(position, player)
                 if(self.map[math.floor(position[1])][math.floor(position[0])] != -1):
