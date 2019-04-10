@@ -1,183 +1,278 @@
-let socket = io( "https://448.cuzzo.net" );
-//var socket = io( "http://localhost:3000" );
+let socket = io("https://448.cuzzo.net");
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
 
-wrapper.makeActive = ( id ) => {
-  Array.from( wrapper.getElementsByTagName( "div" )).map( ( elem ) => {
-    if( elem.id == id ) { elem.classList.add( "active" ) }
-    else { elem.classList.remove( "active" ); }
-  });
+/**
+  * A helper function that changes which div is visible in the main#wrapper
+  * element.
+  * @param{string} id the id of the element to be displayed
+  */
+makeActive = (id) => {
+  Array.from(wrapper.getElementsByTagName("div")).map((elem) => {
+    if(elem.id == id) {elem.classList.add("active")}
+    else {elem.classList.remove("active");}
+ });
 };
 
+/**
+  * A helper function that handles user input for selecting a username. If input
+  * is valid, the username will be set in localStorage.
+  */
 var pickUsername = () => {
-  let name = document.getElementById( "username" ).value;
-  if( name === "" ) { alert( "Name cannot be blank, please try again." ); return; }
+  let name = document.getElementById("username").value;
+  if(name === "") {alert("Name cannot be blank, please try again."); return;}
 
-  localStorage.setItem( "username", document.getElementById( "username" ).value.toUpperCase() );
-  wrapper.makeActive( "splash2" );
+  localStorage.setItem("username", document.getElementById("username").value.toUpperCase());
+  makeActive("splash2");
 };
 
+/**
+  * A helper function that moves the user to the Join a Lobby screen.
+  * This is called by a button in the splash2 view.
+  */
 var loadJoin = () => {
   wrapper.children.title.innerHTML = "Join a Lobby";
-  wrapper.makeActive( "join" );
+  makeActive("join");
 };
 
+/**
+  * This emits a signal to the server that a new lobby is requested.
+  * It changes the view to waiting.
+  * It is called by a button on the splash2 view.
+  */
 var createLobby = () => {
-  let name = localStorage.getItem( "username" );
-  socket.emit( "createLobby", { username : name.toUpperCase() } );
+  let name = localStorage.username;
+  socket.emit("createLobby", {username : name.toUpperCase()});
 
-  wrapper.makeActive( "waiting" );
+  makeActive("waiting");
 };
 
+/**
+  * A function that sends a signal to the server to be added to a lobby. The
+  * lobby is specified by a 4 letter string in a text input on the join view.
+  * It changes the view to waiting.
+  * It is called by a button on the join view.
+  */
 var joinLobby = () => {
-  let lobbyCode = document.getElementById( "lobbyCode" ).value.toUpperCase();
-  let name = localStorage.getItem( "username" );
+  let lobbyCode = document.getElementById("lobbyCode").value.toUpperCase();
+  let name = localStorage.username;
 
-  if( lobbyCode === "" ) { alert( "Lobby code cannot be blank!" ); return; }
+  if(lobbyCode === "") {alert("Lobby code cannot be blank!"); return;}
 
-  socket.emit( "joinLobby", { lobbyCode : lobbyCode, username: name } );
-  wrapper.makeActive( "waiting" );
+  socket.emit("joinLobby", {lobbyCode : lobbyCode, username: name});
+  makeActive("waiting");
 };
 
+/**
+  * A function that sends a signal to the server to begin the game. It changes
+  * the view to waiting.
+  * It is called by a button on the lobbyMenu view.
+  */
 var startGame = () => {
-  wrapper.makeActive( "waiting" );
-  socket.emit( "startGame", {} );
+  makeActive("waiting");
+  socket.emit("startGame", {});
 };
 
+/**
+  * A function that clears the localStorage and emits a signal to the server to
+  * announce the user has left.
+  * It is called by buttons on the lobbyMenu and game views.
+  */
 var logout = () => {
-  socket.emit( "logout", { lobbyCode : localStorage.getItem("lobbyCode"), userID : localStorage.getItem("userID") });
+  socket.emit("logout", {lobbyCode : localStorage.lobbyCode, userID : localStorage.userID});
   localStorage.clear();
   window.location.reload();
 };
 
+/**
+  * A function that signals the server to request the selected lobby's player
+  * list. It sets the lobbyName element in the lobbyMenu view to the lobbyCode.
+  * This is called by the moveToLobby socket handler.
+  */
 var setupLobbyMenu = () => {
-  document.getElementById( "lobbyName" ).innerHTML = localStorage["lobbyCode"];
-  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+  document.getElementById("lobbyName").innerHTML = localStorage.lobbyCode;
+  socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
 }
 
+/**
+  * A function that creates &lt;li&gt; elements within the lobbyList &lt;ul&gt;
+  * element in the lobbyMenu view. It is called by the "playerList" signal
+  * socket signal handler.
+  */
 var updateLists = () => {
-  if( game === null ) return;
+  if(game === null) return;
 
   var lobbyList = document.getElementById("lobbyList");
   lobbyList.innerHTML = "";
-  for( userID in game.tanks ) {
-    let newListItem = document.createElement( "li" );
+  for(userID in game.tanks) {
+    let newListItem = document.createElement("li");
     newListItem.innerHTML = game.tanks[userID].username;
-    lobbyList.appendChild( newListItem );
-  }
+    lobbyList.appendChild(newListItem);
+ }
 }
 
-socket.on( "setID", (data) => {
-  console.log( "Setting ID" );
-  localStorage.setItem( "userID", data["userID"] );
-  localStorage.setItem( "username", data["username"] );
+/**
+  * The event handler for the setID signal from the server. It sets the userID
+  * as generated by the server. This is stored in localStorage.
+  */
+socket.on("setID", (data) => {
+  console.log("Setting ID");
+  localStorage.setItem("userID", data["userID"]);
 })
 
-socket.on( "moveToLobby", ( data ) => {
-  if( data["type"] == "lobbyJoined" ) {
-    if( data["result"] == 0 ) {
-      alert( "The lobby you tried to join does not exist." );
-      wrapper.makeActive( "join" );
+/**
+  * The event handler for the moveToLobby signal from the server. It determines
+  * if the request to join or create a lobby was successful or not. If not, it
+  * creates an alert with the relevant error message and returns user to the
+  * join view. If the server signals success, the Game object is instantiated.
+  * The lobbyCode is set in localStorage as sent by the server, the lobbyMenu
+  * view is setup and made visible, and a request for the player list is sent.
+  */
+socket.on("moveToLobby", (data) => {
+  if(data["type"] == "lobbyJoined") {
+    if(data["result"] == 0) {
+      alert("The lobby you tried to join does not exist.");
+      makeActive("join");
       return;
-    } else if( data["result"] == 1 ) {
-      alert( "The lobby you tried to join has already started the game" );
-      wrapper.makeActive( "join" );
+    } else if(data["result"] == 1) {
+      alert("The lobby you tried to join has already started the game");
+      makeActive("join");
       return;
     }
   }
-  console.log( "Lobby created/joined: " + data );
-  game = new Game( 20 );
-  localStorage.setItem( "lobbyCode", data["lobbyCode"] );
+
+  console.log("Lobby created/joined: " + data);
+  game = new Game(20);
+  localStorage.lobbyCode = data["lobbyCode"];
   setupLobbyMenu();
-  wrapper.makeActive( "lobbyMenu" );
-  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+  makeActive("lobbyMenu");
+  socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
 });
 
-socket.on( "playerList", function (data) {
+/**
+  * The event handler for the playerList signal from the server. It stores the
+  * list of players sent by the server into new Tank objects in the current
+  * Game object. It then calls updateLists to update the lobbyMenu view.
+  */
+socket.on("playerList", (data) => {
   console.log(data);
-  if (game) {
+  if(game) {
     for(let user in data) {
       let userData = data[user];
-      game.addTank(user, userData['username'], userData['xPos'], userData['yPos'], userData['direction'], userData['distanceLeft'], userData['color']);
+      game.addTank(user, userData["username"], userData["xPos"], userData["yPos"], userData["direction"], userData["distanceLeft"], userData["color"]);
     }
   }
   updateLists();
 });
 
-socket.on( "playerJoin", ( data ) => {
-  console.log( "Player Joined: " + data );
-  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+/**
+  * The event handler for the playerJoin signal from the server. It prompts the
+  * client to request the playerList to update the Game object.
+  */
+socket.on("playerJoin", (data) => {
+  console.log("Player Joined: " + data);
+  socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
 });
 
-socket.on( "gameStart" , ( data ) => {
-  socket.emit( "requestInfo", { request : "getTurn" } );
-  socket.emit( "requestInfo", { request : "getMap" } );
+/**
+  * The event handler for the gameStart signal from the server. The client sends
+  * requsets to the server for the current turn and map. The view is switched
+  * from the wrapper element to the div#game element which contains the canvas.
+  * The Game object then has its startGame method called to begin rendering and
+  * calling server updates.
+  */
+var gameStartHandler = (data) => {
+  socket.emit("requestInfo", {request : "getTurn"});
+  socket.emit("requestInfo", {request : "getMap"});
   wrapper.style.display = "none";
-  document.getElementById( "game" ).style.display = "block";
+  document.getElementById("game").style.display = "block";
+  localStorage.gameActive = true;
   game.startGame();
-});
+};
+socket.on("gameStart" , gameStartHandler);
 
-socket.on('mapUpdate', function (data) {
-  game.updateMap(data.map)
-  console.log('Got Map')
-});
+/**
+  * The event handler for the mapUpdate signal from the server. The received
+  * map data is sent to the Game object to be stored.
+  */
+socket.on("mapUpdate", mapUpdateHandler);
+var mapUpdateHandler = (data) => {
+  game.updateMap(data.map);
+};
 
-socket.on( "error", ( data ) => { console.log( data ); } );
-
-socket.on('connect', function (data) {
+socket.on("error", (data) => {console.log(data);});
+/**
+  * The event handler for the socket connect signal. It detects if the user has
+  * a set userID in localStorage before verifying if the server has matching
+  * data through an auth request.
+  */
+var connectHandler = (data) => {
   console.log("authing server")
-  if( localStorage.userID ) {
+  if(localStorage.userID) {
     let url = window.location.pathname;
-    url = url.substring(url.lastIndexOf('/')+1);
-    socket.emit('auth', {userID : localStorage.userID, lobbyCode : localStorage.lobbyCode, page : url});
+    url = url.substring(url.lastIndexOf("/")+1);
+    socket.emit("auth", {userID : localStorage.userID, lobbyCode : localStorage.lobbyCode, page : url});
   }
-});
+};
+socket.on("connect", connectHandler);
 
-socket.on('clearStorage', function (data) {
+/**
+  * The event handler for the clearStorage signal from the server. This allows
+  * the server to prompt the client to clear localStorage. It causes the client
+  * to reload the index page.
+  */
+var clearStorageHandler = (data) => {
   localStorage.clear();
-  window.location.href = 'index.html';
-});
+  window.location.href = "index.html";
+};
+socket.on("clearStorage", clearStorageHandler);
 
-socket.on('gameUpdate', function (data) {
+/**
+  * The event handler for the gameUpdate signal from the server.
+  */
+var gameUpdateHandler = (data) => {
   console.log("Game update received");
-  switch(data['eventType']) {
-    case 'playerMove':
-      if (localStorage.userID != data['userID']) {
-        game.updateTankPosition(data['userID'], data['newPos'][0], data['newPos'][1], data['newDir'])
+  switch(data["eventType"]) {
+    case "playerMove":
+      if(localStorage.userID != data["userID"]) {
+        game.updateTankPosition(data["userID"],
+                                data["newPos"][0], data["newPos"][1],
+                                data["newDir"]);
       }
       break;
-    case 'playerFire':
-      if(data.mapUpdate){
+    case "playerFire":
+      if(data.mapUpdate) {
         game.updateMap(data.mapUpdate);
       }
       else if (data.playerHit) {
         game.updateTankhealth(data.playerHit, data.newHealth)
-        if (data.gameOver) {
+        if(data.gameOver) {
           game.endGame(data.gameOver);
           clearInterval(sendServerUpdateInt);
         }
       }
-      if(data.userID == localStorage.userID){
+      if(data.userID == localStorage.userID) {
         game.resetPlayerShot();
       }
-      game.fire(data['userID'], 0, 0, data.distance);
+      game.fire(data["userID"], 0, 0, data.distance);
       break;
-    case 'advanceTurn':
-      game.advanceTurn(data['userID']);
+     case "advanceTurn":
+      game.advanceTurn(data["userID"]);
       break;
   }
-});
+};
+socket.on("gameUpdate", gameUpdateHandler);
 
-var handleKeyDown = function (evt) {
+
+var handleKeyDown = (evt) => {
   if (game.turn == localStorage.userID) {
     game.keys[ evt.key ] = true;
   }
 }
 
-var handleKeyUp = function (evt) {
-    game.keys[ evt.key ] = false;
+var handleKeyUp = (evt) => {
+  game.keys[ evt.key ] = false;
 }
 
 function mainLoop() {
@@ -186,31 +281,36 @@ function mainLoop() {
 
 function sendServerUpdate() {
   myTurn = game.turn == localStorage.userID;
-  if(myTurn){
-    if (game.playerMoved()) {
+  if(myTurn) {
+    if(game.playerMoved()) {
       myPos = game.getPlayerPos();
       myDir = game.getPlayerDir();
       game.resetLastMoved();
-      socket.emit('gameEvent', {eventType: 'playerMove', newPos: myPos, newDir: myDir});
-    }
+      socket.emit("gameEvent", {eventType: "playerMove",
+                                  newPos: myPos,
+                                  newDir: myDir});
+   }
     else if (game.getPlayerShot()) {
-      socket.emit('gameEvent', {eventType: 'playerFire'});
+      socket.emit("gameEvent", {eventType: "playerFire"});
       ;
-    }
-  }
+   }
+ }
 }
 
+
 var main = () => {
-  if( !localStorage.username ) {
-    wrapper.makeActive( "splash" );
+  if(!localStorage.username) {
+    makeActive("splash");
     data = {};
-  } else if( !localStorage.lobbyCode || !localStorage.userID ) {
-    wrapper.makeActive( "splash2" );
-  } else {
+ } else if(!localStorage.lobbyCode || !localStorage.userID) {
+    makeActive("splash2");
+ } else {
+    handleResize();
+    wrapper.style.display = "none";
+    socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
+    socket.emit("requestInfo", {request : "getMap"});
     game = new Game(20);
-    setupLobbyMenu();
-    wrapper.makeActive( "lobbyMenu" );
-  }
+ }
 };
 
 window.addEventListener("load", main);

@@ -15,6 +15,7 @@ class Game {
     this.movedSinceLastTransmit = false;
     this.playerShot = false;
     this.begun = false;
+    this.won = false;
     this.init();
   }
 
@@ -27,6 +28,7 @@ class Game {
     window.addEventListener('keyup', handleKeyUp, true);
     gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
     sendServerUpdateInt = setInterval(sendServerUpdate, 40);
+    this.begun = true;
   }
 
   initCanvas() {
@@ -307,6 +309,7 @@ class Game {
 
   //TODO make end game
   endGame( winningUserID ) {
+    this.won = true;
     alert( "Game over. Winner is: " + game.tanks[winningUserID].username );
   }
 };
