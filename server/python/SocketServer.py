@@ -112,7 +112,7 @@ def auth(sid, data):
         io.emit('clearStorage', {}, room=data['lobbyCode'])
         return
     elif lobbyHandler.getLobby(data['lobbyCode']).getGameStarted():
-        io.emit('gameStart', {}, room=data['lobbyCode'])
+        io.emit('gameStart', {}, room=sid)
     else:
         if (not lobbyHandler.getLobby(data['lobbyCode']).updateSeen(data['userID'])):
             pass
@@ -159,9 +159,9 @@ def gameEvent(sid, data):
         io.emit('gameUpdate', gameUpdate , room=lobbyCode)
         if('eventType' in gameUpdate):
             if(gameUpdate['eventType'] == 'playerFire'):
-                io.emit('gameUpdate', {'eventType' : 'advanceTurn', 'userID' :  lobbyHandler.getLobby(lobbyCode).getTurn()})
+                io.emit('gameUpdate', {'eventType' : 'advanceTurn', 'userID' :  lobbyHandler.getLobby(lobbyCode).getTurn()}, room=lobbyCode)
     else:
-        io.emit('error', {'errorType': 'Unknown lobbycode given in gameEvent'})
+        io.emit('error', {'errorType': 'Unknown lobbycode given in gameEvent'},  room=lobbyCode)
 
 if __name__ == '__main__':
     eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 3000)), app)
