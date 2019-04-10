@@ -45,7 +45,7 @@
 
     </script>
   </head>
-  <body onload="handleResize()">
+  <body>
     <main id="wrapper">
       <h1 id="title">Welcome to tanks!</h1>
       <div id="splash" class="active">
@@ -63,7 +63,7 @@
         <label for="lobbyCode">Enter a room code:</label><br>
         <input type='text' id="lobbyCode"></input><br>
         <button type='button' onclick="joinLobby()">Join Lobby</button>
-        <button type="button" onclick="wrapper.makeActive('splash2');">Back</button>
+        <button type="button" onclick="wrapper.makeActive('splash2')">Back</button>
       </div>
 
       <div id="waiting">

@@ -1,47 +1,92 @@
+/**
+* @class Holds the Game's state data
+* @param {number} mapDim the size of the gameboard
+  */
 class Game {
   constructor(mapDim) {
+    /**
+     * HTML5 Canvas 2D context
+     */
     this.ctx;
+    /**
+      * 2D array of numbers to represent the map
+      */
     this.map = [];
     this.mapDim = mapDim;
+    /**
+      * Float that contains the current scale for display on small screens
+      */
     this.scale;
+    /**
+      * Associative array of user data by userID
+      */
     this.tanks = {};
+    /**
+      * UserID of player whose turn it currently is
+      */
     this.turn = '';
+    /**
+      * Distance in tiles for a user before end of turn
+      */
     this.distLeftThisTurn = 5;
-    this.player;
     this.gridBoxDim;
-    this.geometryDim = 40;                // normalized tile size
+    /**
+      * Normalized tile size for render calls
+      */
+    this.geometryDim = 40;
+    /**
+      * List of bullet objects currently active to render.
+      */
     this.bullets = [];
+    /**
+      * List of keys with their current state (true for pressed, false for not)
+      */
     this.keys = [];
+    /**
+      * Bool that records whether or not a transmit to server is needed
+      */
     this.movedSinceLastTransmit = false;
+    /**
+      * Bool that records if player has fired on their turn
+      */
     this.playerShot = false;
+    /**
+      * Bool for if game has started
+      */
     this.begun = false;
+    /**
+      * Bool for if game has been won.
+      */
     this.won = false;
-    this.init();
-  }
-
-  init() {
     this.initCanvas();
   }
 
+  /**
+    * Attaches event handlers for key strokes and begins method call intervals.
+    */
   startGame() {
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keyup', handleKeyUp, true);
-    gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
+    gameTickUpdateInt = setInterval(this.gameTick(), Math.floor(1000/32));
     sendServerUpdateInt = setInterval(sendServerUpdate, 40);
     this.begun = true;
   }
 
+  /**
+    * Prepares canvas element for rendering and sets properties needed for rendering
+    */
   initCanvas() {
     this.canvas = document.getElementById('canvas');
     this.width = canvas.width;
     this.height = canvas.height;
     this.gridBoxDim = this.width / this.mapDim;
     this.scale = this.gridBoxDim / this.geometryDim;
-    console.log(this.mapDim);
     this.ctx = canvas.getContext('2d');
   }
 
-
+  /**
+    * Draws the background for the game.
+    */
   renderMap() {
     this.ctx.save();
     this.ctx.fillStyle = "#906030";
@@ -87,12 +132,27 @@ class Game {
     this.ctx.restore();
   }
 
+  /**
+    * Sets the stored map to the passed array.
+    * @param {number[][]} map 2D numerical array representing the map.
+    */
   updateMap(map) {
     this.map = map
   }
 
+  /**
+    * Adds tank with passed properties to tanks list.
+    * @param {string} userID used to uniquely identify a player
+    * @param {string} username the displayed username for the player
+    * @param {number} xPos the horizontal position of the player
+    * @param {number} yPos the vertical position of the player
+    * @param {number} direction the direction in radians of the player
+    * @param {number} distanceLeft the distance the player may move remaining this turn
+    * @param {string} color the color to render the player in
+    * @param {number} health the health of the player
+    */
   addTank(userID, username, xPos, yPos, direction, distanceLeft, color, health) {
-    this.tanks[userID] = new Tank(username ,xPos, yPos, direction, distanceLeft, color, health);
+    this.tanks[userID] = new Tank(username, xPos, yPos, direction, distanceLeft, color, health);
   }
 
   updateTankPosition(userID, newXPos, newYPos, newDirection) {
@@ -198,6 +258,9 @@ class Game {
     }
   }
 
+  /**
+    * 
+    */
   checkMapCollision(obj, linearVelocity, rotationalVelocity) {
     let increment = -linearVelocity;
     let map = this.map;
@@ -227,16 +290,19 @@ class Game {
     return(toReturn);
   }
 
+  /**
+    * Process the current input state if it is the users turn.
+    */
   processInput() {
     let player = this.tanks[localStorage.userID];
     if( this.turn != localStorage.userID ) return;
-    if( this.keys["ArrowLeft"] ) {
+    if( this.keys["ArrowLeft"] || this.keys["A"] ) {
       if(this.checkMapCollision(player, 0, -0.1) == true) {
         player.direction -= 0.1;
         this.movedSinceLastTransmit = true;
       }
     }
-    if( this.keys["ArrowRight"] ) {
+    if( this.keys["ArrowRight"] || this.keys["D"] ) {
       if(this.checkMapCollision(player, 0, 0.1) == true) {
         player.direction += 0.1;
         this.movedSinceLastTransmit = true;
@@ -251,7 +317,7 @@ class Game {
     if( player.distanceLeft <= 0 ) return;                // Cancel if no more moving
     let deltaPos = Math.min( player.distanceLeft, 0.1 );  // Constrain movement w/in dist limit
 
-    if( this.keys["ArrowUp"] ) {
+    if( this.keys["ArrowUp"] || this.keys["W"] ) {
       if(this.checkMapCollision(player, 0.1, 0) == true) {
         player.xPos += Math.sin( player.direction ) * deltaPos;
         player.yPos -= Math.cos( player.direction ) * deltaPos;
@@ -259,7 +325,7 @@ class Game {
         this.movedSinceLastTransmit = true;
       }
     }
-    if( this.keys["ArrowDown"] ) {
+    if( this.keys["ArrowDown"] || this.keys["S"] ) {
       if(this.checkMapCollision(player, -0.1, 0) == true) {
         player.xPos -= Math.sin( player.direction ) * deltaPos;
         player.yPos += Math.cos( player.direction ) * deltaPos;
@@ -270,6 +336,9 @@ class Game {
     player.distanceLeft = Math.max( 0.0, player.distanceLeft );
   }
 
+  /**
+    * A function that contains the rendering and processing calls for each frame.
+    */
   gameTick() {
     this.renderMap();
     this.renderTanks();
@@ -277,6 +346,10 @@ class Game {
     this.renderBullets();
   }
 
+  /**
+    * Sets the current turn to the given user
+    * @param {string} userID the unique userID of the given player
+    */
   advanceTurn(userID) {
     this.tanks[userID].canShoot = true;
     if(this.turn != ''){
@@ -285,31 +358,56 @@ class Game {
     this.turn = userID;
   }
 
+  /**
+    * A getter for this.movedSinceLastTransmit
+    * @return {bool} this.movedSinceLastTransmit
+    */
   playerMoved() {
     return this.movedSinceLastTransmit;
   }
 
+  /**
+    * A getter for this.playerShot
+    * @return {bool} this.playerShot
+    */
   getPlayerShot() {
     return this.playerShot;
   }
 
+  /**
+    * A setter for this.playerShot
+    */
   resetPlayerShot() {
     this.playerShot = false;
   }
 
+  /**
+    * A getter for [this.xPos, this.yPos]
+    * @return {number[]} player position in [x, y] format
+    */
   getPlayerPos() {
     return [this.tanks[localStorage.userID].xPos, this.tanks[localStorage.userID].yPos];
   }
 
+  /**
+    * A getter for this.direction
+    * @return {number} this.direction mod 2PI
+    */
   getPlayerDir() {
     return (this.tanks[localStorage.userID].direction) % (Math.PI * 2);
   }
 
+  /**
+    * A setter for this.movedSinceLastTransmit
+    */
   resetLastMoved() {
     this.movedSinceLastTransmit = false;
   }
 
-  //TODO make end game
+  /**
+    * Method called on gameOver. Alerts with the winner's username.
+    * @param {string} winningUserID
+    */
   endGame( winningUserID ) {
     this.won = true;
     alert( "Game over. Winner is: " + game.tanks[winningUserID].username );
