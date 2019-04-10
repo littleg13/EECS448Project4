@@ -355,6 +355,7 @@ class Game {
       this.tanks[userID].distanceLeft = 5;
     }
     this.turn = userID;
+    document.getElementById('turn').innerHTML = 'Turn: ' + this.tanks[userID].username;
   }
 
   /**
