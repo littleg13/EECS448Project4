@@ -67,7 +67,7 @@ class Game {
   startGame() {
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keyup', handleKeyUp, true);
-    gameTickUpdateInt = setInterval(this.gameTick(), Math.floor(1000/32));
+    gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
     sendServerUpdateInt = setInterval(sendServerUpdate, 40);
     this.begun = true;
   }

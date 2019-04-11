@@ -346,4 +346,6 @@ var main = () => {
  }
 };
 
+var mainLoop = () => { game.gameTick(); };
+
 window.addEventListener("load", main);
