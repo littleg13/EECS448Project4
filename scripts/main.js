@@ -1,4 +1,5 @@
-let socket = io("https://448.cuzzo.net");
+// let socket = io("https://448.cuzzo.net");
+let socket = io('http://localhost:3000')
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -275,7 +276,7 @@ var gameUpdateHandler = (data) => {
       if(data.userID == localStorage.userID) {
         game.resetPlayerShot();
       }
-      game.fire(data["userID"], 0, 0, data.distance);
+      game.fire(data["userID"], 5, .1, data.distance);
       break;
      case "advanceTurn":
       game.advanceTurn(data["userID"]);

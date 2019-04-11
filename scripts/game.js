@@ -29,7 +29,7 @@ class Game {
       * Distance in tiles for a user before end of turn
       */
     this.distLeftThisTurn = 5;
-    this.gridBoxDim;
+    this.gridBoxDim = 40;
     /**
       * Normalized tile size for render calls
       */
@@ -240,6 +240,7 @@ class Game {
       else{
         this.bullets.pop(i);
       }
+      bullet.direction += Math.min(0, bullet.distanceTraveled - bullet.power) * bullet.curve;
 
     }
     this.ctx.restore();
@@ -251,14 +252,16 @@ class Game {
       var proj = { xPos: shooter.xPos,
                    yPos: shooter.yPos,
                    direction: shooter.direction,
-                   distanceToTravel: dist, distanceTraveled: 0 };
+                   distanceToTravel: dist, distanceTraveled: 0,
+                   power: power,
+                   curve: curve};
       this.bullets.push(proj);
       this.tanks[shooterID].canShoot = false;
     }
   }
 
   /**
-    * 
+    *
     */
   checkMapCollision(obj, linearVelocity, rotationalVelocity) {
     let increment = -linearVelocity;
