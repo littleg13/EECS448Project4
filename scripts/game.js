@@ -42,6 +42,8 @@ class Game {
       * List of keys with their current state (true for pressed, false for not)
       */
     this.keys = [];
+
+    this.keyTimes = {}
     /**
       * Bool that records whether or not a transmit to server is needed
       */
@@ -58,6 +60,7 @@ class Game {
       * Bool for if game has been won.
       */
     this.won = false;
+
     this.initCanvas();
   }
 
@@ -240,7 +243,7 @@ class Game {
       else{
         this.bullets.pop(i);
       }
-      bullet.direction += Math.min(0, bullet.distanceTraveled - bullet.power) * bullet.curve;
+      bullet.direction += Math.max(0, bullet.distanceTraveled - bullet.power) * bullet.curve*Math.PI/(180);
 
     }
     this.ctx.restore();
@@ -314,6 +317,7 @@ class Game {
       if( player.canShoot && !this.playerShot ){
         this.playerShot = true;
       }
+      this.keys[" "] = false
     }
 
     if( player.distanceLeft <= 0 ) return;                // Cancel if no more moving
@@ -336,6 +340,13 @@ class Game {
       }
     }
     player.distanceLeft = Math.max( 0.0, player.distanceLeft );
+  }
+
+  recordKeyPress(key){
+    if(!game.keys['spaceDown']){
+      this.keyTimes[key] = new Date();
+      game.keys['spaceDown'] = true;
+    }
   }
 
   /**
