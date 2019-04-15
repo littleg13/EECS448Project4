@@ -420,7 +420,7 @@ class Game {
     let user = document.getElementsByClassName('User');
     msg.innerHtml = user.value;
     msg.innerHTML = text.value;
-    chatBox.insertAdjacentElement("beforeend", msg);
+    chatBox.insertAdjacentElement("beforebegin", msg);
   }
 
 };
