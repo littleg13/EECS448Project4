@@ -132,15 +132,15 @@ div.healthBar div {
 #leftSide {
   display: inline-block;
   padding: 10px;
-  margin: 2%;
-  width: 29%;
+  margin: 1%;
+  width: 22%;
   background-color: black;
 }
 #rightSide {
   display: inline-block;
   padding: 10px;
-  margin: 2%;
-  width: 29%;
+  margin: 1%;
+  width: 22%;
   background-color: white;
 }
 message {
