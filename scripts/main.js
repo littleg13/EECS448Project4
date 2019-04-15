@@ -1,4 +1,5 @@
-let socket = io("https://448.cuzzo.net");
+//let socket = io("https://448.cuzzo.net");
+let socket = io("http://localhost:3000");
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -346,3 +347,4 @@ var main = () => {
 };
 
 window.addEventListener("load", main);
+let mainLoop = () => {game.gameTick(); };

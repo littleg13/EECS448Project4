@@ -9,6 +9,11 @@
     <script src="scripts/tank.js"></script>
     <script src="scripts/game.js"></script>
     <script src="scripts/main.js" defer></script>
+    <!-- <link
+      rel="stylesheet"    href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    /> -->
     <script>
     const delay = 10;
     var resizeTaskId = null;
@@ -79,11 +84,21 @@
         <button type="button" onclick="logout()">Logout</button>
       </div>
     </main>
-
     <div id="game">
-      <canvas id="canvas" width=600 height=600></canvas>
-      <div id='turn'>Turn: </div>
-      <button type="button" onclick="logout()">Exit</button>
+        <div class="container" id="leftSide">
+          <div id="chatBox">
+            <div class="message">
+              <div class="sender"></div>
+              <div class="content"></div>
+            </div>
+              <input type="text" id="textBox"></input>
+              <input type="submit" value="enter" onclick="game.showMsg()"></input>
+          </div>
+        </div>
+        <canvas id="canvas" width=600 height=600></canvas>
+        <div class="container" id="rightSide"></div>
     </div>
+    <div id='turn'>Turn: </div>
+    <button type="button" onclick="logout()">Exit</button>
   </body>
 <html>
