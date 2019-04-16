@@ -171,6 +171,7 @@ var playerListHandler = (data) => {
       let userData = data[user];
       game.addTank(user, userData['username'], userData['xPos'], userData['yPos'], userData['direction'], userData['distanceLeft'], userData['color'], userData['health']);
     }
+    game.populateSidebar();
   }
   updateLists();
 };
