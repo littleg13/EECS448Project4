@@ -26,6 +26,11 @@ class LobbyHandler:
         result = 0
         if(self.isLobby(lobbyCode)):
             lobby = self.lobbyList[lobbyCode]
+            if (lobby.getNumberofPlayers() == 0):
+                print("Player added is first player")
+                lobby.host = userID
+            else:
+                print("Player added is not first player")
             if(not lobby.getGameStarted()):
                 lobby.appendPlayer(userID, username)
                 result = 200
@@ -45,7 +50,10 @@ class LobbyHandler:
             self.createLobby(self.matchmakingLobbyCode)
         lobby = self.lobbyList[self.matchmakingLobbyCode]
         self.joinLobby(self.matchmakingLobbyCode, userID, username)
+        lobby.host = "matchmaking"
+        gameStarted = False
         if lobby.getNumberofPlayers() > 3:
-            lobby.startGame()
+            gameStarted = True
+            lobby.startGame("matchmaking")
             self.matchmakingLobbyCode = ""
-        return self.matchmakingLobbyCode
+        return {'lobbyCode': self.matchmakingLobbyCode, 'gameStarted': gameStarted}

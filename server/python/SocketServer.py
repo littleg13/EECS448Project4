@@ -48,6 +48,10 @@ def sendTurn(sid, data):
 def sendMap(sid, data):
     io.emit('mapUpdate', {'map' : lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getMap()}, room=sid)
 
+def sendHost(sid, data):
+    print("Asked to send host")
+    io.emit('lobbyHost', {'host': lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getHost()}, room=sid)
+
 @io.on('joinLobby')
 def joinLobby(sid, data):
     """Adds a user to a lobby upon request
@@ -122,7 +126,8 @@ def requestInfo(sid, data):
     options = {
     'getPlayerList' : sendPlayerList,
     'getTurn' : sendTurn,
-    'getMap' : sendMap
+    'getMap' : sendMap,
+    'getHost' : sendHost
     }
     options[data['request']](sid, data)
 
@@ -133,20 +138,24 @@ def logout(sid, data):
 @io.on('startGame')
 def startGame(sid, data):
     lobbyCode = io.get_session(sid)['lobbyCode']
-    lobbyHandler.getLobby(lobbyCode).startGame()
-    io.emit('gameStart', {}, room=io.get_session(sid)['lobbyCode'])
+    userID = io.get_session(sid)['userID']
+    success = lobbyHandler.getLobby(lobbyCode).startGame(userID)
+    if (success):
+        io.emit('gameStart', {}, room=lobbyCode)
 
 @io.on('enterMatchmaking')
 def enterMatchmaking(sid, data):
     userID = generateRandomString(10)
-    lobbyCode = lobbyHandler.enterMatchmaking(userID, data['username'])
+    result = lobbyHandler.enterMatchmaking(userID, data['username'])
     with io.session(sid) as session:
         session['userID'] = userID
-        session['lobbyCode'] = lobbyCode
+        session['lobbyCode'] = result['lobbyCode']
     io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
-    io.enter_room(sid, lobbyCode)
-    io.emit('playerJoin', {'username' : data['username']}, room=lobbyCode)
-    io.emit('moveToLobby', {'type' : 'lobbyJoined', 'result' : '200','lobbyCode': lobbyCode}, room=sid)
+    io.enter_room(sid, result['lobbyCode'])
+    io.emit('playerJoin', {'username' : data['username']}, room=result['lobbyCode'])
+    io.emit('moveToLobby', {'type' : 'lobbyJoined', 'result' : '200','lobbyCode': result['lobbyCode']}, room=sid)
+    if (result['gameStarted']):
+        io.emit('gameStart', {}, room=lobbyCode)
 
 @io.on('gameEvent')
 def gameEvent(sid, data):

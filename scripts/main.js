@@ -96,8 +96,10 @@ var logout = () => {
   * This is called by the moveToLobby socket handler.
   */
 var setupLobbyMenu = () => {
+  document.getElementById('startGame').style.display = 'none';
   document.getElementById("lobbyName").innerHTML = localStorage.lobbyCode;
   socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
+  socket.emit("requestInfo", {request : "getHost"});
 };
 
 /**
@@ -107,7 +109,6 @@ var setupLobbyMenu = () => {
   */
 var updateLists = () => {
   if(game === null) return;
-
   var lobbyList = document.getElementById("lobbyList");
   lobbyList.innerHTML = "";
   for(userID in game.tanks) {
@@ -288,6 +289,13 @@ var gameUpdateHandler = (data) => {
   }
 };
 socket.on("gameUpdate", gameUpdateHandler);
+
+var checkIfHost = (data) => {
+  if (data['host'] == localStorage.userID) {
+    document.getElementById('startGame').style.display = 'block';
+  }
+};
+socket.on("lobbyHost", checkIfHost)
 
 /**
   * Event handler for key down events. It is attached to the window object.
