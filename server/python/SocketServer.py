@@ -90,7 +90,7 @@ def createLobby(sid, data):
     io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
     lobbyHandler.createLobby(lobbyCode)
     result = lobbyHandler.joinLobby(lobbyCode, userID, data['username'])
-    io.emit('moveToLobby', {'type' : 'lobbyCreated', 'result' : result,'lobbyCode': lobbyCode}, room=sid)
+    io.emit('moveToLobby', {'type' : 'lobbyCreated', 'result' : result, 'lobbyCode': lobbyCode}, room=sid)
 
 @io.on('auth')
 def auth(sid, data):
@@ -117,7 +117,6 @@ def auth(sid, data):
         if (not lobbyHandler.getLobby(data['lobbyCode']).updateSeen(data['userID'])):
             pass
 
-
 @io.on('requestInfo')
 def requestInfo(sid, data):
     options = {
@@ -130,15 +129,24 @@ def requestInfo(sid, data):
 @io.on('logout')
 def logout(sid, data):
     lobbyHandler.getLobby(data['lobbyCode']).removePlayer(data['userID'])
-# @io.on('disconnect')
-# def disconnect(sid):
-#     io.session_save()
 
 @io.on('startGame')
 def startGame(sid, data):
     lobbyCode = io.get_session(sid)['lobbyCode']
     lobbyHandler.getLobby(lobbyCode).startGame()
     io.emit('gameStart', {}, room=io.get_session(sid)['lobbyCode'])
+
+@io.on('enterMatchmaking')
+def enterMatchmaking(sid, data):
+    userID = generateRandomString(10)
+    lobbyCode = lobbyHandler.enterMatchmaking(userID, data['username'])
+    with io.session(sid) as session:
+        session['userID'] = userID
+        session['lobbyCode'] = lobbyCode
+    io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
+    io.enter_room(sid, lobbyCode)
+    io.emit('playerJoin', {'username' : data['username']}, room=lobbyCode)
+    io.emit('moveToLobby', {'type' : 'lobbyJoined', 'result' : '200','lobbyCode': lobbyCode}, room=sid)
 
 @io.on('gameEvent')
 def gameEvent(sid, data):

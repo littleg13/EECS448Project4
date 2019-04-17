@@ -224,3 +224,6 @@ class Lobby:
                 if -1/2 <= y <= 1/2:
                     return playerID
         return False
+
+    def getNumberofPlayers(self):
+        return len(self.players)

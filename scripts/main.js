@@ -1,4 +1,4 @@
-let socket = io("https://448.cuzzo.net");
+let socket = io("http://localhost:3000");
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -22,9 +22,14 @@ var makeActive = (id) => {
 var pickUsername = () => {
   let name = document.getElementById("username").value;
   if(name === "") {alert("Name cannot be blank, please try again."); return;}
-
   localStorage.setItem("username", document.getElementById("username").value.toUpperCase());
   makeActive("splash2");
+};
+
+var enterMatchmaking = () => {
+  console.log("Joining matchmaking");
+  socket.emit("enterMatchmaking", {username : localStorage.username});
+  makeActive("waiting");
 };
 
 /**
