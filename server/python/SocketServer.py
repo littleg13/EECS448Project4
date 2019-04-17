@@ -49,7 +49,6 @@ def sendMap(sid, data):
     io.emit('mapUpdate', {'map' : lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getMap()}, room=sid)
 
 def sendHost(sid, data):
-    print("Asked to send host")
     io.emit('lobbyHost', {'host': lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getHost()}, room=sid)
 
 @io.on('joinLobby')
@@ -85,14 +84,13 @@ def createLobby(sid, data):
             sid (string): Unique ID of every Websocket
             data (data): Dictionary of all of the data necessary to add the user
         """
-    lobbyCode = generateRandomString(4)
+    lobbyCode = lobbyHandler.createLobby()
     userID = generateRandomString(10)
     with io.session(sid) as session:
         session['userID'] = userID
         session['lobbyCode'] = lobbyCode
     io.enter_room(sid, lobbyCode)
     io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
-    lobbyHandler.createLobby(lobbyCode)
     result = lobbyHandler.joinLobby(lobbyCode, userID, data['username'])
     io.emit('moveToLobby', {'type' : 'lobbyCreated', 'result' : result, 'lobbyCode': lobbyCode}, room=sid)
 
