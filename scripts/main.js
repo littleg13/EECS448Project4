@@ -1,4 +1,4 @@
-let socket = io("https://448.cuzzo.net");
+let socket = io("http://localhost:3000");
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -22,9 +22,14 @@ var makeActive = (id) => {
 var pickUsername = () => {
   let name = document.getElementById("username").value;
   if(name === "") {alert("Name cannot be blank, please try again."); return;}
-
   localStorage.setItem("username", document.getElementById("username").value.toUpperCase());
   makeActive("splash2");
+};
+
+var enterMatchmaking = () => {
+  console.log("Joining matchmaking");
+  socket.emit("enterMatchmaking", {username : localStorage.username});
+  makeActive("waiting");
 };
 
 /**
@@ -91,8 +96,10 @@ var logout = () => {
   * This is called by the moveToLobby socket handler.
   */
 var setupLobbyMenu = () => {
+  document.getElementById('startGame').style.display = 'none';
   document.getElementById("lobbyName").innerHTML = localStorage.lobbyCode;
   socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
+  socket.emit("requestInfo", {request : "getHost"});
 };
 
 /**
@@ -102,7 +109,6 @@ var setupLobbyMenu = () => {
   */
 var updateLists = () => {
   if(game === null) return;
-
   var lobbyList = document.getElementById("lobbyList");
   lobbyList.innerHTML = "";
   for(userID in game.tanks) {
@@ -283,6 +289,13 @@ var gameUpdateHandler = (data) => {
   }
 };
 socket.on("gameUpdate", gameUpdateHandler);
+
+var checkIfHost = (data) => {
+  if (data['host'] == localStorage.userID) {
+    document.getElementById('startGame').style.display = 'block';
+  }
+};
+socket.on("lobbyHost", checkIfHost)
 
 /**
   * Event handler for key down events. It is attached to the window object.

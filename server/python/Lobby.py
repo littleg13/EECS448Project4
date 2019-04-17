@@ -13,6 +13,7 @@ class Lobby:
         lobbyCode (string) : Code required to enter a particular lobby
     """
     def __init__(self, lobbyCode):
+        self.host = ""
         self.gameStarted = False
         self.players = {}
         self.lobbyCode = lobbyCode
@@ -89,8 +90,12 @@ class Lobby:
     def getTurn(self):
         return self.order[self.turn]
 
-    def startGame(self):
-        if (self.gameStarted):
+    def getHost(self):
+        print("Giving host. Host is: " + self.host)
+        return self.host
+
+    def startGame(self, userID):
+        if (self.gameStarted or userID != self.host):
             return False
         else:
             self.gameStarted = True
@@ -224,3 +229,6 @@ class Lobby:
                 if -1/2 <= y <= 1/2:
                     return playerID
         return False
+
+    def getNumberofPlayers(self):
+        return len(self.players)
