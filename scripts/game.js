@@ -61,6 +61,8 @@ class Game {
       */
     this.won = false;
 
+    this.gameUpdate = {}
+
     this.initCanvas();
   }
 
@@ -143,6 +145,23 @@ class Game {
     this.map = map
   }
 
+  updateGameElements(){
+    if(this.gameUpdate.health){
+      this.updateTankhealth(this.gameUpdate.health[0], this.gameUpdate.health[1]);
+    }
+    if(this.gameUpdate.map){
+      console.log(this.gameUpdate.map)
+      game.updateMap(this.gameUpdate.map);
+    }
+    if(this.gameUpdate.advanceTurn){
+      this.advanceTurn(this.gameUpdate.advanceTurn);
+    }
+    if(this.gameUpdate.gameOver){
+      this.endGame(this.gameUpdate.gameOver);
+      delete localStorage.userID;
+      delete localStorage.lobbyCode;
+    }
+  }
   /**
     * Adds tank with passed properties to tanks list.
     * @param {string} userID used to uniquely identify a player
@@ -286,10 +305,15 @@ class Game {
       }
       else{
         this.bullets.pop(i);
+        if(this.bullets.length == 0){
+          this.updateGameElements();
+        }
       }
       bullet.direction += Math.max(0, bullet.distanceTraveled - bullet.power) * bullet.curve*Math.PI/(180);
 
     }
+
+
     this.ctx.restore();
   }
 
