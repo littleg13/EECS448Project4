@@ -24,14 +24,17 @@ class MapTile extends Renderable {
   below : MapTile;
   left  : MapTile;
   right : MapTile;
+  isBlocking : boolean;
   constructor() {
     super();
+    this.isBlocking = false;
   }
 }
 
 class WallTile extends MapTile {
   constructor() {
     super();
+    this.isBlocking = true;
   }
 
   render = ( ctx: CanvasRenderingContext2D ) : void => {

@@ -37,7 +37,9 @@ var Map = /** @class */ (function (_super) {
 var MapTile = /** @class */ (function (_super) {
     __extends(MapTile, _super);
     function MapTile() {
-        return _super.call(this) || this;
+        var _this = _super.call(this) || this;
+        _this.isBlocking = false;
+        return _this;
     }
     return MapTile;
 }(Renderable));
@@ -63,6 +65,7 @@ var WallTile = /** @class */ (function (_super) {
             ctx.fillRect(11, 29, 18, 7);
             ctx.fillRect(31, 29, 8, 7);
         };
+        _this.isBlocking = true;
         return _this;
     }
     return WallTile;
