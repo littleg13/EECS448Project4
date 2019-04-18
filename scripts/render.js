@@ -38,13 +38,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var Point = /** @class */ (function () {
-    function Point(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-    return Point;
-}());
 var Counter = /** @class */ (function () {
     function Counter(initial, delta, max) {
         var _this = this;
@@ -76,54 +69,6 @@ var Renderable = /** @class */ (function () {
     }
     return Renderable;
 }());
-var Shape = /** @class */ (function (_super) {
-    __extends(Shape, _super);
-    function Shape() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return Shape;
-}(Renderable));
-var Rect = /** @class */ (function (_super) {
-    __extends(Rect, _super);
-    function Rect(x, y, w, h, color, borderColor) {
-        if (color === void 0) { color = "#fff"; }
-        if (borderColor === void 0) { borderColor = "#0000"; }
-        var _this = _super.call(this) || this;
-        _this.render = function (ctx) {
-            ctx.fillStyle = _this.color;
-            ctx.fillRect(_this.x, _this.y, _this.w, _this.h);
-            ctx.strokeStyle = _this.borderColor;
-            ctx.strokeRect(_this.x, _this.y, _this.w, _this.h);
-            return;
-        };
-        _this.x = x;
-        _this.y = y;
-        _this.w = w;
-        _this.h = h;
-        _this.color = color;
-        _this.borderColor = borderColor;
-        return _this;
-    }
-    return Rect;
-}(Shape));
-var Circle = /** @class */ (function (_super) {
-    __extends(Circle, _super);
-    function Circle(x, y, radius, color) {
-        var _this = _super.call(this) || this;
-        _this.render = function (ctx) {
-            ctx.fillStyle = _this.color;
-            ctx.arc(_this.x, _this.y, _this.radius, 0, Math.PI * 2, true);
-            ctx.fill();
-            return;
-        };
-        _this.x = x;
-        _this.y = y;
-        _this.radius = radius;
-        _this.color = color;
-        return _this;
-    }
-    return Circle;
-}(Shape));
 var Animated = /** @class */ (function (_super) {
     __extends(Animated, _super);
     function Animated() {
@@ -131,6 +76,102 @@ var Animated = /** @class */ (function (_super) {
     }
     return Animated;
 }(Renderable));
+var Shape = /** @class */ (function (_super) {
+    __extends(Shape, _super);
+    function Shape(color, borderColor) {
+        if (color === void 0) { color = "#fff"; }
+        if (borderColor === void 0) { borderColor = "#0000"; }
+        var _this = _super.call(this) || this;
+        _this.color = color;
+        _this.borderColor = borderColor;
+        return _this;
+    }
+    return Shape;
+}(Renderable));
+var Point = /** @class */ (function () {
+    function Point(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    return Point;
+}());
+var Rect = /** @class */ (function (_super) {
+    __extends(Rect, _super);
+    function Rect(x, y, w, h, color, borderColor) {
+        if (color === void 0) { color = "#fff"; }
+        if (borderColor === void 0) { borderColor = "#0000"; }
+        var _this = _super.call(this, color, borderColor) || this;
+        _this.render = function (ctx) {
+            ctx.fillStyle = _this.color;
+            ctx.strokeStyle = _this.borderColor;
+            ctx.fillRect(_this.x, _this.y, _this.w, _this.h);
+            ctx.strokeRect(_this.x, _this.y, _this.w, _this.h);
+            return;
+        };
+        _this.x = x;
+        _this.y = y;
+        _this.w = w;
+        _this.h = h;
+        return _this;
+    }
+    return Rect;
+}(Shape));
+var RoundRect = /** @class */ (function (_super) {
+    __extends(RoundRect, _super);
+    function RoundRect(x, y, w, h, rad, color, borderColor) {
+        if (color === void 0) { color = "#fff"; }
+        if (borderColor === void 0) { borderColor = "#0000"; }
+        var _this = _super.call(this, x, y, w, h, color, borderColor) || this;
+        _this.render = function (ctx) {
+            var _a = [_this.x, _this.x + _this.w,
+                _this.y, _this.y + _this.h, _this.rad], left = _a[0], right = _a[1], top = _a[2], bottom = _a[3], r = _a[4];
+            ctx.fillStyle = _this.color;
+            ctx.strokeStyle = _this.borderColor;
+            ctx.beginPath(); // clockwise path
+            ctx.moveTo(left, top + r); // begin lower top-left corner
+            ctx.arcTo(left, top, // 'true' corner
+            left + r, top, // end upper top-left corner
+            r);
+            ctx.lineTo(right - r, top); // move to upper top-right corner
+            ctx.arcTo(right, top, // 'true' corner
+            right, top + r, // end lower top-right corner
+            r);
+            ctx.lineTo(right, bottom - r); // move to upper bottom-right corner
+            ctx.arcTo(right, bottom, right - r, bottom, r);
+            ctx.lineTo(left + r, bottom);
+            ctx.arcTo(left, bottom, left, bottom - r, r);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        };
+        _this.rad = Math.min(rad, w, h);
+        return _this;
+    }
+    return RoundRect;
+}(Rect));
+var Circle = /** @class */ (function (_super) {
+    __extends(Circle, _super);
+    function Circle(x, y, radius, color, borderColor) {
+        if (color === void 0) { color = "#fff"; }
+        if (borderColor === void 0) { borderColor = "#0000"; }
+        var _this = _super.call(this, color, borderColor) || this;
+        _this.render = function (ctx) {
+            ctx.fillStyle = _this.color;
+            ctx.strokeStyle = _this.borderColor;
+            ctx.beginPath();
+            ctx.arc(_this.x, _this.y, _this.radius, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            return;
+        };
+        _this.x = x;
+        _this.y = y;
+        _this.radius = radius;
+        return _this;
+    }
+    return Circle;
+}(Shape));
 var Tread = /** @class */ (function (_super) {
     __extends(Tread, _super);
     function Tread(x) {
@@ -140,14 +181,16 @@ var Tread = /** @class */ (function (_super) {
             _this.rects.map(function (rect) { rect.render(ctx); });
         };
         _this.x = x;
-        _this.mainRect = new Rect(x, -15, 10, 30, "#666", "#0000"), // Full tread
+        _this.mainRect = new Rect(x, -20, 10, 40, "#666", "#0000"), // Full tread
             _this.rects = [
+                new Rect(x, -20, 10, 2, "#000", "#0000"),
                 new Rect(x, -15, 10, 2, "#000", "#0000"),
                 new Rect(x, -10, 10, 2, "#000", "#0000"),
                 new Rect(x, -5, 10, 2, "#000", "#0000"),
                 new Rect(x, 0, 10, 2, "#000", "#0000"),
                 new Rect(x, 5, 10, 2, "#000", "#0000"),
-                new Rect(x, 10, 10, 2, "#000", "#0000")
+                new Rect(x, 10, 10, 2, "#000", "#0000"),
+                new Rect(x, 15, 10, 2, "#000", "#0000")
             ];
         /*
           Counter states:
@@ -173,7 +216,7 @@ var Tread = /** @class */ (function (_super) {
                     // move treads
                     _this.rects.map(moveUp);
                     // new tread, height = 1, very bottom
-                    frst = new Rect(_this.x, -15, 10, 1, "#000", "#0000");
+                    frst = new Rect(_this.x, -20, 10, 1, "#000", "#0000");
                     _this.rects.unshift(frst);
                     break;
                 case 0: // on increase, previous state was 4
@@ -205,7 +248,7 @@ var Tread = /** @class */ (function (_super) {
                     _this.rects.map(moveDown);
                     _this.rects.unshift(frst);
                     // create and add new last tread
-                    last = new Rect(_this.x, 14, 10, 1, "#000", "#0000");
+                    last = new Rect(_this.x, 19, 10, 1, "#000", "#0000");
                     _this.rects.push(last);
                     break;
                 case 3: // on decrease, previous state was 4
@@ -227,105 +270,72 @@ var Tread = /** @class */ (function (_super) {
     }
     return Tread;
 }(Animated));
-var Sprite = /** @class */ (function (_super) {
-    __extends(Sprite, _super);
-    function Sprite() {
+var TankSprite = /** @class */ (function (_super) {
+    __extends(TankSprite, _super);
+    function TankSprite(x, y, dir, color) {
+        if (color === void 0) { color = "#c00"; }
         var _this = _super.call(this) || this;
-        _this.addShape = function (item) {
-            _this.items.push(item);
-            return;
-        };
         _this.render = function (ctx) {
-            _this.items;
-            for (var i = 0; i < _this.items.length; i++) {
-                _this.items[i].render(ctx);
+            if (_this.showHitbox) {
+                _this.hitbox.render(ctx);
             }
-            return;
+            _this.getItems().map(function (item) { item.render(ctx); });
         };
-        _this.items = [];
+        _this.getItems = function () {
+            return [_this.leftTread, _this.rightTread,
+                _this.body, _this.barrel,
+                _this.cap, _this.turret];
+        };
+        _this.changeColor = function (color) {
+            _this.getItems().map(function (item) {
+                if (item instanceof Shape) {
+                    item.color = color;
+                }
+            });
+        };
+        _this.moveForward = function (delta) {
+            if (delta === void 0) { delta = 1.0; }
+            var dirRads = (_this.dir / 180.0) * Math.PI;
+            _this.x += Math.sin(dirRads) * delta;
+            _this.y -= Math.cos(dirRads) * delta;
+            _this.leftTread.counter.dec();
+            _this.rightTread.counter.dec();
+        };
+        _this.moveBackward = function (delta) {
+            if (delta === void 0) { delta = 1.0; }
+            var dirRads = (_this.dir / 180.0) * Math.PI;
+            _this.x -= Math.sin(dirRads) * delta;
+            _this.y += Math.cos(dirRads) * delta;
+            _this.leftTread.counter.inc();
+            _this.rightTread.counter.inc();
+        };
+        _this.rotateCW = function (delta) {
+            if (delta === void 0) { delta = 1.0; }
+            _this.dir += delta;
+            _this.leftTread.counter.dec();
+            _this.rightTread.counter.inc();
+        };
+        _this.rotateCCW = function (delta) {
+            if (delta === void 0) { delta = 1.0; }
+            _this.dir -= delta;
+            _this.leftTread.counter.inc();
+            _this.rightTread.counter.dec();
+        };
+        _this.x = x;
+        _this.y = y;
+        _this.dir = dir; // stored in degrees
+        _this.color = color;
+        /*
+         *  Set up the different shapes
+         */
+        _this.hitbox = new Rect(-20, -20, 40, 40, "#ccc", "#000");
+        _this.leftTread = new Tread(-17.5);
+        _this.rightTread = new Tread(7.5);
+        _this.body = new RoundRect(-12.5, -20, 25, 40, 2.5, color, "#000");
+        _this.barrel = new Rect(-5, -20, 10, 25, color, "#000");
+        _this.cap = new Rect(-7.5, -25, 15, 7.5, color, "#000");
+        _this.turret = new Circle(0, 0, 10, color, "#000");
         return _this;
     }
-    return Sprite;
+    return TankSprite;
 }(Renderable));
-/******************************************************************************/
-var canvas;
-var ctx;
-var tank = new Sprite();
-[new Tread(-15),
-    new Tread(5),
-    new Rect(-5, -20, 11, 35, "#f00", "#000")].map(function (x) { tank.addShape(x); });
-var interval;
-var degs;
-var degDisplay;
-var delta;
-var keys = {
-    "ArrowUp": false,
-    "ArrowDown": false,
-    "ArrowLeft": false,
-    "ArrowRight": false
-};
-var getContext = function (canvas) {
-    var ctx = canvas.getContext("2d");
-    if (ctx instanceof CanvasRenderingContext2D)
-        return ctx;
-};
-var main = function () {
-    canvas = document.getElementById("canvas");
-    if (!(canvas instanceof HTMLCanvasElement))
-        return;
-    degDisplay = document.querySelector("input#deg");
-    if (!(degDisplay instanceof HTMLInputElement))
-        return;
-    ctx = getContext(canvas);
-    degs = 0.0;
-    delta = 0.5;
-    window.addEventListener("keydown", keyDownHandler);
-    window.addEventListener("keyup", keyUpHandler);
-    interval = setInterval(loop, Math.floor(1000 / 64));
-};
-var loop = function () {
-    processInput();
-    render();
-    degDisplay.value = degs;
-};
-var processInput = function () {
-    var leftTread = tank.items[0];
-    var rightTread = tank.items[1];
-    if (!(leftTread instanceof Tread) || !(rightTread instanceof Tread))
-        return;
-    if (keys["ArrowUp"]) {
-        leftTread.counter.dec();
-        rightTread.counter.dec();
-    }
-    if (keys["ArrowDown"]) {
-        leftTread.counter.inc();
-        rightTread.counter.inc();
-    }
-    if (keys["ArrowLeft"]) {
-        degs -= 1.0;
-        leftTread.counter.inc();
-        rightTread.counter.dec();
-    }
-    if (keys["ArrowRight"]) {
-        degs += 1.0;
-        leftTread.counter.dec();
-        rightTread.counter.inc();
-    }
-};
-var keyDownHandler = function (evt) {
-    keys[evt.key] = true;
-    return;
-};
-var keyUpHandler = function (evt) {
-    keys[evt.key] = false;
-    return;
-};
-var render = function () {
-    ctx.save();
-    ctx.clearRect(0, 0, 300, 300);
-    ctx.scale(3, 3);
-    ctx.translate(60, 60);
-    ctx.rotate(degs / 180.0 * Math.PI);
-    tank.render(ctx);
-    ctx.restore();
-};

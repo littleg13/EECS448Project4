@@ -26,15 +26,6 @@
  *
  */
 
-class Point {
-  x: number;
-  y: number;
-  constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-}
-
 class Counter {
   value   : number;
   delta   : number;
@@ -73,9 +64,28 @@ abstract class Renderable {
   render: ( ctx: CanvasRenderingContext2D ) => void;
 }
 
+abstract class Animated extends Renderable {
+  counters  : Counter[];
+  items     : Renderable[];
+}
+
 abstract class Shape extends Renderable {
-  color: string;
-  borderColor: string;
+  color       : string;
+  borderColor : string;
+  constructor( color = "#fff" , borderColor = "#0000" ) {
+    super();
+    this.color = color;
+    this.borderColor = borderColor;
+  }
+}
+
+class Point {
+  x: number;
+  y: number;
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
 }
 
 class Rect extends Shape {
@@ -83,22 +93,58 @@ class Rect extends Shape {
   y    : number;
   w    : number;
   h    : number;
-  constructor( x: number, y: number, w: number, h: number, color = "#fff", borderColor = "#0000") {
-    super();
+  constructor( x: number, y: number, w: number, h: number,
+               color = "#fff", borderColor = "#0000") {
+    super( color, borderColor );
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
-    this.color = color;
-    this.borderColor = borderColor;
   }
 
   render = ( ctx: CanvasRenderingContext2D ) : void => {
     ctx.fillStyle = this.color;
-    ctx.fillRect( this.x, this.y, this.w, this.h );
     ctx.strokeStyle = this.borderColor;
+    ctx.fillRect( this.x, this.y, this.w, this.h );
     ctx.strokeRect( this.x, this.y, this.w, this.h );
     return;
+  }
+}
+
+class RoundRect extends Rect {
+  rad : number;
+  constructor( x: number, y: number, w: number, h: number, rad: number,
+               color = "#fff", borderColor = "#0000" ) {
+      super( x, y, w, h, color, borderColor );
+      this.rad = Math.min( rad, w, h );
+  }
+
+  render = ( ctx: CanvasRenderingContext2D ) : void => {
+    let [ left, right, top, bottom, r ] = [ this.x, this.x + this.w,
+                                            this.y, this.y + this.h, this.rad ];
+
+    ctx.fillStyle = this.color;
+    ctx.strokeStyle = this.borderColor;
+    ctx.beginPath();             // clockwise path
+    ctx.moveTo( left, top + r ); // begin lower top-left corner
+    ctx.arcTo( left, top,        // 'true' corner
+               left + r, top,    // end upper top-left corner
+               r );
+    ctx.lineTo( right - r, top );    // move to upper top-right corner
+    ctx.arcTo( right, top,       // 'true' corner
+               right, top + r,   // end lower top-right corner
+               r );
+    ctx.lineTo( right, bottom - r );  // move to upper bottom-right corner
+    ctx.arcTo( right, bottom,
+               right - r, bottom,
+               r );
+    ctx.lineTo( left + r, bottom );
+    ctx.arcTo( left, bottom,
+               left, bottom - r,
+               r );
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
   }
 }
 
@@ -106,25 +152,23 @@ class Circle extends Shape {
   x     : number;
   y     : number;
   radius: number;
-  constructor( x: number, y: number, radius: number, color: string ) {
-    super();
+  constructor( x: number, y: number, radius: number, color = "#fff", borderColor = "#0000" ) {
+    super( color, borderColor );
     this.x = x;
     this.y = y;
     this.radius = radius;
-    this.color = color;
   }
 
   render = ( ctx: CanvasRenderingContext2D ) : void => {
     ctx.fillStyle = this.color;
+    ctx.strokeStyle = this.borderColor;
+    ctx.beginPath();
     ctx.arc( this.x, this.y, this.radius, 0, Math.PI * 2, true );
+    ctx.closePath();
     ctx.fill();
+    ctx.stroke();
     return;
   }
-}
-
-class Animated extends Renderable {
-  counters  : Counter[];
-  items     : Renderable[];
 }
 
 class Tread extends Animated {
@@ -136,14 +180,16 @@ class Tread extends Animated {
   constructor( x : number ) {
     super();
     this.x = x;
-    this.mainRect = new Rect( x, -15, 10, 30, "#666", "#0000" ), // Full tread
+    this.mainRect = new Rect( x, -20, 10, 40, "#666", "#0000" ), // Full tread
     this.rects = [
+      new Rect( x, -20, 10, 2, "#000", "#0000" ),
       new Rect( x, -15, 10, 2, "#000", "#0000" ),
       new Rect( x, -10, 10, 2, "#000", "#0000" ),
       new Rect( x,  -5, 10, 2, "#000", "#0000" ),
       new Rect( x,   0, 10, 2, "#000", "#0000" ),
       new Rect( x,   5, 10, 2, "#000", "#0000" ),
-      new Rect( x,  10, 10, 2, "#000", "#0000" )
+      new Rect( x,  10, 10, 2, "#000", "#0000" ),
+      new Rect( x,  15, 10, 2, "#000", "#0000" )
     ];
     /*
       Counter states:
@@ -171,7 +217,7 @@ class Tread extends Animated {
           this.rects.map( moveUp );
 
           // new tread, height = 1, very bottom
-          frst = new Rect( this.x, -15, 10, 1, "#000", "#0000" );
+          frst = new Rect( this.x, -20, 10, 1, "#000", "#0000" );
           this.rects.unshift( frst );
           break;
         case 0: // on increase, previous state was 4
@@ -206,7 +252,7 @@ class Tread extends Animated {
           this.rects.unshift( frst );
 
           // create and add new last tread
-          last = new Rect( this.x, 14, 10, 1, "#000", "#0000" );
+          last = new Rect( this.x, 19, 10, 1, "#000", "#0000" );
           this.rects.push( last );
           break;
         case 3: // on decrease, previous state was 4
@@ -233,107 +279,84 @@ class Tread extends Animated {
   }
 }
 
-class Sprite extends Renderable {
-  items : Renderable[];
-  constructor() { super(); this.items = []; }
+class TankSprite extends Renderable {
+  x       : number;
+  y       : number;
+  dir     : number;
+  color   : string;
 
-  addShape = ( item: Renderable ) : void => {
-    this.items.push( item );
-    return;
+  /*
+   *  Initialize the shape variables
+   */
+  hitbox      : Rect;
+  showHitbox  : boolean;
+  leftTread   : Tread;
+  rightTread  : Tread;
+  body        : RoundRect;
+  barrel      : Rect;
+  cap         : Rect;
+  turret      : Circle;
+  constructor( x: number, y: number, dir: number, color = "#c00" ) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.dir = dir;         // stored in degrees
+    this.color = color;
+
+    /*
+     *  Set up the different shapes
+     */
+    this.hitbox     = new Rect( -20, -20, 40, 40, "#ccc", "#000" );
+    this.leftTread  = new Tread( -17.5 );
+    this.rightTread = new Tread(   7.5 );
+    this.body       = new RoundRect( -12.5, -20, 25, 40, 2.5, color, "#000" );
+    this.barrel     = new Rect( -5,   -20, 10, 25, color, "#000" );
+    this.cap        = new Rect( -7.5, -25, 15, 7.5, color, "#000" );
+    this.turret     = new Circle( 0, 0, 10, color, "#000" );
   }
 
   render = ( ctx: CanvasRenderingContext2D ) : void => {
-    this.items
-    for( let i = 0; i < this.items.length; i++ ) {
-      this.items[i].render( ctx );
-    }
-    return;
+    if( this.showHitbox ) { this.hitbox.render( ctx ); }
+    this.getItems().map( ( item : Renderable ) => { item.render( ctx ); } );
   }
-}
 
-/******************************************************************************/
-
-var canvas;
-var ctx;
-var tank = new Sprite();
-[ new Tread( -15 ),
-  new Tread(   5 ),
-  new Rect(  -5, -20, 11, 35, "#f00", "#000" ) ].map( (x) => { tank.addShape( x ) });
-var interval;
-var degs : number;
-var degDisplay;
-var delta : number;
-var keys = {
-  "ArrowUp"     : false,
-  "ArrowDown"   : false,
-  "ArrowLeft"   : false,
-  "ArrowRight"  : false
-};
-
-var getContext = ( canvas : HTMLCanvasElement ): CanvasRenderingContext2D | void => {
-  let ctx = canvas.getContext( "2d" );
-  if( ctx instanceof CanvasRenderingContext2D ) return ctx;
-}
-
-var main = (): void => {
-  canvas = document.getElementById( "canvas" );
-  if( ! ( canvas instanceof HTMLCanvasElement ) ) return;
-  degDisplay = document.querySelector( "input#deg" );
-  if( ! ( degDisplay instanceof HTMLInputElement ) ) return;
-  ctx = getContext( canvas );
-  degs = 0.0;
-  delta = 0.5;
-  window.addEventListener( "keydown", keyDownHandler );
-  window.addEventListener( "keyup", keyUpHandler );
-  interval = setInterval( loop, Math.floor( 1000 / 64 ) );
-}
-
-var loop = ():void => {
-  processInput();
-  render();
-  degDisplay.value = degs;
-}
-
-var processInput = (): void => {
-  let leftTread = tank.items[0];
-  let rightTread = tank.items[1];
-  if( ! ( leftTread instanceof Tread ) || ! ( rightTread instanceof Tread ) ) return;
-  if( keys[ "ArrowUp" ] ) {
-    leftTread.counter.dec();
-    rightTread.counter.dec();
+  getItems = () : Renderable[] => {
+    return [ this.leftTread, this.rightTread,
+             this.body, this.barrel,
+             this.cap, this.turret ];
   }
-  if( keys[ "ArrowDown" ] ) {
-    leftTread.counter.inc();
-    rightTread.counter.inc();
-  }
-  if( keys[ "ArrowLeft" ] ) {
-    degs -= 1.0;
-    leftTread.counter.inc();
-    rightTread.counter.dec();
-  }
-  if( keys[ "ArrowRight" ] ) {
-    degs += 1.0;
-    leftTread.counter.dec();
-    rightTread.counter.inc();
-  }
-}
 
-var keyDownHandler = ( evt : KeyboardEvent ): void => {
-  keys[ evt.key ] = true;
-  return;
-}
+  changeColor = ( color : string ) : void => {
+    this.getItems().map( ( item ) => {
+      if( item instanceof Shape ) { item.color = color; }
+    } );
+  }
 
-var keyUpHandler = ( evt : KeyboardEvent ): void => {
-  keys[ evt.key ] = false;
-  return;
-}
+  moveForward = ( delta = 1.0 ) : void => {
+    let dirRads = ( this.dir / 180.0 ) * Math.PI;
+    this.x += Math.sin( dirRads ) * delta;
+    this.y -= Math.cos( dirRads ) * delta;
+    this.leftTread.counter.dec();
+    this.rightTread.counter.dec();
+  }
 
-var render = (): void => {
-  ctx.save();
-  ctx.clearRect( 0, 0, 300, 300 );
-  ctx.scale(3, 3);
-  ctx.translate( 60, 60 );
-  ctx.rotate( degs / 180.0 * Math.PI );
-  tank.render( ctx );
-  ctx.restore();
+  moveBackward = ( delta = 1.0 ) : void => {
+    let dirRads = ( this.dir / 180.0 ) * Math.PI;
+    this.x -= Math.sin( dirRads ) * delta;
+    this.y += Math.cos( dirRads ) * delta;
+    this.leftTread.counter.inc();
+    this.rightTread.counter.inc();
+  }
+
+  rotateCW = ( delta = 1.0 ) : void => {
+    this.dir += delta;
+    this.leftTread.counter.dec();
+    this.rightTread.counter.inc();
+  }
+
+  rotateCCW = ( delta = 1.0 ) : void => {
+    this.dir -= delta;
+    this.leftTread.counter.inc();
+    this.rightTread.counter.dec();
+  }
 }
