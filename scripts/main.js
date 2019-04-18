@@ -346,5 +346,18 @@ var main = () => {
  }
 };
 
+var sendMsg = () => {
+  let user = game.tanks[localStorage.userID].username;
+  let text = document.getElementById('textBox').value;
+  socket.emit("sendMsg", {sender: user, content: text});
+};
+
+var chatMsg = (data) => {
+  let sender = data['sender'];
+  let content = data['content'];
+  game.showMsg(sender, content);
+};
+socket.on("chatMsg", chatMsg);
+
 window.addEventListener("load", main);
 let mainLoop = () => {game.gameTick(); };

@@ -133,9 +133,12 @@ div.healthBar div {
   display: inline-block;
   padding: 10px;
   margin: 1%;
+  height: 600px;
+  overflow: auto;
   width: 22%;
   background-color: black;
 }
+
 #rightSide {
   display: inline-block;
   padding: 10px;
@@ -143,12 +146,36 @@ div.healthBar div {
   width: 22%;
   background-color: white;
 }
-message {
+
+#chatWindow {
+  flex-direction: column-reverse;
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+#chatBox {
   display: block;
+  align-self: flex-end;
 }
-sender {
+
+#messageWindow {
+  overflow: wrap;
+  display: block;
+  height: 75%;
+  align-self: flex-start;
+}
+
+.message {
+  display: block;
+  background-color: rgba(150,150,150, 0.8);
+}
+
+.sender {
   display: inline;
 }
-content {
+
+.content {
   display: inline;
+  overflow-wrap: break-word;
 }

@@ -413,14 +413,23 @@ class Game {
     alert( "Game over. Winner is: " + game.tanks[winningUserID].username );
   }
 
-  showMsg() {
-    let chatBox = document.getElementById('chatBox');
+  showMsg(username, text) {
+    let messageWindow = document.getElementById('messageWindow');
     let msg = document.createElement('div');
-    let text = document.getElementById('textBox');
-    let user = document.getElementsByClassName('User');
-    msg.innerHtml = user.value;
-    msg.innerHTML = text.value;
-    chatBox.insertAdjacentElement("beforebegin", msg);
+    msg.classList.add('message');
+
+    let sender = document.createElement('div');
+    sender.classList.add('sender');
+    sender.innerHTML = username + ": ";
+    msg.appendChild(sender);
+
+    let content = document.createElement('div');
+    content.classList.add('content');
+    content.innerHTML = text;
+    msg.appendChild(content);
+
+    msg.setAttribute('content', text);
+    messageWindow.insertAdjacentElement("beforeend", msg);
   }
 
 };

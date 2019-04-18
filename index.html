@@ -86,13 +86,16 @@
     </main>
     <div id="game">
         <div class="container" id="leftSide">
-          <div id="chatBox">
-            <div class="message">
-              <div class="sender"></div>
-              <div class="content"></div>
+          <div class="container" id="chatWindow">
+            <div id="chatBox">
+              <div class="message">
+                <div class="sender"></div>
+                <div class="content"></div>
+              </div>
+                <input type="text" id="textBox"></input>
+                <input type="submit" value="enter" onclick="sendMsg()"></input>
             </div>
-              <input type="text" id="textBox"></input>
-              <input type="submit" value="enter" onclick="game.showMsg()"></input>
+            <div class="container" id="messageWindow"></div>
           </div>
         </div>
         <canvas id="canvas" width=600 height=600></canvas>
