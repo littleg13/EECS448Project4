@@ -2,12 +2,29 @@
 /******************************************************************************/
 
 var canvas;
+var backgroundElem;
 var ctx;
-var tank = new TankSprite( 50, 50, 0.0 );
+var width;
+var height;
+var tank = new TankSprite( 5, 5, 0.0 );
 var interval;
-var degs : number;
-var degDisplay;
-var delta : number;
+var map = new Map();
+map.tiles =
+  [[ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 ],
+   [ -1,  0,  0,  0,  0,  0,  0,  0,  0, -1 ],
+   [ -1,  0,  0,  0,  0,  0,  0,  0,  0, -1 ],
+   [ -1,  0,  0,  0,  0,  0,  0,  0,  0, -1 ],
+   [ -1,  0,  0,  0,  0,  0,  0,  0,  0, -1 ],
+   [ -1,  0,  0,  0,  0,  0,  0,  0,  0, -1 ],
+   [ -1,  0,  0,  0,  0,  0,  0,  0,  0, -1 ],
+   [ -1,  0,  0,  0,  0,  0,  0,  0,  0, -1 ],
+   [ -1,  0,  0,  0,  0,  0,  0,  0,  0, -1 ],
+   [ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 ]].map( ( row ) => {
+     return row.map( ( val ) => {
+       if( val === 0 ) return new FloorTile();
+       else return new WallTile();
+     });
+   });
 var keys = {
   "ArrowUp"     : false,
   "ArrowDown"   : false,
@@ -22,35 +39,36 @@ var getContext = ( canvas : HTMLCanvasElement ): CanvasRenderingContext2D | void
 
 var main = (): void => {
   canvas = document.getElementById( "canvas" );
+  backgroundElem = document.getElementById( "background" );
   if( ! ( canvas instanceof HTMLCanvasElement ) ) return;
-  degDisplay = document.querySelector( "input#deg" );
-  if( ! ( degDisplay instanceof HTMLInputElement ) ) return;
+  if( ! ( backgroundElem instanceof HTMLCanvasElement ) ) return;
   ctx = getContext( canvas );
-  degs = 0.0;
-  delta = 0.5;
+  bkg = getContext( backgroundElem );
+  map.render( bkg );
+  width  = canvas.width;
+  height = canvas.height;
   window.addEventListener( "keydown", keyDownHandler );
   window.addEventListener( "keyup", keyUpHandler );
+  ctx.scale(2, 2);
   interval = setInterval( loop, Math.floor( 1000 / 64 ) );
 }
 
 var loop = ():void => {
   processInput();
   render();
-  degDisplay.value = degs;
 }
 
 var processInput = (): void => {
-  if( keys[ "ArrowUp" ] ) {
-    tank.moveForward();
-  }
-  if( keys[ "ArrowDown" ] ) {
-    tank.moveBackward();
-  }
-  if( keys[ "ArrowLeft" ] ) {
-    tank.rotateCCW();
-  }
-  if( keys[ "ArrowRight" ] ) {
-    tank.rotateCW();
+  if( keys[ "ArrowUp" ] || keys[ "w" ] ) {
+    tank.moveForward( 0.125 );
+  } else if( keys[ "ArrowDown" ] || keys[ "s" ] ) {
+    tank.moveBackward( 0.125 );
+  } else if( keys[ "ArrowLeft" ] || keys[ "a" ] ) {
+    tank.rotateCCW( 1.25 );
+  } else if( keys[ "ArrowRight" ] || keys[ "d" ] ) {
+    tank.rotateCW( 1.25 );
+  } else if( keys[ " " ] ) {
+    console.log("fire");
   }
 }
 
@@ -65,10 +83,15 @@ var keyUpHandler = ( evt : KeyboardEvent ): void => {
 }
 
 var render = (): void => {
+  let tileDim = 20;
+  ctx.clearRect( 0, 0, width, height );
   ctx.save();
-  ctx.clearRect( 0, 0, 300, 300 );
-  ctx.scale( 2, 2 );
-  ctx.translate( tank.x, tank.y );
+  ctx.translate( -( tank.x * tileDim ), -( tank.y * tileDim) );
+  ctx.drawImage( backgroundElem, 0, 0 );
+  ctx.restore();
+
+  ctx.save();
+  ctx.translate( width / 4, height / 4 );
   ctx.rotate( tank.dir / 180.0 * Math.PI );
   tank.render( ctx );
   ctx.restore();

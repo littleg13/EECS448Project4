@@ -4,10 +4,18 @@
   <head>
     <title>Rendering Test</title>
     <script src="scripts/render.js"></script>
+    <script src="scripts/map.js"></script>
     <script src="scripts/test_main.js"></script>
+    <style>
+    #background {
+      display: none;
+    }
+    </style>
   </head>
   <body onload="main()">
-    <canvas id="canvas" width=600 height=600>
+    <canvas id="background" width=800 height=800>
+    </canvas>
+    <canvas id="canvas" width=800 height=800>
     </canvas>
     <input type="text" id="deg">
   </body>
