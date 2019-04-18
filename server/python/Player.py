@@ -1,7 +1,6 @@
 class Player:
     def __init__(self, username, pos):
         self.username = username
-        self.lastSeen = 0
         self.xPos = pos['x']
         self.yPos = pos['y']
         self.distanceLeft = 5

@@ -13,6 +13,7 @@ class Lobby:
         lobbyCode (string) : Code required to enter a particular lobby
     """
     def __init__(self, lobbyCode):
+        self.timeLobbyWasLastUsed = datetime.now()
         self.host = ""
         self.gameStarted = False
         self.players = {}
@@ -73,8 +74,8 @@ class Lobby:
 
     def removePlayer(self, userID):
         if(self.checkForPlayer(userID)):
-            colorList += self.players[userID].color
-            spawnPosList += {'x': self.players[userID].xPos, 'y': self.players[userID].yPos}
+            self.colorList += self.players[userID].color
+            self.spawnPosList += {'x': self.players[userID].xPos, 'y': self.players[userID].yPos}
             del self.players[userID]
             return True
         return False
@@ -91,7 +92,6 @@ class Lobby:
         return self.order[self.turn]
 
     def getHost(self):
-        print("Giving host. Host is: " + self.host)
         return self.host
 
     def startGame(self, userID):
@@ -109,6 +109,9 @@ class Lobby:
             output[playerID] = playerObject.toDictionary()
         return output
 
+    def refreshLastUsedTime(self):
+        self.timeLobbyWasLastUsed = datetime.now()
+
     def processGameEvent(self, userID, data):
         """Handles Game Events
 
@@ -123,6 +126,7 @@ class Lobby:
         Returns:
             outBoundData (dictionary): contains the updated information of the game
         """
+        self.refreshLastUsedTime()
         player = self.players[userID]
         outboundData = {}
         if userID == self.order[self.turn]:
