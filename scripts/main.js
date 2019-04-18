@@ -1,4 +1,5 @@
-let socket = io("http://localhost:3000");
+//let socket = io("https://448.cuzzo.net");
+let socket = io("http://localhost:3000")
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -176,6 +177,7 @@ var playerListHandler = (data) => {
       let userData = data[user];
       game.addTank(user, userData['username'], userData['xPos'], userData['yPos'], userData['direction'], userData['distanceLeft'], userData['color'], userData['health']);
     }
+    game.populateSidebar();
   }
   updateLists();
 };
@@ -281,7 +283,7 @@ var gameUpdateHandler = (data) => {
       if(data.userID == localStorage.userID) {
         game.resetPlayerShot();
       }
-      game.fire(data["userID"], 5, .1, data.distance);
+      game.fire(data.userID, data.power, 1, data.distance);
       break;
      case "advanceTurn":
       game.advanceTurn(data["userID"]);
@@ -304,6 +306,11 @@ socket.on("lobbyHost", checkIfHost)
   */
 var handleKeyDown = (evt) => {
   if (game.turn == localStorage.userID) {
+    if(evt.key == " "){
+      game.recordKeyPress(evt.key);
+
+      return;
+    }
     game.keys[ evt.key ] = true;
   }
 }
@@ -314,7 +321,13 @@ var handleKeyDown = (evt) => {
   * @param{Event} evt The event object which gives access to key information.
   */
 var handleKeyUp = (evt) => {
-  game.keys[ evt.key ] = false;
+  if(evt.key == " "){
+    game.keys[ evt.key ] = true;
+    game.keys['spaceDown'] = false;
+  }
+  else{
+    game.keys[ evt.key ] = false;
+  }
 }
 
 
@@ -334,7 +347,10 @@ function sendServerUpdate() {
                                 newDir: myDir});
     }
     else if (game.getPlayerShot()) {
-      socket.emit("gameEvent", {eventType: "playerFire"});
+      let finalTime = new Date();
+      let power = Math.min(5, Math.max(0, (((finalTime - game.keyTimes[" "])-100)*5)/2000))
+      console.log(power);
+      socket.emit("gameEvent", {eventType: "playerFire", power: power});
     }
   }
 }

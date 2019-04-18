@@ -87,7 +87,14 @@
         <div id="center">
           <canvas id="canvas" width=600 height=600></canvas>
         </div>
-        <div id="rightSide" class="sidebar"></div>
+        <div id="rightSide" class="sidebar">
+          <div id="additionalInfo">
+            <div id="userInfo">
+              <div id="spin"><input type="range" min="-100" max="100" value="0" class="slider" id="spinSlider"></div>
+            </div>
+            <div id="lobbyInfo"></div>
+          </div>
+        </div>
       </div>
       <div id='turn'>Turn: </div>
       <button type="button" onclick="logout()">Exit</button>

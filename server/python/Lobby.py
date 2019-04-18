@@ -156,6 +156,7 @@ class Lobby:
                     outboundData['newHealth'] = newHealth
                 self.advanceTurn(turnsToAdvance)
                 outboundData['distance'] = collisionData[1]
+                outboundData['power'] = data['power']
                 outboundData['eventType'] = 'playerFire'
                 outboundData['userID'] = userID
         return outboundData

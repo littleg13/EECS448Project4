@@ -42,6 +42,8 @@ class Game {
       * List of keys with their current state (true for pressed, false for not)
       */
     this.keys = [];
+
+    this.keyTimes = {}
     /**
       * Bool that records whether or not a transmit to server is needed
       */
@@ -58,6 +60,7 @@ class Game {
       * Bool for if game has been won.
       */
     this.won = false;
+
     this.initCanvas();
   }
 
@@ -182,6 +185,50 @@ class Game {
     }
   }
 
+  populateSidebar() {
+    let userInfoDiv = document.getElementById('userInfo');
+    let lobbyInfoDiv = document.getElementById('lobbyInfo');
+    for(let userID in this.tanks){
+      let tank = this.tanks[userID];
+      if(document.getElementById('info'+userID) === null){
+        let cardDiv = this.makePlayerCardDiv(userID, tank.username, tank.color)
+        if(userID == localStorage.userID){
+          userInfoDiv.appendChild(cardDiv);
+        }
+        else{
+          lobbyInfoDiv.appendChild(cardDiv);
+        }
+      }
+    }
+  }
+
+  makePlayerCardDiv(userID, username, color) {
+    let cardDiv = document.createElement('div');
+    cardDiv.classList.add('playerCard');
+    cardDiv.setAttribute('id', 'info'+userID);
+    let usernameDiv = document.createElement('div');
+    usernameDiv.classList.add('username');
+    usernameDiv.innerHTML = username;
+    let healthDiv = document.createElement('div');
+    healthDiv.classList.add('tankHealth');
+    healthDiv.innerHTML = '100/100';
+    let colorDiv = document.createElement('div');
+    colorDiv.classList.add('tankColor');
+    colorDiv.innerHTML = 'Color: '
+    let swatch = document.createElement('div');
+    swatch.classList.add('colorSwatch');
+    swatch.style.backgroundColor = color;
+    colorDiv.appendChild(swatch);
+    cardDiv.appendChild(usernameDiv);
+    cardDiv.appendChild(healthDiv);
+    cardDiv.appendChild(colorDiv);
+    return cardDiv;
+  }
+
+  updateSidebar() {
+
+  }
+
   renderTank(userID, tank) {
     this.ctx.save();
     this.ctx.scale( this.scale, this.scale );
@@ -240,7 +287,7 @@ class Game {
       else{
         this.bullets.pop(i);
       }
-      bullet.direction += Math.min(0, bullet.distanceTraveled - bullet.power) * bullet.curve;
+      bullet.direction += Math.max(0, bullet.distanceTraveled - bullet.power) * bullet.curve*Math.PI/(180);
 
     }
     this.ctx.restore();
@@ -314,6 +361,7 @@ class Game {
       if( player.canShoot && !this.playerShot ){
         this.playerShot = true;
       }
+      this.keys[" "] = false
     }
 
     if( player.distanceLeft <= 0 ) return;                // Cancel if no more moving
@@ -336,6 +384,13 @@ class Game {
       }
     }
     player.distanceLeft = Math.max( 0.0, player.distanceLeft );
+  }
+
+  recordKeyPress(key){
+    if(!game.keys['spaceDown']){
+      this.keyTimes[key] = new Date();
+      game.keys['spaceDown'] = true;
+    }
   }
 
   /**
