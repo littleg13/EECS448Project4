@@ -32,7 +32,7 @@ class LobbyHandler:
         lobbiesToDelete = []
         for lobbyCode, lobby in self.lobbyList.items():
             timeDiff = (datetime.now() - lobby.timeLobbyWasLastUsed).total_seconds()
-            if (timeDiff > 30 or lobby.getNumberofPlayers() == 0):
+            if (timeDiff > 7200 or lobby.getNumberofPlayers() == 0):
                 lobbiesToDelete.append(lobbyCode)
         for lobbyCode in lobbiesToDelete:
             del self.lobbyList[lobbyCode]
