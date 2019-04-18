@@ -1,4 +1,5 @@
 from Lobby import Lobby
+from datetime import datetime
 import random
 import string
 
@@ -20,11 +21,21 @@ class LobbyHandler:
         return output
 
     def createLobby(self):
+        self.checkForDeadLobbies()
         codeToCheck = self.generateRandomString(4)
         while (codeToCheck in self.lobbyList.keys()):
             codeToCheck = self.generateRandomString(4)
         self.lobbyList[codeToCheck] = Lobby(codeToCheck)
         return codeToCheck
+
+    def checkForDeadLobbies(self):
+        lobbiesToDelete = []
+        for lobbyCode, lobby in self.lobbyList.items():
+            timeDiff = (datetime.now() - lobby.timeLobbyWasLastUsed).total_seconds()
+            if (timeDiff > 7200 or lobby.getNumberofPlayers() == 0):
+                lobbiesToDelete.append(lobbyCode)
+        for lobbyCode in lobbiesToDelete:
+            del self.lobbyList[lobbyCode]
 
     def joinLobby(self, lobbyCode, userID, username):
         result = 0

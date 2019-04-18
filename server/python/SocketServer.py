@@ -121,13 +121,16 @@ def auth(sid, data):
 
 @io.on('requestInfo')
 def requestInfo(sid, data):
-    options = {
-    'getPlayerList' : sendPlayerList,
-    'getTurn' : sendTurn,
-    'getMap' : sendMap,
-    'getHost' : sendHost
-    }
-    options[data['request']](sid, data)
+    if 'lobbyCode' in io.get_session(sid):
+        options = {
+        'getPlayerList' : sendPlayerList,
+        'getTurn' : sendTurn,
+        'getMap' : sendMap,
+        'getHost' : sendHost
+        }
+        options[data['request']](sid, data)
+    else:
+        io.emit('clearStorage', {}, room=sid)
 
 @io.on('logout')
 def logout(sid, data):
