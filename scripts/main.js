@@ -1,4 +1,5 @@
-let socket = io("https://448.cuzzo.net");
+//let socket = io("https://448.cuzzo.net");
+let socket = io("http://localhost:3000")
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -22,9 +23,14 @@ var makeActive = (id) => {
 var pickUsername = () => {
   let name = document.getElementById("username").value;
   if(name === "") {alert("Name cannot be blank, please try again."); return;}
-
   localStorage.setItem("username", document.getElementById("username").value.toUpperCase());
   makeActive("splash2");
+};
+
+var enterMatchmaking = () => {
+  console.log("Joining matchmaking");
+  socket.emit("enterMatchmaking", {username : localStorage.username});
+  makeActive("waiting");
 };
 
 /**
@@ -91,8 +97,10 @@ var logout = () => {
   * This is called by the moveToLobby socket handler.
   */
 var setupLobbyMenu = () => {
+  document.getElementById('startGame').style.display = 'none';
   document.getElementById("lobbyName").innerHTML = localStorage.lobbyCode;
   socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
+  socket.emit("requestInfo", {request : "getHost"});
 };
 
 /**
@@ -102,7 +110,6 @@ var setupLobbyMenu = () => {
   */
 var updateLists = () => {
   if(game === null) return;
-
   var lobbyList = document.getElementById("lobbyList");
   lobbyList.innerHTML = "";
   for(userID in game.tanks) {
@@ -170,6 +177,7 @@ var playerListHandler = (data) => {
       let userData = data[user];
       game.addTank(user, userData['username'], userData['xPos'], userData['yPos'], userData['direction'], userData['distanceLeft'], userData['color'], userData['health']);
     }
+    game.populateSidebar();
   }
   updateLists();
 };
@@ -275,7 +283,7 @@ var gameUpdateHandler = (data) => {
       if(data.userID == localStorage.userID) {
         game.resetPlayerShot();
       }
-      game.fire(data["userID"], 0, 0, data.distance);
+      game.fire(data.userID, data.power, 1, data.distance);
       break;
      case "advanceTurn":
       game.advanceTurn(data["userID"]);
@@ -284,6 +292,13 @@ var gameUpdateHandler = (data) => {
 };
 socket.on("gameUpdate", gameUpdateHandler);
 
+var checkIfHost = (data) => {
+  if (data['host'] == localStorage.userID) {
+    document.getElementById('startGame').style.display = 'block';
+  }
+};
+socket.on("lobbyHost", checkIfHost)
+
 /**
   * Event handler for key down events. It is attached to the window object.
   * Updates the global list of keys which is a boolean list indexed by key strings.
@@ -291,6 +306,11 @@ socket.on("gameUpdate", gameUpdateHandler);
   */
 var handleKeyDown = (evt) => {
   if (game.turn == localStorage.userID) {
+    if(evt.key == " "){
+      game.recordKeyPress(evt.key);
+
+      return;
+    }
     game.keys[ evt.key ] = true;
   }
 }
@@ -301,7 +321,13 @@ var handleKeyDown = (evt) => {
   * @param{Event} evt The event object which gives access to key information.
   */
 var handleKeyUp = (evt) => {
-  game.keys[ evt.key ] = false;
+  if(evt.key == " "){
+    game.keys[ evt.key ] = true;
+    game.keys['spaceDown'] = false;
+  }
+  else{
+    game.keys[ evt.key ] = false;
+  }
 }
 
 
@@ -321,7 +347,10 @@ function sendServerUpdate() {
                                 newDir: myDir});
     }
     else if (game.getPlayerShot()) {
-      socket.emit("gameEvent", {eventType: "playerFire"});
+      let finalTime = new Date();
+      let power = Math.min(5, Math.max(0, (((finalTime - game.keyTimes[" "])-100)*5)/2000))
+      console.log(power);
+      socket.emit("gameEvent", {eventType: "playerFire", power: power});
     }
   }
 }
@@ -344,5 +373,7 @@ var main = () => {
     game = new Game(20);
  }
 };
+
+var mainLoop = () => { game.gameTick(); };
 
 window.addEventListener("load", main);

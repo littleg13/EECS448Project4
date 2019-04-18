@@ -55,6 +55,7 @@
       </div>
 
       <div id="splash2">
+        <button type='button' onclick="enterMatchmaking()">Find a game</button>
         <button type='button' onclick="loadJoin()">Join a Lobby</button>
         <button type='button' onclick="createLobby()">Create a Lobby</button>
       </div>
@@ -75,13 +76,26 @@
         <h3>Players:</h3>
         <ul id="lobbyList">
         </ul>
-        <button type="button" onclick="startGame()">Start Game</button>
+        <button type="button" onclick="startGame()" id="startGame">Start Game</button>
         <button type="button" onclick="logout()">Logout</button>
       </div>
     </main>
 
     <div id="game">
-      <canvas id="canvas" width=600 height=600></canvas>
+      <div id="gameBody">
+        <div id="leftSide" class="sidebar"></div>
+        <div id="center">
+          <canvas id="canvas" width=600 height=600></canvas>
+        </div>
+        <div id="rightSide" class="sidebar">
+          <div id="additionalInfo">
+            <div id="userInfo">
+              <div id="spin"><input type="range" min="-100" max="100" value="0" class="slider" id="spinSlider"></div>
+            </div>
+            <div id="lobbyInfo"></div>
+          </div>
+        </div>
+      </div>
       <div id='turn'>Turn: </div>
       <button type="button" onclick="logout()">Exit</button>
     </div>
