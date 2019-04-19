@@ -158,6 +158,10 @@ def enterMatchmaking(sid, data):
     if (result['gameStarted']):
         io.emit('gameStart', {}, room=lobbyCode)
 
+@io.on('sendMsg')
+def sendMsg(sid, data):
+    io.emit('chatMsg', {'sender': data['sender'], 'content': data['content']}, room=io.get_session(sid)['lobbyCode'])
+
 @io.on('gameEvent')
 def gameEvent(sid, data):
     """Updates the current state of the game on the server side.

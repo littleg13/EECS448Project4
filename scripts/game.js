@@ -67,7 +67,7 @@ class Game {
   startGame() {
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keyup', handleKeyUp, true);
-    gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
+    gameTickUpdateInt = setInterval(mainLoop(), Math.floor(1000/32));
     sendServerUpdateInt = setInterval(sendServerUpdate, 40);
     this.begun = true;
   }
@@ -415,4 +415,24 @@ class Game {
     this.won = true;
     alert( "Game over. Winner is: " + game.tanks[winningUserID].username );
   }
+
+  showMsg(username, text) {
+    let messageWindow = document.getElementById('messageWindow');
+    let msg = document.createElement('div');
+    msg.classList.add('message');
+
+    let sender = document.createElement('div');
+    sender.classList.add('sender');
+    sender.innerHTML = username + ": ";
+    msg.appendChild(sender);
+
+    let content = document.createElement('div');
+    content.classList.add('content');
+    content.innerHTML = text;
+    msg.appendChild(content);
+
+    msg.setAttribute('content', text);
+    messageWindow.insertAdjacentElement("beforeend", msg);
+  }
+
 };
