@@ -156,7 +156,7 @@ def enterMatchmaking(sid, data):
     io.emit('playerJoin', {'username' : data['username']}, room=result['lobbyCode'])
     io.emit('moveToLobby', {'type' : 'lobbyJoined', 'result' : '200','lobbyCode': result['lobbyCode']}, room=sid)
     if (result['gameStarted']):
-        io.emit('gameStart', {}, room=lobbyCode)
+        io.emit('gameStart', {}, room=result['lobbyCode'])
 
 @io.on('gameEvent')
 def gameEvent(sid, data):
