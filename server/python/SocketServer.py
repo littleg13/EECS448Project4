@@ -41,6 +41,9 @@ def sendPlayerList(sid, data):
         playerList = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getPlayerList()
     io.emit('playerList', playerList, room=sid)
 
+def makeStringSafe(inputString):
+    return inputString.replace('<', "&lt;").replace('>', "&gt;")
+
 def sendTurn(sid, data):
     turn = lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getTurn()
     io.emit('gameUpdate', {'eventType' : 'advanceTurn', 'userID' : turn}, room=sid)
@@ -63,14 +66,15 @@ def joinLobby(sid, data):
             data (data): Dictionary of all of the data necessary to add the user
         """
     userID = generateRandomString(10)
+    username = makeStringSafe(data['username'])
     with io.session(sid) as session:
         session['userID'] = userID
         session['lobbyCode'] = data['lobbyCode']
-    io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
+    io.emit('setID', {'userID' : userID, 'username' : username}, room=sid)
     io.enter_room(sid, data['lobbyCode'])
-    result = lobbyHandler.joinLobby(data['lobbyCode'], userID, data['username'])
+    result = lobbyHandler.joinLobby(data['lobbyCode'], userID, username)
     if(result == 200):
-        io.emit('playerJoin', {'username' : data['username']}, room=data['lobbyCode'])
+        io.emit('playerJoin', {'username' : username}, room=data['lobbyCode'])
     io.emit('moveToLobby', {'type' : 'lobbyJoined', 'result' : result,'lobbyCode': data['lobbyCode']}, room=sid)
 
 @io.on('createLobby')
@@ -86,12 +90,13 @@ def createLobby(sid, data):
         """
     lobbyCode = lobbyHandler.createLobby()
     userID = generateRandomString(10)
+    username = makeStringSafe(data['username'])
     with io.session(sid) as session:
         session['userID'] = userID
         session['lobbyCode'] = lobbyCode
     io.enter_room(sid, lobbyCode)
-    io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
-    result = lobbyHandler.joinLobby(lobbyCode, userID, data['username'])
+    io.emit('setID', {'userID' : userID, 'username' : username}, room=sid)
+    result = lobbyHandler.joinLobby(lobbyCode, userID, username)
     io.emit('moveToLobby', {'type' : 'lobbyCreated', 'result' : result, 'lobbyCode': lobbyCode}, room=sid)
 
 @io.on('auth')
@@ -147,13 +152,14 @@ def startGame(sid, data):
 @io.on('enterMatchmaking')
 def enterMatchmaking(sid, data):
     userID = generateRandomString(10)
-    result = lobbyHandler.enterMatchmaking(userID, data['username'])
+    username = makeStringSafe(data['username'])
+    result = lobbyHandler.enterMatchmaking(userID, username)
     with io.session(sid) as session:
         session['userID'] = userID
         session['lobbyCode'] = result['lobbyCode']
-    io.emit('setID', {'userID' : userID, 'username' : data['username']}, room=sid)
+    io.emit('setID', {'userID' : userID, 'username' : username}, room=sid)
     io.enter_room(sid, result['lobbyCode'])
-    io.emit('playerJoin', {'username' : data['username']}, room=result['lobbyCode'])
+    io.emit('playerJoin', {'username' : username}, room=result['lobbyCode'])
     io.emit('moveToLobby', {'type' : 'lobbyJoined', 'result' : '200','lobbyCode': result['lobbyCode']}, room=sid)
     if (result['gameStarted']):
         io.emit('gameStart', {}, room=result['lobbyCode'])
