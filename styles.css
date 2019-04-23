@@ -35,10 +35,8 @@ main #lobbyList {
 }
 
 div#game {
-  display: flex;
+  display: none;
   margin: auto;
-  align-items:center;
-  flex-direction: row;
 }
 
 canvas {
@@ -128,7 +126,12 @@ div.healthBar div {
   padding: 0;
   background-color: red;
 }
-
+#gameBody {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+}
 #leftSide {
   display: inline-block;
   padding: 10px;
@@ -178,4 +181,33 @@ div.healthBar div {
 .content {
   display: inline;
   overflow-wrap: break-word;
+}
+.sidebar {
+  height: 630px;
+  width: 330px;
+  padding: 15px;
+}
+
+#additionalInfo {
+  background-color: rgba(50, 50, 50, 1);
+  padding: 10px;
+  border-radius: 10px;
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+#userInfo {
+  border: 5px solid black;
+  padding: 5px;
+  height: 25%;
+  width: 100%;
+}
+#lobbyInfo {
+  height: 75%;
+  width: 100%;
+}
+.colorSwatch {
+  display: inline-block;
+  height: 10px;
+  width: 10px;
 }

@@ -75,7 +75,7 @@ class Lobby:
     def removePlayer(self, userID):
         if(self.checkForPlayer(userID)):
             self.colorList += self.players[userID].color
-            self.spawnPosList += {'x': self.players[userID].xPos, 'y': self.players[userID].yPos}
+            self.spawnPosList.append({'x': self.players[userID].xPos, 'y': self.players[userID].yPos})
             del self.players[userID]
             return True
         return False
@@ -142,7 +142,7 @@ class Lobby:
                     outboundData['newPos'] = data['newPos']
                     outboundData['newDir'] = data['newDir']
             elif data['eventType'] == 'playerFire':
-                collisionData = self.checkBulletCollision(userID, player, 0, 0)
+                collisionData = self.checkBulletCollision(userID, player, data['power'], data['spin'])
                 turnsToAdvance = 1
                 if(collisionData[0] is 'map'):
                     outboundData['mapUpdate'] = self.map
@@ -160,6 +160,8 @@ class Lobby:
                     outboundData['newHealth'] = newHealth
                 self.advanceTurn(turnsToAdvance)
                 outboundData['distance'] = collisionData[1]
+                outboundData['power'] = data['power']
+                outboundData['spin'] = data['spin']
                 outboundData['eventType'] = 'playerFire'
                 outboundData['userID'] = userID
         return outboundData
@@ -184,6 +186,8 @@ class Lobby:
 
         """
         position = [player.xPos + 0.5, player.yPos + 0.5]
+        direction = player.direction
+        spin = spin/5
         increment = 0.1
         collided = False
         collidedWith = ''
@@ -192,18 +196,22 @@ class Lobby:
             collidedPlayerUserID = self.isPositionInPlayerBounds(position)
             if collidedPlayerUserID and collidedPlayerUserID != userID:
                 collidedWith = collidedPlayerUserID
-                finalDistance = self.getDistanceToPlayer(position, player)
                 collided = True
             elif self.map[math.floor(position[1])][math.floor(position[0])] != 0:
                 collided = True
-                finalDistance = self.getDistanceToPlayer(position, player)
                 if(self.map[math.floor(position[1])][math.floor(position[0])] != -1):
                     self.map[math.floor(position[1])][math.floor(position[0])] -= 1
                     collidedWith = 'map'
                 else:
                     collidedWith = 'edge'
-            position[0] =  math.sin(player.direction)*increment + position[0];
-            position[1] =  -math.cos(player.direction)*increment + position[1];
+            position[0] =  math.sin(direction)*increment + position[0]
+            position[1] =  -math.cos(direction)*increment + position[1]
+            finalDistance += increment
+            direction += max(0, finalDistance - power) * spin*math.pi/(180)
+
+            if(abs(player.direction - direction) >= 3/4 * 2*math.pi):
+                collided = True
+                collidedWith = 'edge'
         return [collidedWith, finalDistance]
 
     def getDistanceToPlayer(self, position, player):

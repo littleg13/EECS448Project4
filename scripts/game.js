@@ -42,6 +42,8 @@ class Game {
       * List of keys with their current state (true for pressed, false for not)
       */
     this.keys = [];
+
+    this.keyTimes = {}
     /**
       * Bool that records whether or not a transmit to server is needed
       */
@@ -58,6 +60,9 @@ class Game {
       * Bool for if game has been won.
       */
     this.won = false;
+
+    this.gameUpdate = {}
+
     this.initCanvas();
   }
 
@@ -67,7 +72,7 @@ class Game {
   startGame() {
     window.addEventListener('keydown', handleKeyDown, true);
     window.addEventListener('keyup', handleKeyUp, true);
-    gameTickUpdateInt = setInterval(mainLoop(), Math.floor(1000/32));
+    gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
     sendServerUpdateInt = setInterval(sendServerUpdate, 40);
     this.begun = true;
   }
@@ -140,6 +145,23 @@ class Game {
     this.map = map
   }
 
+  updateGameElements(){
+    if(this.gameUpdate.health){
+      this.updateTankhealth(this.gameUpdate.health[0], this.gameUpdate.health[1]);
+    }
+    if(this.gameUpdate.map){
+      console.log(this.gameUpdate.map)
+      game.updateMap(this.gameUpdate.map);
+    }
+    if(this.gameUpdate.advanceTurn){
+      this.advanceTurn(this.gameUpdate.advanceTurn);
+    }
+    if(this.gameUpdate.gameOver){
+      this.endGame(this.gameUpdate.gameOver);
+      delete localStorage.userID;
+      delete localStorage.lobbyCode;
+    }
+  }
   /**
     * Adds tank with passed properties to tanks list.
     * @param {string} userID used to uniquely identify a player
@@ -180,6 +202,50 @@ class Game {
         this.renderTank( key, tank );
       }
     }
+  }
+
+  populateSidebar() {
+    let userInfoDiv = document.getElementById('userInfo');
+    let lobbyInfoDiv = document.getElementById('lobbyInfo');
+    for(let userID in this.tanks){
+      let tank = this.tanks[userID];
+      if(document.getElementById('info'+userID) === null){
+        let cardDiv = this.makePlayerCardDiv(userID, tank.username, tank.color)
+        if(userID == localStorage.userID){
+          userInfoDiv.appendChild(cardDiv);
+        }
+        else{
+          lobbyInfoDiv.appendChild(cardDiv);
+        }
+      }
+    }
+  }
+
+  makePlayerCardDiv(userID, username, color) {
+    let cardDiv = document.createElement('div');
+    cardDiv.classList.add('playerCard');
+    cardDiv.setAttribute('id', 'info'+userID);
+    let usernameDiv = document.createElement('div');
+    usernameDiv.classList.add('username');
+    usernameDiv.innerHTML = username;
+    let healthDiv = document.createElement('div');
+    healthDiv.classList.add('tankHealth');
+    healthDiv.innerHTML = '100/100';
+    let colorDiv = document.createElement('div');
+    colorDiv.classList.add('tankColor');
+    colorDiv.innerHTML = 'Color: '
+    let swatch = document.createElement('div');
+    swatch.classList.add('colorSwatch');
+    swatch.style.backgroundColor = color;
+    colorDiv.appendChild(swatch);
+    cardDiv.appendChild(usernameDiv);
+    cardDiv.appendChild(healthDiv);
+    cardDiv.appendChild(colorDiv);
+    return cardDiv;
+  }
+
+  updateSidebar() {
+
   }
 
   renderTank(userID, tank) {
@@ -239,10 +305,15 @@ class Game {
       }
       else{
         this.bullets.pop(i);
+        if(this.bullets.length == 0){
+          this.updateGameElements();
+        }
       }
-      bullet.direction += Math.min(0, bullet.distanceTraveled - bullet.power) * bullet.curve;
+      bullet.direction += Math.max(0, bullet.distanceTraveled - bullet.power) * bullet.curve*Math.PI/(180);
 
     }
+
+
     this.ctx.restore();
   }
 
@@ -314,6 +385,7 @@ class Game {
       if( player.canShoot && !this.playerShot ){
         this.playerShot = true;
       }
+      this.keys[" "] = false
     }
 
     if( player.distanceLeft <= 0 ) return;                // Cancel if no more moving
@@ -336,6 +408,13 @@ class Game {
       }
     }
     player.distanceLeft = Math.max( 0.0, player.distanceLeft );
+  }
+
+  recordKeyPress(key){
+    if(!game.keys['spaceDown']){
+      this.keyTimes[key] = new Date();
+      game.keys['spaceDown'] = true;
+    }
   }
 
   /**
