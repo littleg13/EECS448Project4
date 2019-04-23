@@ -63,8 +63,9 @@ class LobbyHandler:
         self.joinLobby(self.matchmakingLobbyCode, userID, username)
         lobby.host = "matchmaking"
         gameStarted = False
+        lobbyCode = self.matchmakingLobbyCode
         if lobby.getNumberofPlayers() > 3:
             gameStarted = True
             lobby.startGame("matchmaking")
             self.matchmakingLobbyCode = ""
-        return {'lobbyCode': self.matchmakingLobbyCode, 'gameStarted': gameStarted}
+        return {'lobbyCode': lobbyCode, 'gameStarted': gameStarted}

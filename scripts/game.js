@@ -253,10 +253,16 @@ class Game {
     this.ctx.scale( this.scale, this.scale );
     this.ctx.translate( this.geometryDim * (tank.xPos + 0.5), this.geometryDim * (tank.yPos + 0.5) );
 
+    // Convert username back to non-html safe for canvas
+    let username = tank.username;
+    while (username.includes("&lt;") || username.includes("&gt;")) {
+      username = username.replace("&gt;", ">").replace("&lt;", "<");
+    }
+
     // Health bar and username text
     this.ctx.fillStyle = "black";
     this.ctx.font = "15px Arial";
-    this.ctx.fillText( tank.username, - this.geometryDim / 2, 40);
+    this.ctx.fillText( username, - this.geometryDim / 2, 40);
     this.ctx.fillRect( - this.geometryDim / 2, this.geometryDim + 10, this.geometryDim, 10 );
     this.ctx.fillStyle = tank.color;
     this.ctx.fillRect( - this.geometryDim / 2 + 2, this.geometryDim + 12, ( this.geometryDim - 4 ) * ( tank.health / 100 ), 6 );
