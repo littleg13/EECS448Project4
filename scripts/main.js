@@ -303,6 +303,7 @@ socket.on("lobbyHost", checkIfHost)
   * @param{Event} evt The event object which gives access to key information.
   */
 var handleKeyDown = (evt) => {
+  if(document.activeElement != document.body) return;
   if (game.turn == localStorage.userID) {
     if(evt.key == " "){
       game.recordKeyPress(evt.key);
@@ -322,6 +323,9 @@ var handleKeyUp = (evt) => {
   if(evt.key == " "){
     game.keys[ evt.key ] = true;
     game.keys['spaceDown'] = false;
+  }
+  else if (evt.key == "Enter" && document.activeElement == document.getElementById('textBox')) {
+    sendMsg();
   }
   else{
     game.keys[ evt.key ] = false;
@@ -376,7 +380,9 @@ var main = () => {
 var sendMsg = () => {
   let user = game.tanks[localStorage.userID].username;
   let text = document.getElementById('textBox').value;
-  socket.emit("sendMsg", {sender: user, content: text});
+  if(text.length > 0){
+    socket.emit("sendMsg", {sender: user, content: text});
+  }
 };
 
 var chatMsg = (data) => {
