@@ -61,7 +61,9 @@ class Game {
       */
     this.won = false;
 
-    this.gameUpdate = {}
+    this.gameUpdate = {};
+
+    this.powerupsOnMap = {};
 
     this.initCanvas();
   }
@@ -131,6 +133,10 @@ class Game {
           this.ctx.fillRect( 11, 29, 18, 7 );
           this.ctx.fillRect( 31, 29,  8, 7 );
         }
+        if(this.powerupsOnMap[col][row]) {
+          this.ctx.arc(0, 0, 15, 0, 2*Math.PI);
+          this.ctx.fill();
+        }
         this.ctx.restore();
       }
     }
@@ -189,6 +195,9 @@ class Game {
     }
     let playerIcon = document.getElementById( "display-" + userID );
     this.tanks[userID].health = newHealth;
+  }
+  updateTankPowerups(userID, powerups){
+    this.tanks[userID].powerups = powerups;
   }
 
   killTank( userID ) {

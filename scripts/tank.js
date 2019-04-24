@@ -54,6 +54,9 @@ class Tank {
       * @type {bool}
       */
     this.alive = true;
+
+    this.powerups = [];
+
     this.size = 30;
   }
 }

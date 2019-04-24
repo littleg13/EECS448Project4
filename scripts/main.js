@@ -265,6 +265,9 @@ var gameUpdateHandler = (data) => {
                                 data["newPos"][0], data["newPos"][1],
                                 data["newDir"]);
       }
+      if(data.playerPowerups) {
+        game.updateTankPowerups(data.userID, data.playerPowerups);
+      }
       break;
     case "playerFire":
       if(data.mapUpdate) {
@@ -279,6 +282,9 @@ var gameUpdateHandler = (data) => {
         }
       }
       game.fire(data.userID, data.power, data.spin, data.distance);
+      if(data.powerupsOnMap){
+        game.updatePowerupsOnMap(data.powerupsOnMap);
+      }
       break;
      case "advanceTurn":
       game.gameUpdate.advanceTurn = data["userID"];
