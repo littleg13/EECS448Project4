@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 //let socket = io("https://448.cuzzo.net");
 let socket = io("http://192.168.1.100:3000")
+=======
+let socket = io("https://448.cuzzo.net");
+//let socket = io("http://localhost:3000");
+>>>>>>> b6d7374c90121c8b03a0f4518ed73c4893c0a5cf
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -268,25 +273,23 @@ var gameUpdateHandler = (data) => {
       break;
     case "playerFire":
       if(data.mapUpdate) {
-        game.updateMap(data.mapUpdate);
+        game.gameUpdate.map = data.mapUpdate;
       }
       else if (data.playerHit) {
-        game.updateTankhealth(data.playerHit, data.newHealth)
+        game.gameUpdate.health = [data.playerHit, data.newHealth]
         if(data.gameOver) {
-          game.endGame(data.gameOver);
-          delete localStorage.userID;
-          delete localStorage.lobbyCode;
+          game.gameUpdate.gameOver = data.gameOver;
           clearInterval(sendServerUpdateInt);
           makeActive( "splash2" );
         }
       }
-      if(data.userID == localStorage.userID) {
-        game.resetPlayerShot();
-      }
-      game.fire(data.userID, data.power, 1, data.distance);
+      game.fire(data.userID, data.power, data.spin, data.distance);
       break;
      case "advanceTurn":
-      game.advanceTurn(data["userID"]);
+      game.gameUpdate.advanceTurn = data["userID"];
+      if(game.turn == ''){
+        game.updateGameElements();
+      }
       break;
   }
 };
@@ -349,8 +352,9 @@ function sendServerUpdate() {
     else if (game.getPlayerShot()) {
       let finalTime = new Date();
       let power = Math.min(5, Math.max(0, (((finalTime - game.keyTimes[" "])-100)*5)/2000))
-      console.log(power);
-      socket.emit("gameEvent", {eventType: "playerFire", power: power});
+      let spin = document.getElementById('spinSlider').value/100;
+      socket.emit("gameEvent", {eventType: "playerFire", power: power, spin: spin});
+      game.resetPlayerShot();
     }
   }
 }
@@ -374,6 +378,18 @@ var main = () => {
  }
 };
 
-var mainLoop = () => { game.gameTick(); };
+var sendMsg = () => {
+  let user = game.tanks[localStorage.userID].username;
+  let text = document.getElementById('textBox').value;
+  socket.emit("sendMsg", {sender: user, content: text});
+};
+
+var chatMsg = (data) => {
+  let sender = data['sender'];
+  let content = data['content'];
+  game.showMsg(sender, content);
+};
+socket.on("chatMsg", chatMsg);
 
 window.addEventListener("load", main);
+let mainLoop = () => {game.gameTick(); };

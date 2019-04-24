@@ -61,6 +61,8 @@ class Game {
       */
     this.won = false;
 
+    this.gameUpdate = {}
+
     this.initCanvas();
   }
 
@@ -143,6 +145,23 @@ class Game {
     this.map = map
   }
 
+  updateGameElements(){
+    if(this.gameUpdate.health){
+      this.updateTankhealth(this.gameUpdate.health[0], this.gameUpdate.health[1]);
+    }
+    if(this.gameUpdate.map){
+      console.log(this.gameUpdate.map)
+      game.updateMap(this.gameUpdate.map);
+    }
+    if(this.gameUpdate.advanceTurn){
+      this.advanceTurn(this.gameUpdate.advanceTurn);
+    }
+    if(this.gameUpdate.gameOver){
+      this.endGame(this.gameUpdate.gameOver);
+      delete localStorage.userID;
+      delete localStorage.lobbyCode;
+    }
+  }
   /**
     * Adds tank with passed properties to tanks list.
     * @param {string} userID used to uniquely identify a player
@@ -234,10 +253,16 @@ class Game {
     this.ctx.scale( this.scale, this.scale );
     this.ctx.translate( this.geometryDim * (tank.xPos + 0.5), this.geometryDim * (tank.yPos + 0.5) );
 
+    // Convert username back to non-html safe for canvas
+    let username = tank.username;
+    while (username.includes("&lt;") || username.includes("&gt;")) {
+      username = username.replace("&gt;", ">").replace("&lt;", "<");
+    }
+
     // Health bar and username text
     this.ctx.fillStyle = "black";
     this.ctx.font = "15px Arial";
-    this.ctx.fillText( tank.username, - this.geometryDim / 2, 40);
+    this.ctx.fillText( username, - this.geometryDim / 2, 40);
     this.ctx.fillRect( - this.geometryDim / 2, this.geometryDim + 10, this.geometryDim, 10 );
     this.ctx.fillStyle = tank.color;
     this.ctx.fillRect( - this.geometryDim / 2 + 2, this.geometryDim + 12, ( this.geometryDim - 4 ) * ( tank.health / 100 ), 6 );
@@ -286,10 +311,15 @@ class Game {
       }
       else{
         this.bullets.pop(i);
+        if(this.bullets.length == 0){
+          this.updateGameElements();
+        }
       }
       bullet.direction += Math.max(0, bullet.distanceTraveled - bullet.power) * bullet.curve*Math.PI/(180);
 
     }
+
+
     this.ctx.restore();
   }
 
@@ -470,4 +500,24 @@ class Game {
     this.won = true;
     alert( "Game over. Winner is: " + game.tanks[winningUserID].username );
   }
+
+  showMsg(username, text) {
+    let messageWindow = document.getElementById('messageWindow');
+    let msg = document.createElement('div');
+    msg.classList.add('message');
+
+    let sender = document.createElement('div');
+    sender.classList.add('sender');
+    sender.innerHTML = username + ": ";
+    msg.appendChild(sender);
+
+    let content = document.createElement('div');
+    content.classList.add('content');
+    content.innerHTML = text;
+    msg.appendChild(content);
+
+    msg.setAttribute('content', text);
+    messageWindow.insertAdjacentElement("beforeend", msg);
+  }
+
 };
