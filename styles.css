@@ -132,46 +132,36 @@ div.healthBar div {
   justify-content: center;
   align-items: flex-end;
 }
-#leftSide {
-  display: inline-block;
-  padding: 10px;
-  margin: 1%;
-  height: 600px;
-  overflow: auto;
-  width: 22%;
-  background-color: black;
-}
-
-#rightSide {
-  display: inline-block;
-  padding: 10px;
-  margin: 1%;
-  width: 22%;
-  background-color: white;
-}
-
 #chatWindow {
+  padding: 10px;
   flex-direction: column-reverse;
   display: flex;
   height: 100%;
   width: 100%;
+  background-color: rgba(50, 50, 50, 1);
 }
 
 #chatBox {
-  display: block;
+  height: 10%;
+  width: 100%;
+  padding: 10px;
   align-self: flex-end;
 }
 
 #messageWindow {
-  overflow: wrap;
-  display: block;
-  height: 75%;
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 10px;
+  overflow: auto;
+  height: 505px;
+  min-height: 0px;
+  width: 100%;
   align-self: flex-start;
 }
 
 .message {
   display: block;
-  background-color: rgba(150,150,150, 0.8);
+  padding: 2px;
 }
 
 .sender {
@@ -179,7 +169,7 @@ div.healthBar div {
 }
 
 .content {
-  display: inline;
+  display: inline-block;
   overflow-wrap: break-word;
 }
 .sidebar {

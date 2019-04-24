@@ -517,7 +517,7 @@ class Game {
     msg.appendChild(content);
 
     msg.setAttribute('content', text);
-    messageWindow.insertAdjacentElement("beforeend", msg);
+    messageWindow.insertAdjacentElement("afterbegin", msg);
   }
 
 };
