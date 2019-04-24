@@ -3,6 +3,7 @@ class Player:
         self.username = username
         self.xPos = pos['x']
         self.yPos = pos['y']
+        self.powerups = []
         self.distanceLeft = 5
         self.direction = 0
         self.color = 'black'
