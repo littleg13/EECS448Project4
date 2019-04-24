@@ -1,6 +1,8 @@
 class Map extends Renderable {
   tiles : MapTile[][];
-  constructor() { super(); }
+  constructor() {
+    super();
+  }
 
   render = ( ctx: CanvasRenderingContext2D ) : void => {
     ctx.save();
@@ -16,6 +18,15 @@ class Map extends Renderable {
       ctx.translate( 0, 40 );
     }
     ctx.restore();
+  }
+
+  update = ( tiles: number[][] ) : void => {
+    this.tiles = tiles.map( ( row ) => {
+      return row.map( ( val ) => {
+      if( val === 0 ) return new FloorTile();
+      else return new WallTile();
+      });
+    });
   }
 }
 

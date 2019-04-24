@@ -1,5 +1,5 @@
 //let socket = io("https://448.cuzzo.net");
-let socket = io("http://localhost:3000")
+let socket = io("http://192.168.1.100:3000")
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -307,7 +307,7 @@ socket.on("lobbyHost", checkIfHost)
 var handleKeyDown = (evt) => {
   if (game.turn == localStorage.userID) {
     if(evt.key == " "){
-      game.recordKeyPress(evt.key);
+      game.recordKeyPress( evt.key );
 
       return;
     }

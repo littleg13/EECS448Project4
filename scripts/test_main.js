@@ -1,11 +1,7 @@
-/******************************************************************************/
-var canvas;
-var backgroundElem;
-var ctx;
-var bkg;
-var width;
-var height;
-var tank = new TankSprite(5, 5, 0.0);
+var gameview;
+var background;
+var tank = new Tank(5, 5, 0, "Test", "#c00", 100);
+var bullets = [];
 var interval;
 var map = new Map();
 var tileGen;
@@ -34,23 +30,13 @@ var keys = {
     "ArrowLeft": false,
     "ArrowRight": false
 };
-var getContext = function (canvas) {
-    var ctx = canvas.getContext("2d");
-    if (ctx instanceof CanvasRenderingContext2D)
-        return ctx;
-};
 var main = function () {
-    canvas = document.getElementById("canvas");
-    backgroundElem = document.getElementById("background");
-    if (!(canvas instanceof HTMLCanvasElement))
-        return;
-    if (!(backgroundElem instanceof HTMLCanvasElement))
-        return;
-    ctx = getContext(canvas);
-    bkg = getContext(backgroundElem);
-    map.render(bkg);
-    width = canvas.width;
-    height = canvas.height;
+    gameview = new Layer("game", 800, 800);
+    background = new Layer("background", map.tiles.length * 40, map.tiles.length * 40);
+    gameview.attachToParent(document.getElementById("visible"));
+    background.attachToParent(document.getElementById("hidden"));
+    background.drawItem(map);
+    tank.addToSidebar(document.getElementById("sidebar"));
     window.addEventListener("keydown", keyDownHandler);
     window.addEventListener("keyup", keyUpHandler);
     interval = setInterval(loop, Math.floor(1000 / 64));
@@ -60,20 +46,19 @@ var loop = function () {
     processInput();
 };
 var processInput = function () {
-    if ((keys["ArrowUp"] || keys["w"]) && checkMapCollision(tank, 0.125, 0.0)) {
+    if ((keys["ArrowUp"] || keys["w"])) {
         tank.moveForward(0.125);
     }
-    else if ((keys["ArrowDown"] || keys["s"]) && checkMapCollision(tank, -0.125, 0.0)) {
+    else if ((keys["ArrowDown"] || keys["s"])) {
         tank.moveBackward(0.125);
     }
-    else if ((keys["ArrowLeft"] || keys["a"]) && checkMapCollision(tank, 0.0, -1.25)) {
+    if ((keys["ArrowLeft"] || keys["a"])) {
         tank.rotateCCW(1.25);
     }
-    else if ((keys["ArrowRight"] || keys["d"]) && checkMapCollision(tank, 0.0, 1.25)) {
+    else if ((keys["ArrowRight"] || keys["d"])) {
         tank.rotateCW(1.25);
     }
-    else if (keys[" "]) {
-        console.log("fire");
+    if (keys[" "] && tank.canShoot) {
     }
 };
 var checkMapCollision = function (obj, linVel, rotVel) {
@@ -107,15 +92,27 @@ var keyUpHandler = function (evt) {
     keys[evt.key] = false;
     return;
 };
+var setFrameRate = function (frameRate) {
+    clearInterval(interval);
+    interval = setInterval(loop, Math.round(1000 / frameRate));
+    return;
+};
 var render = function () {
-    ctx.save();
-    ctx.clearRect(0, 0, width, height);
-    ctx.translate(width / 2, height / 2);
-    ctx.save();
-    ctx.translate(-(tank.x * 40 + 20), -(tank.y * 40 + 20));
-    ctx.drawImage(backgroundElem, 0, 0);
-    ctx.restore();
-    ctx.rotate(tank.dir / 180.0 * Math.PI);
-    tank.render(ctx);
-    ctx.restore();
+    gameview.clear();
+    gameview.center();
+    gameview.applyTranslate(-(tank.xPos * 40 + 20), -(tank.yPos * 40 + 20));
+    gameview.addLayer(background);
+    /*
+      bullets.map( ( bullet ) => {
+        bullet.update();
+        ctx.save();
+        ctx.translate( ( bullet.x * 40 ), ( bullet.y * 40 ) );
+        ctx.rotate( bullet.dir * Math.PI / 180.0 );
+        bullet.render( ctx );
+        ctx.restore();
+      });*/
+    gameview.popTransform();
+    tank.updateImage();
+    gameview.addLayer(tank.getLayer());
+    gameview.popTransform();
 };

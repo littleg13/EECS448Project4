@@ -139,7 +139,7 @@ class Game {
     * Sets the stored map to the passed array.
     * @param {number[][]} map 2D numerical array representing the map.
     */
-  updateMap(map) {
+  updateMap( map ) {
     this.map = map
   }
 
@@ -188,14 +188,14 @@ class Game {
   populateSidebar() {
     let userInfoDiv = document.getElementById('userInfo');
     let lobbyInfoDiv = document.getElementById('lobbyInfo');
-    for(let userID in this.tanks){
+    for(let userID in this.tanks) {
       let tank = this.tanks[userID];
       if(document.getElementById('info'+userID) === null){
-        let cardDiv = this.makePlayerCardDiv(userID, tank.username, tank.color)
-        if(userID == localStorage.userID){
+        let cardDiv = this.makePlayerCardDiv(userID, tank.username, tank.color);
+        if(userID == localStorage.userID) {
           userInfoDiv.appendChild(cardDiv);
         }
-        else{
+        else {
           lobbyInfoDiv.appendChild(cardDiv);
         }
       }
@@ -361,7 +361,7 @@ class Game {
       if( player.canShoot && !this.playerShot ){
         this.playerShot = true;
       }
-      this.keys[" "] = false
+      this.keys[" "] = false;
     }
 
     if( player.distanceLeft <= 0 ) return;                // Cancel if no more moving
@@ -387,9 +387,9 @@ class Game {
   }
 
   recordKeyPress(key){
-    if(!game.keys['spaceDown']){
+    if(!game.keys[' ']){
       this.keyTimes[key] = new Date();
-      game.keys['spaceDown'] = true;
+      game.keys[' '] = true;
     }
   }
 

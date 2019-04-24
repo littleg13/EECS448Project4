@@ -4,21 +4,30 @@
   <head>
     <title>Rendering Test</title>
     <script src="scripts/render.js"></script>
+    <script src="scripts/icons.js"></script>
+    <script src="scripts/entity.js"></script>
     <script src="scripts/map.js"></script>
     <script src="scripts/test_main.js"></script>
     <style>
-    #background {
+    #hidden {
       display: none;
     }
-    canvas {
+
+    canvas#game {
       background-color: black;
+    }
+    
+    canvas.TankSprite {
+      background-color: white;
     }
     </style>
   </head>
   <body onload="main()">
-    <canvas id="background" width=2000 height=2000>
-    </canvas>
-    <canvas id="canvas" width=800 height=800>
-    </canvas>
+    <div id="visible">
+      <div id="sidebar">
+      </div>
+    </div>
+    <div id="hidden">
+    </div>
   </body>
 </html>

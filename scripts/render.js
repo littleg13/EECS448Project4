@@ -1,30 +1,3 @@
-/*  Overview:
- *  Class Point
- *    - x
- *    - y
- *
- *  Superclass Entity
- *    - shapes {Shapes[]}
- *    - dimension {number}
- *    - foreCtx {HTMLCanvasContext}
- *    - backCtx {HTMLCanvasContext}
- *    - render()
- *
- *  Superclass Shape
- *    - render()
- *
- *  Subclass Rect
- *    - corner {Point}
- *    - size {Point}
- *
- *  Subclass Arc
- *    - center {Point}
- *    - radius {number}
- *    - start {number} = 0
- *    - end {number} = Math.PI * 2
- *    - clockwise {bool} = true
- *
- */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -38,19 +11,87 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var Layer = /** @class */ (function () {
+    function Layer(id, width, height) {
+        var _this = this;
+        if (width === void 0) { width = 40; }
+        if (height === void 0) { height = 40; }
+        this.attachToParent = function (parent) {
+            parent.appendChild(_this.canvas);
+        };
+        this.applyRotation = function (deg) {
+            _this.ctx.save();
+            _this.ctx.rotate(deg * Math.PI / 180.0);
+        };
+        this.applyTranslate = function (x, y) {
+            _this.ctx.save();
+            _this.ctx.translate(x, y);
+        };
+        this.applyScale = function (x, y) {
+            _this.ctx.save();
+            _this.ctx.scale(x, y);
+        };
+        this.popTransform = function () {
+            _this.ctx.restore();
+        };
+        this.center = function () {
+            _this.applyTranslate(_this.width / 2, _this.height / 2);
+        };
+        this.clear = function () {
+            _this.ctx.clearRect(0, 0, _this.width, _this.height);
+        };
+        this.drawItem = function (item) {
+            item.render(_this.ctx);
+        };
+        this.addLayer = function (image, dx, dy) {
+            if (dx === void 0) { dx = 0; }
+            if (dy === void 0) { dy = 0; }
+            _this.ctx.drawImage(image.getImage(), dx, dy);
+        };
+        this.getImage = function () {
+            return _this.canvas;
+        };
+        var canvas = document.createElement("canvas");
+        if (!(canvas instanceof HTMLCanvasElement)) {
+            return null;
+        }
+        var ctx = canvas.getContext("2d");
+        if (!(ctx instanceof CanvasRenderingContext2D)) {
+            return null;
+        }
+        canvas.setAttribute("id", id);
+        canvas.width = width;
+        canvas.height = height;
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.id = id;
+        this.width = width;
+        this.height = height;
+    }
+    return Layer;
+}());
 var Counter = /** @class */ (function () {
     function Counter(initial, delta, max) {
         var _this = this;
         if (delta === void 0) { delta = 1; }
         if (max === void 0) { max = Infinity; }
-        this.inc = function () {
-            _this.value = (_this.value + _this.delta) % _this.max;
-            _this.onInc();
-        };
-        this.dec = function () {
+        this.inc = function (delta) {
+            if (delta === void 0) { delta = 0; }
+            delta = Math.max(delta, _this.delta);
             // extra max term added bc % returns - for - numbers
-            _this.value = (_this.value + _this.max - _this.delta) % _this.max;
-            _this.onDec();
+            for (var i = 0; i < delta; i++) {
+                _this.value = (_this.value + _this.max + 1) % _this.max;
+                _this.onInc();
+            }
+        };
+        this.dec = function (delta) {
+            if (delta === void 0) { delta = 0; }
+            delta = Math.max(delta, _this.delta);
+            // extra max term added bc % returns - for - numbers
+            for (var i = 0; i < delta; i++) {
+                _this.value = (_this.value + _this.max - 1) % _this.max;
+                _this.onDec();
+            }
         };
         this.get = function () {
             return _this.value;
@@ -60,6 +101,9 @@ var Counter = /** @class */ (function () {
         };
         this.value = initial;
         this.delta = delta;
+        if (delta < 0) {
+            delta = -delta;
+        }
         this.max = max;
     }
     return Counter;
@@ -172,170 +216,3 @@ var Circle = /** @class */ (function (_super) {
     }
     return Circle;
 }(Shape));
-var Tread = /** @class */ (function (_super) {
-    __extends(Tread, _super);
-    function Tread(x) {
-        var _this = _super.call(this) || this;
-        _this.render = function (ctx) {
-            _this.mainRect.render(ctx);
-            _this.rects.map(function (rect) { rect.render(ctx); });
-        };
-        _this.x = x;
-        _this.mainRect = new Rect(x, -20, 10, 40, "#666", "#0000"), // Full tread
-            _this.rects = [
-                new Rect(x, -20, 10, 2, "#000", "#0000"),
-                new Rect(x, -15, 10, 2, "#000", "#0000"),
-                new Rect(x, -10, 10, 2, "#000", "#0000"),
-                new Rect(x, -5, 10, 2, "#000", "#0000"),
-                new Rect(x, 0, 10, 2, "#000", "#0000"),
-                new Rect(x, 5, 10, 2, "#000", "#0000"),
-                new Rect(x, 10, 10, 2, "#000", "#0000"),
-                new Rect(x, 15, 10, 2, "#000", "#0000")
-            ];
-        /*
-          Counter states:
-          0 - [11000 11000 11000 11000 11000 11000 11000]
-          1 - [01100 01100 01100 01100 01100 01100 01100]
-          2 - [00110 00110 00110 00110 00110 00110 00110]
-          3 - [00011 00011 00011 00011 00011 00011 00011]
-          4 - [10001 10001 10001 10001 10001 10001 10001]
-          5 - rolls over to 0...
-        */
-        _this.counter = new Counter(0, 1, 5);
-        _this.counter.setParent(_this);
-        _this.counter.onInc = function () {
-            var frst;
-            var last;
-            var moveUp = function (rect) { rect.y++; return rect; };
-            switch (_this.counter.get()) {
-                case 4: // on increase, previous state was 3
-                    // remove last tread, change height, push back
-                    last = _this.rects.pop();
-                    last.h = 1;
-                    _this.rects.push(last);
-                    // move treads
-                    _this.rects.map(moveUp);
-                    // new tread, height = 1, very bottom
-                    frst = new Rect(_this.x, -20, 10, 1, "#000", "#0000");
-                    _this.rects.unshift(frst);
-                    break;
-                case 0: // on increase, previous state was 4
-                    // delete last tread
-                    _this.rects.pop();
-                    // get first tread (only 1 pixel high)
-                    frst = _this.rects.shift();
-                    frst.h = 2;
-                    // move treads up 1
-                    _this.rects.map(moveUp);
-                    // put back frst into array
-                    _this.rects.unshift(frst);
-                    break;
-                default:
-                    _this.rects.map(moveUp);
-                    break;
-            }
-        };
-        _this.counter.onDec = function () {
-            var frst;
-            var last;
-            var moveDown = function (rect) { rect.y--; return rect; };
-            switch (_this.counter.get()) {
-                case 4: // on decrease, previous state was 0
-                    // take first element, change height
-                    frst = _this.rects.shift();
-                    frst.h = 1;
-                    // change treads, put back first
-                    _this.rects.map(moveDown);
-                    _this.rects.unshift(frst);
-                    // create and add new last tread
-                    last = new Rect(_this.x, 19, 10, 1, "#000", "#0000");
-                    _this.rects.push(last);
-                    break;
-                case 3: // on decrease, previous state was 4
-                    // delete the bottom tread
-                    _this.rects.shift();
-                    // get last tread, change height, push back
-                    last = _this.rects.pop();
-                    last.h = 2;
-                    _this.rects.push(last);
-                    // move treads down 1
-                    _this.rects.map(moveDown);
-                    break;
-                default:
-                    _this.rects.map(moveDown);
-                    break;
-            }
-        };
-        return _this;
-    }
-    return Tread;
-}(Animated));
-var TankSprite = /** @class */ (function (_super) {
-    __extends(TankSprite, _super);
-    function TankSprite(x, y, dir, color) {
-        if (color === void 0) { color = "#c00"; }
-        var _this = _super.call(this) || this;
-        _this.render = function (ctx) {
-            if (_this.showHitbox) {
-                _this.hitbox.render(ctx);
-            }
-            _this.getItems().map(function (item) { item.render(ctx); });
-        };
-        _this.getItems = function () {
-            return [_this.leftTread, _this.rightTread,
-                _this.body, _this.barrel,
-                _this.cap, _this.turret];
-        };
-        _this.changeColor = function (color) {
-            _this.getItems().map(function (item) {
-                if (item instanceof Shape) {
-                    item.color = color;
-                }
-            });
-        };
-        _this.moveForward = function (delta) {
-            if (delta === void 0) { delta = 1.0; }
-            var dirRads = (_this.dir / 180.0) * Math.PI;
-            _this.x += Math.sin(dirRads) * delta;
-            _this.y -= Math.cos(dirRads) * delta;
-            _this.leftTread.counter.dec();
-            _this.rightTread.counter.dec();
-        };
-        _this.moveBackward = function (delta) {
-            if (delta === void 0) { delta = 1.0; }
-            var dirRads = (_this.dir / 180.0) * Math.PI;
-            _this.x -= Math.sin(dirRads) * delta;
-            _this.y += Math.cos(dirRads) * delta;
-            _this.leftTread.counter.inc();
-            _this.rightTread.counter.inc();
-        };
-        _this.rotateCW = function (delta) {
-            if (delta === void 0) { delta = 1.0; }
-            _this.dir += delta;
-            _this.leftTread.counter.dec();
-            _this.rightTread.counter.inc();
-        };
-        _this.rotateCCW = function (delta) {
-            if (delta === void 0) { delta = 1.0; }
-            _this.dir -= delta;
-            _this.leftTread.counter.inc();
-            _this.rightTread.counter.dec();
-        };
-        _this.x = x;
-        _this.y = y;
-        _this.dir = dir; // stored in degrees
-        _this.color = color;
-        /*
-         *  Set up the different shapes
-         */
-        _this.hitbox = new Rect(-20, -20, 40, 40, "#ccc", "#000");
-        _this.leftTread = new Tread(-17.5);
-        _this.rightTread = new Tread(7.5);
-        _this.body = new RoundRect(-12.5, -20, 25, 40, 2.5, color, "#000");
-        _this.barrel = new Rect(-5, -20, 10, 25, color, "#000");
-        _this.cap = new Rect(-7.5, -25, 15, 7.5, color, "#000");
-        _this.turret = new Circle(0, 0, 10, color, "#000");
-        return _this;
-    }
-    return TankSprite;
-}(Renderable));

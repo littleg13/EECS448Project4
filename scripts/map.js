@@ -30,6 +30,16 @@ var Map = /** @class */ (function (_super) {
             }
             ctx.restore();
         };
+        _this.update = function (tiles) {
+            _this.tiles = tiles.map(function (row) {
+                return row.map(function (val) {
+                    if (val === 0)
+                        return new FloorTile();
+                    else
+                        return new WallTile();
+                });
+            });
+        };
         return _this;
     }
     return Map;
