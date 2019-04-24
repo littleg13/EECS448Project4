@@ -96,12 +96,12 @@ class Lobby:
         self.players[self.order[self.turn]].resetDistance()
 
     def updatePowerups(self):
-        self.turnsSinceLastPowerupSpawn++
+        self.turnsSinceLastPowerupSpawn += 1
         if (random.random() < (self.turnsSinceLastPowerupSpawn * 0.2)): # Add powerup
             self.addedPowerup = True
             self.turnsSinceLastPowerupSpawn = 0
             pos = self.powerUpSpawnList.pop(0)
-            while true:
+            while True:
                 pointTaken = False
                 for playerId, player in self.players.items():
                     if (math.floor(player.xPos) == pos['x'] and math.floor(player.yPox) == pos['y']):
@@ -112,9 +112,9 @@ class Lobby:
                     pos = self.powerUpSpawnList.pop(0)
                 else:
                     break
-            if (xPos not in self.powerups):
-                self.powerups[xPos] = {}
-            self.powerups[xPos][yPos] = random.choice(self.powerupTypes)
+            if (pos['x'] not in self.powerups):
+                self.powerups[pos['x']] = {}
+            self.powerups[pos['x']][pos['y']] = random.choice(self.powerupTypes)
 
     def getTurn(self):
         return self.order[self.turn]
@@ -169,7 +169,7 @@ class Lobby:
                     outboundData['userID'] = userID
                     outboundData['newPos'] = data['newPos']
                     outboundData['newDir'] = data['newDir']
-                    if (checkForPowerupCollision(userID, player)):
+                    if (self.checkForPowerupCollision(userID, player)):
                         outBoundData['playerPowerups'] = player.powerups
             elif data['eventType'] == 'playerFire':
                 collisionData = self.checkBulletCollision(userID, player, data['power'], data['spin'])
@@ -191,7 +191,7 @@ class Lobby:
                 self.advanceTurn(turnsToAdvance)
                 if (self.addedPowerup):
                     self.addedPowerup = False
-                    outBoundData['powerupsOnMap'] = self.powerups
+                    outboundData['powerupsOnMap'] = self.powerups
                 outboundData['distance'] = collisionData[1]
                 outboundData['power'] = data['power']
                 outboundData['spin'] = data['spin']
@@ -203,7 +203,7 @@ class Lobby:
         playerxPos = math.floor(player.xPos)
         playeryPos = math.floor(player.yPos)
         if (playerxPos in self.powerups):
-            if (playeryPos in self.powerups[playerxPos]:
+            if (playeryPos in self.powerups[playerxPos]):
                 player.powerups.append(self.powerups[playerxPos][playeryPos])
                 self.powerUpSpawnList += {'x': playerxPos, 'y': playeryPos}
                 del self.powerups[playerxPos][playeryPos]

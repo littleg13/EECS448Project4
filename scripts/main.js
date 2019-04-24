@@ -1,5 +1,5 @@
 let socket = io("https://448.cuzzo.net");
-//let socket = io("http://localhost:3000");
+// let socket = io("http://localhost:3000");
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -380,6 +380,7 @@ var main = () => {
 var sendMsg = () => {
   let user = game.tanks[localStorage.userID].username;
   let text = document.getElementById('textBox').value;
+  document.getElementById('textBox').value = "";
   if(text.length > 0){
     socket.emit("sendMsg", {sender: user, content: text});
   }
