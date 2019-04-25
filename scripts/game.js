@@ -133,10 +133,7 @@ class Game {
           this.ctx.fillRect( 11, 29, 18, 7 );
           this.ctx.fillRect( 31, 29,  8, 7 );
         }
-        if(this.powerupsOnMap[col][row]) {
-          this.ctx.arc(0, 0, 15, 0, 2*Math.PI);
-          this.ctx.fill();
-        }
+
         this.ctx.restore();
       }
     }
@@ -149,6 +146,10 @@ class Game {
     */
   updateMap(map) {
     this.map = map
+  }
+  u
+  updatePowerupsOnMap(powerups){
+    this.powerupsOnMap = powerups;
   }
 
   updateGameElements(){
@@ -209,6 +210,24 @@ class Game {
       let tank = this.tanks[key];
       if (tank.alive) {
         this.renderTank( key, tank );
+      }
+    }
+  }
+  renderPowerups() {
+    for( let row = 0; row < this.map.length; row++ ) {
+      for( let col = 0; col < this.map[row].length; col++ ) {
+        this.ctx.save();
+        this.ctx.scale( this.scale, this.scale );
+        this.ctx.translate( col * this.geometryDim, row * this.geometryDim, this.geometryDim, this.geometryDim );
+        if(this.powerupsOnMap[col]) {
+          if(this.powerupsOnMap[col][row]){
+            this.ctx.fillStyle = "#000000";
+            this.ctx.beginPath();
+            this.ctx.arc(this.geometryDim/2, this.geometryDim/2, 15, 0, 2*Math.PI);
+            this.ctx.fill();
+          }
+        }
+        this.ctx.restore();
       }
     }
   }
@@ -438,6 +457,7 @@ class Game {
   gameTick() {
     this.renderMap();
     this.renderTanks();
+    this.renderPowerups();
     this.processInput();
     this.renderBullets();
   }

@@ -1,5 +1,5 @@
-let socket = io("https://448.cuzzo.net");
-// let socket = io("http://localhost:3000");
+//let socket = io("https://448.cuzzo.net");
+ let socket = io("http://localhost:3000");
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
@@ -282,9 +282,6 @@ var gameUpdateHandler = (data) => {
         }
       }
       game.fire(data.userID, data.power, data.spin, data.distance);
-      if(data.powerupsOnMap){
-        game.updatePowerupsOnMap(data.powerupsOnMap);
-      }
       break;
      case "advanceTurn":
       game.gameUpdate.advanceTurn = data["userID"];
@@ -292,6 +289,9 @@ var gameUpdateHandler = (data) => {
         game.updateGameElements();
       }
       break;
+  }
+  if(data.powerupsOnMap){
+    game.updatePowerupsOnMap(data.powerupsOnMap);
   }
 };
 socket.on("gameUpdate", gameUpdateHandler);

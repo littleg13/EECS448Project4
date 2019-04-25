@@ -104,7 +104,7 @@ class Lobby:
             while True:
                 pointTaken = False
                 for playerId, player in self.players.items():
-                    if (math.floor(player.xPos) == pos['x'] and math.floor(player.yPox) == pos['y']):
+                    if (math.floor(player.xPos) == pos['x'] and math.floor(player.yPos) == pos['y']):
                         pointTaken = True
                         break
                 if (pointTaken):
@@ -170,7 +170,8 @@ class Lobby:
                     outboundData['newPos'] = data['newPos']
                     outboundData['newDir'] = data['newDir']
                     if (self.checkForPowerupCollision(userID, player)):
-                        outBoundData['playerPowerups'] = player.powerups
+                        outboundData['playerPowerups'] = player.powerups
+                        outboundData['powerupsOnMap'] = self.powerups
             elif data['eventType'] == 'playerFire':
                 collisionData = self.checkBulletCollision(userID, player, data['power'], data['spin'])
                 turnsToAdvance = 1
@@ -200,12 +201,12 @@ class Lobby:
         return outboundData
 
     def checkForPowerupCollision(self, userID, player):
-        playerxPos = math.floor(player.xPos)
-        playeryPos = math.floor(player.yPos)
+        playerxPos = round(player.xPos)
+        playeryPos = round(player.yPos)
         if (playerxPos in self.powerups):
             if (playeryPos in self.powerups[playerxPos]):
                 player.powerups.append(self.powerups[playerxPos][playeryPos])
-                self.powerUpSpawnList += {'x': playerxPos, 'y': playeryPos}
+                self.powerUpSpawnList.append({'x': playerxPos, 'y': playeryPos})
                 del self.powerups[playerxPos][playeryPos]
                 return True
         return False
