@@ -23,7 +23,7 @@ class Layer {
     this.height = height;
   }
 
-  attachToParent = ( parent : HTMLElement ) : void => {
+  attachToParent = ( parent : Element ) : void => {
     parent.appendChild( this.canvas );
   }
 

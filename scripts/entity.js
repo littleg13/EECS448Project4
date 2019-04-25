@@ -18,7 +18,7 @@ var Entity = /** @class */ (function () {
 }());
 var Tank = /** @class */ (function (_super) {
     __extends(Tank, _super);
-    function Tank(xPos, yPos, dir, playerName, color, health) {
+    function Tank(xPos, yPos, dir, playerName, userID, color, health) {
         var _this = _super.call(this) || this;
         _this.updateImage = function () {
             _this.layer.clear();
@@ -36,6 +36,7 @@ var Tank = /** @class */ (function (_super) {
             var dirRads = (_this.dir / 180.0) * Math.PI;
             _this.xPos += Math.sin(dirRads) * delta;
             _this.yPos -= Math.cos(dirRads) * delta;
+            _this.distanceLeft = Math.max(_this.distanceLeft - delta, 0);
             _this.sprite.moveTreadsForward();
         };
         _this.moveBackward = function (delta) {
@@ -43,6 +44,7 @@ var Tank = /** @class */ (function (_super) {
             var dirRads = (_this.dir / 180.0) * Math.PI;
             _this.xPos -= Math.sin(dirRads) * delta;
             _this.yPos += Math.cos(dirRads) * delta;
+            _this.distanceLeft = Math.max(_this.distanceLeft - delta, 0);
             _this.sprite.moveTreadsBackward();
         };
         _this.rotateCW = function (delta) {
@@ -56,18 +58,75 @@ var Tank = /** @class */ (function (_super) {
             _this.sprite.moveTreadsLeft();
         };
         _this.addToSidebar = function (sidebar) {
-            _this.layer.attachToParent(sidebar);
+            console.log(sidebar);
+            var cardDiv = document.createElement("div");
+            cardDiv.classList.add("playerCard");
+            cardDiv.setAttribute("id", "info" + _this.userID);
+            var usernameDiv = document.createElement("div");
+            usernameDiv.classList.add("username");
+            usernameDiv.innerHTML = _this.playerName;
+            var healthDiv = document.createElement("div");
+            healthDiv.classList.add("tankHealth");
+            healthDiv.innerHTML = _this.health + "/100";
+            var spriteDiv = document.createElement("div");
+            spriteDiv.classList.add("tankSprite");
+            cardDiv.appendChild(usernameDiv);
+            cardDiv.appendChild(healthDiv);
+            cardDiv.appendChild(spriteDiv);
+            _this.layer.attachToParent(spriteDiv);
+            sidebar.appendChild(cardDiv);
+        };
+        _this.setHealth = function (health) {
+            _this.health = health;
+            if (health == 0) {
+                _this.alive = false;
+            }
         };
         _this.xPos = xPos;
         _this.yPos = yPos;
         _this.dir = dir;
+        _this.distanceLeft = 5.0;
         _this.playerName = playerName;
+        _this.userID = userID;
         _this.sprite = new TankSprite(color);
         _this.layer = new Layer(playerName, 60, 60);
-        _this.layer.getImage().classList.add("TankSprite");
         _this.health = health;
         _this.canShoot = false;
         return _this;
     }
     return Tank;
+}(Entity));
+var Bullet = /** @class */ (function (_super) {
+    __extends(Bullet, _super);
+    function Bullet(xPos, yPos, dir, distToGo, power, curve) {
+        var _this = _super.call(this) || this;
+        _this.attachToLayer = function (layer) {
+            _this.layer = layer;
+        };
+        _this.render = function () {
+            _this.layer.drawItem(_this.sprite);
+        };
+        _this.detonate = function () {
+            _this.boom = true;
+        };
+        _this.update = function () {
+            var dirRad = _this.dir * Math.PI / 180.0;
+            _this.xPos += Math.sin(dirRad) * 0.5;
+            _this.yPos -= Math.cos(dirRad) * 0.5;
+            _this.distGone += 0.5;
+            if (_this.distToGo <= _this.distGone) {
+                _this.detonate();
+            }
+        };
+        _this.xPos = xPos;
+        _this.yPos = yPos;
+        _this.dir = dir;
+        _this.sprite = new BulletSprite();
+        _this.distToGo = distToGo;
+        _this.distGone = 0.0;
+        _this.power = power;
+        _this.curve = curve;
+        return _this;
+    }
+    return Bullet;
 }(Entity));

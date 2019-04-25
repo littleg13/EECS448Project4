@@ -116,7 +116,6 @@ class Tread extends Animated {
 
 class TankSprite extends Renderable {
   color   : string;
-
   canFire : boolean;
 
   /*
@@ -179,21 +178,12 @@ class TankSprite extends Renderable {
 }
 
 class BulletSprite extends Animated {
-  x     : number;
-  y     : number;
-  dir   : number;
-  hitbox: Rect;
-  constructor( x: number, y: number, dir: number ) {
+  constructor() {
     super();
-    this.x = x;
-    this.y = y;
-    this.dir = dir;
-    this.hitbox = new Rect( -5, -15, 10, 20 );
   }
 
   render = ( ctx : CanvasRenderingContext2D ) : void => {
     ctx.save();
-    this.hitbox.render( ctx );
     ctx.fillStyle = "#999";
     ctx.strokeStyle = "#000";
     ctx.beginPath();
@@ -210,7 +200,6 @@ class BulletSprite extends Animated {
   }
 
   update = () : void => {
-    this.x += 0.125 * Math.sin( this.dir * Math.PI / 180.0 );
-    this.y -= 0.125 * Math.cos( this.dir * Math.PI / 180.0 );
+    return;
   }
 }

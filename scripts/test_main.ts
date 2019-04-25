@@ -1,6 +1,6 @@
 var gameview    : Layer;
 var background  : Layer;
-var tank = new Tank( 5, 5, 0, "Test", "#c00", 100 );
+var tank = new Tank( 5, 5, 0, "Test", "asdf", "#c00", 100 );
 var bullets = [];
 var interval;
 var map = new Map();

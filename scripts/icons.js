@@ -173,11 +173,10 @@ var TankSprite = /** @class */ (function (_super) {
 }(Renderable));
 var BulletSprite = /** @class */ (function (_super) {
     __extends(BulletSprite, _super);
-    function BulletSprite(x, y, dir) {
+    function BulletSprite() {
         var _this = _super.call(this) || this;
         _this.render = function (ctx) {
             ctx.save();
-            _this.hitbox.render(ctx);
             ctx.fillStyle = "#999";
             ctx.strokeStyle = "#000";
             ctx.beginPath();
@@ -193,13 +192,8 @@ var BulletSprite = /** @class */ (function (_super) {
             ctx.restore();
         };
         _this.update = function () {
-            _this.x += 0.125 * Math.sin(_this.dir * Math.PI / 180.0);
-            _this.y -= 0.125 * Math.cos(_this.dir * Math.PI / 180.0);
+            return;
         };
-        _this.x = x;
-        _this.y = y;
-        _this.dir = dir;
-        _this.hitbox = new Rect(-5, -15, 10, 20);
         return _this;
     }
     return BulletSprite;

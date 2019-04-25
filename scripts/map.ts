@@ -51,17 +51,17 @@ class WallTile extends MapTile {
   render = ( ctx: CanvasRenderingContext2D ) : void => {
     ctx.fillStyle = "#000000";
     ctx.fillRect( 0, 0, 40, 40 );
-    ctx.fillStyle = "#C0C0C0";
+    ctx.fillStyle = "#C0C0FF";
     ctx.fillRect(  1,  2, 18, 7 );
     ctx.fillRect( 21,  2, 18, 7 );
-    ctx.fillStyle = "#A0A0A0";
+    ctx.fillStyle = "#A0A0FF";
     ctx.fillRect(  1, 11,  8, 7 );
     ctx.fillRect( 11, 11, 18, 7 );
     ctx.fillRect( 31, 11,  8, 7 );
-    ctx.fillStyle = "#909090";
+    ctx.fillStyle = "#9090FF";
     ctx.fillRect(  1, 20, 18, 7 );
     ctx.fillRect( 21, 20, 18, 7 );
-    ctx.fillStyle = "#606060";
+    ctx.fillStyle = "#6060FF";
     ctx.fillRect(  1, 29,  8, 7 );
     ctx.fillRect( 11, 29, 18, 7 );
     ctx.fillRect( 31, 29,  8, 7 );

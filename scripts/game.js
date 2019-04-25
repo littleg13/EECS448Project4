@@ -1,523 +1,290 @@
-/**
-* @class Holds the Game's state data
-* @param {number} mapDim the size of the gameboard
-  */
-class Game {
-  constructor(mapDim) {
-    /**
-     * HTML5 Canvas 2D context
-     */
-    this.ctx;
-    /**
-      * 2D array of numbers to represent the map
-      */
-    this.map = [];
-    this.mapDim = mapDim;
-    /**
-      * Float that contains the current scale for display on small screens
-      */
-    this.scale;
-    /**
-      * Associative array of user data by userID
-      */
-    this.tanks = {};
-    /**
-      * UserID of player whose turn it currently is
-      */
-    this.turn = '';
-    /**
-      * Distance in tiles for a user before end of turn
-      */
-    this.distLeftThisTurn = 5;
-    this.gridBoxDim = 40;
-    /**
-      * Normalized tile size for render calls
-      */
-    this.geometryDim = 40;
-    /**
-      * List of bullet objects currently active to render.
-      */
-    this.bullets = [];
-    /**
-      * List of keys with their current state (true for pressed, false for not)
-      */
-    this.keys = [];
-
-    this.keyTimes = {}
-    /**
-      * Bool that records whether or not a transmit to server is needed
-      */
-    this.movedSinceLastTransmit = false;
-    /**
-      * Bool that records if player has fired on their turn
-      */
-    this.playerShot = false;
-    /**
-      * Bool for if game has started
-      */
-    this.begun = false;
-    /**
-      * Bool for if game has been won.
-      */
-    this.won = false;
-
-    this.gameUpdate = {}
-
-    this.initCanvas();
-  }
-
-  /**
-    * Attaches event handlers for key strokes and begins method call intervals.
-    */
-  startGame() {
-    window.addEventListener('keydown', handleKeyDown, true);
-    window.addEventListener('keyup', handleKeyUp, true);
-    gameTickUpdateInt = setInterval(mainLoop, Math.floor(1000/32));
-    sendServerUpdateInt = setInterval(sendServerUpdate, 40);
-    this.begun = true;
-  }
-
-  /**
-    * Prepares canvas element for rendering and sets properties needed for rendering
-    */
-  initCanvas() {
-    this.canvas = document.getElementById('canvas');
-    this.width = canvas.width;
-    this.height = canvas.height;
-    this.gridBoxDim = this.width / this.mapDim;
-    this.scale = this.gridBoxDim / this.geometryDim;
-    this.ctx = canvas.getContext('2d');
-  }
-
-  /**
-    * Draws the background for the game.
-    */
-  renderMap() {
-    this.ctx.save();
-    this.ctx.fillStyle = "#906030";
-    this.ctx.scale( this.scale, this.scale );
-    this.ctx.fillRect( 0, 0, this.geometryDim * this.mapDim, this.geometryDim * this.mapDim );
-    let tank = this.tanks[ localStorage.userID ];
-    if( this.turn == localStorage.userID && tank.distanceLeft > 0 ) {
-      this.ctx.beginPath();
-      this.ctx.arc( ( tank.xPos + 0.5 ) * this.geometryDim,
-                    ( tank.yPos + 0.5 ) * this.geometryDim,
-                    ( tank.distanceLeft + 0.5 ) * this.geometryDim,
-                    0, Math.PI * 2 );
-      this.ctx.fillStyle = 'rgba( 238, 255, 0, 0.5 )';
-      this.ctx.fill();
-      this.ctx.lineWidth = 3;
-      this.ctx.stroke();
+// Declared handlers, defined in main.
+var handleKeyUp = function (evt) { };
+var handleKeyDown = function (evt) { };
+var sendServerUpdate = function () { };
+var Game = /** @class */ (function () {
+    function Game(mapDim) {
+        var _this = this;
+        /**
+        *   INITIAL METHODS:
+        *     Here are the methods that handle setting up various game components
+        *
+        */
+        this.initLayers = function () {
+            _this.gameview = new Layer("gameview", 800, 800);
+            _this.background = new Layer("background", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
+            _this.gameview.attachToParent(document.getElementById("center"));
+            _this.background.attachToParent(document.getElementById("hidden"));
+        };
+        this.startGame = function () {
+            _this.gameTickUpdateInt = setInterval(function () { _this.gameTick(); }, Math.floor(1000 / 32));
+            _this.sendServerUpdateInt = setInterval(function () { sendServerUpdate(); }, 40);
+        };
+        this.addTank = function (userID, username, xPos, yPos, direction, distanceLeft, color, health) {
+            _this.tanks.push(new Tank(xPos, yPos, direction, username, userID, color, health));
+        };
+        this.populateSidebar = function () {
+            var userInfoDiv = document.getElementById("userInfo");
+            var lobbyInfoDiv = document.getElementById("lobbyInfo");
+            _this.tanks.map(function (tank) {
+                var userID = tank.userID;
+                if (document.getElementById("info" + userID) === null) {
+                    if (userID == localStorage.userID) {
+                        tank.addToSidebar(userInfoDiv);
+                    }
+                    else {
+                        tank.addToSidebar(lobbyInfoDiv);
+                    }
+                }
+            });
+            return;
+        };
+        /**
+        *   PROCESS INPUT:
+        *     Here are the methods that handle input processing
+        *
+        */
+        this.checkMapCollision = function (obj, linVel, rotVel) {
+            return true;
+            /*    let toReturn = true;
+                let map = this.map;
+                let corners =
+                  [ [ -0.5, -0.5 - linVel ],
+                    [ -0.5,  0.5 - linVel ],
+                    [  0.5, -0.5 - linVel ],
+                    [  0.5,  0.5 - linVel ] ];
+                corners.forEach( ( corner ) => {
+                  let theta = ( obj.dir + rotVel ) * Math.PI / 180.0;
+                  let x = corner[0] * Math.cos( theta )
+                        - corner[1] * Math.sin( theta )
+                        + obj.x + 0.5;
+                  let y = corner[0] * Math.sin( theta )
+                        + corner[1] * Math.cos( theta )
+                        + obj.y + 0.5;
+                  let col = Math.floor( x );
+                  let row = Math.floor( y );
+                  if( map.tiles[ row ][ col ].isBlocking ) {
+                    toReturn = false;
+                    return false;
+                  }
+                });
+                return toReturn;*/
+        };
+        this.processInput = function () {
+            var player = _this.getPlayer();
+            if (_this.curTurn != localStorage.userID)
+                return;
+            if (_this.keys["ArrowLeft"] || _this.keys["a"]) {
+                if (_this.checkMapCollision(player, 0, -1.0)) {
+                    player.rotateCCW();
+                    _this.setPlayerMoved();
+                }
+            }
+            if (_this.keys["ArrowRight"] || _this.keys["d"]) {
+                if (_this.checkMapCollision(player, 0, 1.0)) {
+                    player.rotateCW();
+                    _this.setPlayerMoved();
+                }
+            }
+            if (_this.keys[" "]) {
+                if (player.canShoot && !_this.getPlayerShot()) {
+                    _this.setPlayerShot(true);
+                }
+                _this.keys[" "] = false;
+            }
+            if (player.distanceLeft <= 0)
+                return;
+            var deltaPos = Math.min(player.distanceLeft, 0.125);
+            if (_this.keys["ArrowUp"] || _this.keys["w"]) {
+                if (_this.checkMapCollision(player, 0.125, 0)) {
+                    player.moveForward(0.125);
+                    _this.setPlayerMoved();
+                }
+            }
+            if (_this.keys["ArrowDown"] || _this.keys["s"]) {
+                if (_this.checkMapCollision(player, -0.125, 0)) {
+                    player.moveBackward(0.125);
+                    _this.setPlayerMoved();
+                }
+            }
+            player.distanceLeft = Math.max(0, player.distanceLeft);
+        };
+        this.recordKeyPress = function (key) {
+            if (!_this.keys[" "]) {
+                _this.keyTimes[key] = new Date();
+                _this.keys[" "] = true;
+            }
+        };
+        /**
+        *   UPDATE METHODS:
+        *     Here are the methods that handle various game state updates
+        *
+        */
+        this.updateMap = function (map) {
+            _this.map.update(map);
+            _this.background.drawItem(_this.map);
+        };
+        this.updateTankHealth = function (userID, health) {
+            _this.getPlayer(userID).setHealth(health);
+        };
+        this.updateTankPosition = function (userID, newXPos, newYPos, newDirection) {
+            console.log({ xPos: newXPos, yPos: newYPos, dir: newDirection });
+            var tank = _this.getPlayer(userID);
+            var deltaDir = newDirection - tank.dir;
+            if (deltaDir < 0) {
+                tank.rotateCCW(deltaDir);
+            }
+            else if (deltaDir > 0) {
+                tank.rotateCW(deltaDir);
+            }
+            var deltaXPos = tank.xPos - newXPos;
+            var deltaYPos = tank.yPos - newYPos;
+            var dirRads = newDirection * Math.PI / 180.0;
+            var deltaLocalY = deltaXPos * Math.sin(dirRads) + deltaYPos * Math.cos(dirRads);
+            if (deltaLocalY > 0) {
+                tank.moveForward(deltaLocalY);
+            }
+            else if (deltaLocalY < 0) {
+                tank.moveBackward(deltaLocalY);
+            }
+        };
+        this.updateTurn = function (userID) {
+            var player = _this.getPlayer(userID);
+            player.canShoot = true;
+            player.distanceLeft = 5.0;
+            _this.curTurn = userID;
+        };
+        this.fire = function (shooterID, power, curve, dist) {
+            var shooter = _this.getPlayer(shooterID);
+            if (shooter.canShoot) {
+                var bullet = new Bullet(shooter.xPos + 0.5, shooter.yPos + 0.5, shooter.dir, dist, power, curve);
+                _this.bullets.push(bullet);
+                shooter.canShoot = false;
+            }
+        };
+        this.endGame = function (winnerUserID) {
+            _this.won = true;
+            alert("Game over. Winner is: " + _this.getPlayer(winnerUserID).playerName);
+            delete localStorage.userID;
+            delete localStorage.lobbyCode;
+        };
+        this.showMsg = function (username, text) {
+            var messageWindow = document.getElementById("messageWindow");
+            var msg = document.createElement("div");
+            msg.classList.add("message");
+            var sender = document.createElement("div");
+            sender.classList.add("sender");
+            sender.innerHTML = username + ": ";
+            msg.appendChild(sender);
+            var content = document.createElement("div");
+            content.classList.add("content");
+            content.innerHTML = text;
+            msg.appendChild(content);
+            messageWindow.insertAdjacentElement("beforeend", msg);
+        };
+        /**
+        *   RENDERING METHODS:
+        *     Here are the methods that handle various rendering functions.
+        *
+        */
+        this.renderMap = function () {
+            _this.gameview.addLayer(_this.background);
+        };
+        this.renderTanks = function () {
+            _this.tanks.map(function (tank) {
+                if (tank.health <= 0) {
+                    return;
+                }
+                _this.renderTank(tank);
+            });
+        };
+        this.renderTank = function (tank) {
+            tank.updateImage();
+            _this.gameview.applyTranslate(_this.tileDim * tank.xPos, _this.tileDim * tank.yPos);
+            if (tank.userID == _this.curTurn) {
+                _this.gameview.drawItem(new Circle(20, 20, tank.distanceLeft * _this.tileDim, "#eeff007f", "#000000ff"));
+            }
+            _this.gameview.addLayer(tank.getLayer(), -10, -10); // Account for the padding on the sprite's canvas
+            _this.gameview.popTransform();
+        };
+        /**
+        * To-do:
+        *   [ ] - Collision Check
+        *   [ ] - One collision, trigger animation
+        *   [ ] - Create animation
+        */
+        this.renderBullets = function () {
+            _this.bullets = _this.bullets.filter(function (bullet) {
+                _this.gameview.applyTranslate(bullet.xPos * _this.tileDim, bullet.yPos * _this.tileDim);
+                _this.gameview.applyRotation(bullet.dir);
+                _this.gameview.drawItem(bullet.sprite);
+                _this.gameview.popTransform();
+                _this.gameview.popTransform();
+                // update bullet position
+                bullet.update();
+                return (!bullet.boom);
+            });
+        };
+        this.renderLoop = function () {
+            _this.gameview.applyScale(_this.scale, _this.scale);
+            _this.renderMap();
+            _this.renderBullets();
+            _this.renderTanks();
+            _this.gameview.popTransform();
+        };
+        this.gameTick = function () {
+            _this.renderLoop();
+            _this.processInput();
+        };
+        /**
+        *     GET AND SET METHODS:
+        *       Here are the methods that handle setting and getting game state variables.
+        *
+        */
+        this.getPlayerMoved = function () { return _this.movedSinceLastTransmit; };
+        this.setPlayerMoved = function (val) {
+            if (val === void 0) { val = true; }
+            _this.movedSinceLastTransmit = val;
+        };
+        this.getPlayerShot = function () { return _this.playerShot; };
+        this.setPlayerShot = function (val) {
+            if (val === void 0) { val = false; }
+            _this.playerShot = val;
+        };
+        this.getPlayer = function (id) {
+            if (id === void 0) { id = null; }
+            if (id === null) {
+                id = localStorage.userID;
+            }
+            var filteredSet = _this.tanks.filter(function (tank) { return tank.userID = id; });
+            if (filteredSet == [])
+                return null;
+            else
+                return filteredSet[0];
+        };
+        this.getPlayerPos = function () {
+            var player = _this.getPlayer();
+            return [player.xPos, player.yPos];
+        };
+        this.getPlayerDir = function () {
+            return _this.getPlayer().dir;
+        };
+        this.map = new Map();
+        this.mapDim = mapDim;
+        this.scale = 1;
+        this.tanks = [];
+        this.curTurn = "";
+        this.distLeftThisTurn = 5.0;
+        this.curBoxDim = 40;
+        this.tileDim = 40;
+        this.bullets = [];
+        this.keys = [];
+        this.keyTimes = {};
+        this.movedSinceLastTransmit = false;
+        this.playerShot = false;
+        this.begun = false;
+        this.won = false;
+        this.initLayers();
     }
-    for( let row = 0; row < this.map.length; row++ ) {
-      for( let col = 0; col < this.map[row].length; col++ ) {
-        this.ctx.save();
-        this.ctx.translate( col * this.geometryDim, row * this.geometryDim, this.geometryDim, this.geometryDim );
-        if( this.map[row][col] != -0 ) {
-          this.ctx.fillStyle = "#000000";
-          this.ctx.fillRect( 0, 0, 40, 40 );
-          this.ctx.fillStyle = "#C0C0C0";
-          this.ctx.fillRect(  1,  2, 18, 7 );
-          this.ctx.fillRect( 21,  2, 18, 7 );
-          this.ctx.fillStyle = "#A0A0A0";
-          this.ctx.fillRect(  1, 11,  8, 7 );
-          this.ctx.fillRect( 11, 11, 18, 7 );
-          this.ctx.fillRect( 31, 11,  8, 7 );
-          this.ctx.fillStyle = "#909090";
-          this.ctx.fillRect(  1, 20, 18, 7 );
-          this.ctx.fillRect( 21, 20, 18, 7 );
-          this.ctx.fillStyle = "#606060";
-          this.ctx.fillRect(  1, 29,  8, 7 );
-          this.ctx.fillRect( 11, 29, 18, 7 );
-          this.ctx.fillRect( 31, 29,  8, 7 );
-        }
-        this.ctx.restore();
-      }
-    }
-    this.ctx.restore();
-  }
-
-  /**
-    * Sets the stored map to the passed array.
-    * @param {number[][]} map 2D numerical array representing the map.
-    */
-  updateMap( map ) {
-    this.map = map
-  }
-
-  updateGameElements(){
-    if(this.gameUpdate.health){
-      this.updateTankhealth(this.gameUpdate.health[0], this.gameUpdate.health[1]);
-    }
-    if(this.gameUpdate.map){
-      console.log(this.gameUpdate.map)
-      game.updateMap(this.gameUpdate.map);
-    }
-    if(this.gameUpdate.advanceTurn){
-      this.advanceTurn(this.gameUpdate.advanceTurn);
-    }
-    if(this.gameUpdate.gameOver){
-      this.endGame(this.gameUpdate.gameOver);
-      delete localStorage.userID;
-      delete localStorage.lobbyCode;
-    }
-  }
-  /**
-    * Adds tank with passed properties to tanks list.
-    * @param {string} userID used to uniquely identify a player
-    * @param {string} username the displayed username for the player
-    * @param {number} xPos the horizontal position of the player
-    * @param {number} yPos the vertical position of the player
-    * @param {number} direction the direction in radians of the player
-    * @param {number} distanceLeft the distance the player may move remaining this turn
-    * @param {string} color the color to render the player in
-    * @param {number} health the health of the player
-    */
-  addTank(userID, username, xPos, yPos, direction, distanceLeft, color, health) {
-    this.tanks[userID] = new Tank(username, xPos, yPos, direction, distanceLeft, color, health);
-  }
-
-  updateTankPosition(userID, newXPos, newYPos, newDirection) {
-    this.tanks[userID].xPos = newXPos;
-    this.tanks[userID].yPos = newYPos;
-    this.tanks[userID].direction = newDirection;
-  }
-
-  updateTankhealth(userID, newHealth) {
-    if( newHealth == 0 ) {
-      this.killTank( userID );
-    }
-    let playerIcon = document.getElementById( "display-" + userID );
-    this.tanks[userID].health = newHealth;
-  }
-
-  killTank( userID ) {
-    this.tanks[userID].alive = false;
-  }
-
-  renderTanks() {
-    for( let key in this.tanks ) {
-      let tank = this.tanks[key];
-      if (tank.alive) {
-        this.renderTank( key, tank );
-      }
-    }
-  }
-
-  populateSidebar() {
-    let userInfoDiv = document.getElementById('userInfo');
-    let lobbyInfoDiv = document.getElementById('lobbyInfo');
-    for(let userID in this.tanks) {
-      let tank = this.tanks[userID];
-      if(document.getElementById('info'+userID) === null){
-        let cardDiv = this.makePlayerCardDiv(userID, tank.username, tank.color);
-        if(userID == localStorage.userID) {
-          userInfoDiv.appendChild(cardDiv);
-        }
-        else {
-          lobbyInfoDiv.appendChild(cardDiv);
-        }
-      }
-    }
-  }
-
-  makePlayerCardDiv(userID, username, color) {
-    let cardDiv = document.createElement('div');
-    cardDiv.classList.add('playerCard');
-    cardDiv.setAttribute('id', 'info'+userID);
-    let usernameDiv = document.createElement('div');
-    usernameDiv.classList.add('username');
-    usernameDiv.innerHTML = username;
-    let healthDiv = document.createElement('div');
-    healthDiv.classList.add('tankHealth');
-    healthDiv.innerHTML = '100/100';
-    let colorDiv = document.createElement('div');
-    colorDiv.classList.add('tankColor');
-    colorDiv.innerHTML = 'Color: '
-    let swatch = document.createElement('div');
-    swatch.classList.add('colorSwatch');
-    swatch.style.backgroundColor = color;
-    colorDiv.appendChild(swatch);
-    cardDiv.appendChild(usernameDiv);
-    cardDiv.appendChild(healthDiv);
-    cardDiv.appendChild(colorDiv);
-    return cardDiv;
-  }
-
-  updateSidebar() {
-
-  }
-
-  renderTank(userID, tank) {
-    this.ctx.save();
-    this.ctx.scale( this.scale, this.scale );
-    this.ctx.translate( this.geometryDim * (tank.xPos + 0.5), this.geometryDim * (tank.yPos + 0.5) );
-
-    // Convert username back to non-html safe for canvas
-    let username = tank.username;
-    while (username.includes("&lt;") || username.includes("&gt;")) {
-      username = username.replace("&gt;", ">").replace("&lt;", "<");
-    }
-
-    // Health bar and username text
-    this.ctx.fillStyle = "black";
-    this.ctx.font = "15px Arial";
-    this.ctx.fillText( username, - this.geometryDim / 2, 40);
-    this.ctx.fillRect( - this.geometryDim / 2, this.geometryDim + 10, this.geometryDim, 10 );
-    this.ctx.fillStyle = tank.color;
-    this.ctx.fillRect( - this.geometryDim / 2 + 2, this.geometryDim + 12, ( this.geometryDim - 4 ) * ( tank.health / 100 ), 6 );
-
-    // Tank icon, rotation for direction
-    this.ctx.rotate( tank.direction );
-
-    this.ctx.fillStyle = 'black';
-    this.ctx.fillRect( -17, -17, 34, 34 );
-    this.ctx.fillRect( 5, -15, 10, 30 );
-    this.ctx.fillStyle = 'grey';
-    this.ctx.fillRect( -15, -15, 10, 30 );
-    this.ctx.fillRect( 5, -15, 10, 30 );
-    this.ctx.fillStyle = 'black';
-    this.ctx.fillRect( -7.5, -22, 15, 39 );
-    this.ctx.fillStyle = tank.color;
-    this.ctx.fillRect( -5.5, -20, 11, 35 );
-    this.ctx.restore();
-  }
-
-  renderBullets() {
-    this.ctx.save();
-    this.ctx.scale( this.scale, this.scale );
-    for(let i = 0; i < this.bullets.length; i++) {
-      let bullet = this.bullets[i];
-      bullet.xPos += Math.sin( bullet.direction ) * 0.5;
-      bullet.yPos -= Math.cos( bullet.direction ) * 0.5;
-      bullet.distanceTraveled += 0.5;
-      if(bullet.distanceTraveled <= bullet.distanceToTravel){
-        this.ctx.save();
-        this.ctx.fillStyle = 'grey';
-        this.ctx.strokeStyle = 'black';
-        this.ctx.translate( (bullet.xPos + 0.5) * this.geometryDim, (bullet.yPos + 0.5) * this.geometryDim );
-        this.ctx.rotate( bullet.direction );
-        this.ctx.beginPath();
-        this.ctx.moveTo( -5,  5 );
-        this.ctx.lineTo(  5,  5 );
-        this.ctx.lineTo(  5, -10 );
-        this.ctx.arc( 0, -10, 5, 0, Math.PI, true );
-        this.ctx.closePath();
-        this.ctx.fill();
-        this.ctx.stroke();
-        this.ctx.fillStyle = '#303030';
-        this.ctx.fillRect( -4, 2, 8, 2 );
-        this.ctx.restore();
-      }
-      else{
-        this.bullets.pop(i);
-        if(this.bullets.length == 0){
-          this.updateGameElements();
-        }
-      }
-      bullet.direction += Math.max(0, bullet.distanceTraveled - bullet.power) * bullet.curve*Math.PI/(180);
-
-    }
-
-
-    this.ctx.restore();
-  }
-
-  fire(shooterID, power, curve, dist) {
-    let shooter = this.tanks[shooterID];
-    if(shooter.canShoot){
-      var proj = { xPos: shooter.xPos,
-                   yPos: shooter.yPos,
-                   direction: shooter.direction,
-                   distanceToTravel: dist, distanceTraveled: 0,
-                   power: power,
-                   curve: curve};
-      this.bullets.push(proj);
-      this.tanks[shooterID].canShoot = false;
-    }
-  }
-
-  /**
-    *
-    */
-  checkMapCollision(obj, linearVelocity, rotationalVelocity) {
-    let increment = -linearVelocity;
-    let map = this.map;
-    // Straight distance between center of "Tank" corner of "Tank"
-    let dimension = obj.size/(2*this.geometryDim);
-    let toReturn = true;
-    let canvas = this.ctx;
-    let corners = [[dimension, dimension+increment],
-      [dimension, -dimension+increment],
-      [-dimension, dimension+increment],
-      [-dimension, -dimension+increment]];
-    corners.forEach(function(corner) {
-      let x = (corner[0])*Math.cos(obj.direction + rotationalVelocity) - (corner[1])*Math.sin(obj.direction + rotationalVelocity);
-      let y = (corner[0])*Math.sin(obj.direction + rotationalVelocity) + (corner[1])*Math.cos(obj.direction + rotationalVelocity);
-      x += obj.xPos;
-      y += obj.yPos;
-      // canvas.fillStyle = 'red';
-      // canvas.fillRect((x+0.45)*30, (y+0.45)*30, 3, 3);
-
-      x = Math.round(x);
-      y = Math.round(y);
-      if(map[y][x] != 0){
-        toReturn = corner;
-        return;
-      }
-    });
-    return(toReturn);
-  }
-
-  /**
-    * Process the current input state if it is the users turn.
-    */
-  processInput() {
-    let player = this.tanks[localStorage.userID];
-    if( this.turn != localStorage.userID ) return;
-    if( this.keys["ArrowLeft"] || this.keys["A"] ) {
-      if(this.checkMapCollision(player, 0, -0.1) == true) {
-        player.direction -= 0.1;
-        this.movedSinceLastTransmit = true;
-      }
-    }
-    if( this.keys["ArrowRight"] || this.keys["D"] ) {
-      if(this.checkMapCollision(player, 0, 0.1) == true) {
-        player.direction += 0.1;
-        this.movedSinceLastTransmit = true;
-      }
-    }
-    if( this.keys[" "] ) {
-      if( player.canShoot && !this.playerShot ){
-        this.playerShot = true;
-      }
-      this.keys[" "] = false;
-    }
-
-    if( player.distanceLeft <= 0 ) return;                // Cancel if no more moving
-    let deltaPos = Math.min( player.distanceLeft, 0.1 );  // Constrain movement w/in dist limit
-
-    if( this.keys["ArrowUp"] || this.keys["W"] ) {
-      if(this.checkMapCollision(player, 0.1, 0) == true) {
-        player.xPos += Math.sin( player.direction ) * deltaPos;
-        player.yPos -= Math.cos( player.direction ) * deltaPos;
-        player.distanceLeft -= deltaPos;
-        this.movedSinceLastTransmit = true;
-      }
-    }
-    if( this.keys["ArrowDown"] || this.keys["S"] ) {
-      if(this.checkMapCollision(player, -0.1, 0) == true) {
-        player.xPos -= Math.sin( player.direction ) * deltaPos;
-        player.yPos += Math.cos( player.direction ) * deltaPos;
-        player.distanceLeft -= deltaPos;
-        this.movedSinceLastTransmit = true;
-      }
-    }
-    player.distanceLeft = Math.max( 0.0, player.distanceLeft );
-  }
-
-  recordKeyPress(key){
-    if(!game.keys[' ']){
-      this.keyTimes[key] = new Date();
-      game.keys[' '] = true;
-    }
-  }
-
-  /**
-    * A function that contains the rendering and processing calls for each frame.
-    */
-  gameTick() {
-    this.renderMap();
-    this.renderTanks();
-    this.processInput();
-    this.renderBullets();
-  }
-
-  /**
-    * Sets the current turn to the given user
-    * @param {string} userID the unique userID of the given player
-    */
-  advanceTurn(userID) {
-    this.tanks[userID].canShoot = true;
-    if(this.turn != ''){
-      this.tanks[userID].distanceLeft = 5;
-    }
-    this.turn = userID;
-    document.getElementById('turn').innerHTML = 'Turn: ' + this.tanks[userID].username;
-  }
-
-  /**
-    * A getter for this.movedSinceLastTransmit
-    * @return {bool} this.movedSinceLastTransmit
-    */
-  playerMoved() {
-    return this.movedSinceLastTransmit;
-  }
-
-  /**
-    * A getter for this.playerShot
-    * @return {bool} this.playerShot
-    */
-  getPlayerShot() {
-    return this.playerShot;
-  }
-
-  /**
-    * A setter for this.playerShot
-    */
-  resetPlayerShot() {
-    this.playerShot = false;
-  }
-
-  /**
-    * A getter for [this.xPos, this.yPos]
-    * @return {number[]} player position in [x, y] format
-    */
-  getPlayerPos() {
-    return [this.tanks[localStorage.userID].xPos, this.tanks[localStorage.userID].yPos];
-  }
-
-  /**
-    * A getter for this.direction
-    * @return {number} this.direction mod 2PI
-    */
-  getPlayerDir() {
-    return (this.tanks[localStorage.userID].direction) % (Math.PI * 2);
-  }
-
-  /**
-    * A setter for this.movedSinceLastTransmit
-    */
-  resetLastMoved() {
-    this.movedSinceLastTransmit = false;
-  }
-
-  /**
-    * Method called on gameOver. Alerts with the winner's username.
-    * @param {string} winningUserID
-    */
-  endGame( winningUserID ) {
-    this.won = true;
-    alert( "Game over. Winner is: " + game.tanks[winningUserID].username );
-  }
-
-  showMsg(username, text) {
-    let messageWindow = document.getElementById('messageWindow');
-    let msg = document.createElement('div');
-    msg.classList.add('message');
-
-    let sender = document.createElement('div');
-    sender.classList.add('sender');
-    sender.innerHTML = username + ": ";
-    msg.appendChild(sender);
-
-    let content = document.createElement('div');
-    content.classList.add('content');
-    content.innerHTML = text;
-    msg.appendChild(content);
-
-    msg.setAttribute('content', text);
-    messageWindow.insertAdjacentElement("beforeend", msg);
-  }
-
-};
+    return Game;
+}());
