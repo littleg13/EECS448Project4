@@ -6,6 +6,7 @@ var sendServerUpdate = () : void => {}
 class Game {
   background  : Layer;
   gameview    : Layer;
+  effects     : Layer;
   map         : Map;
   mapDim      : number;
   scale       : number;
@@ -51,14 +52,17 @@ class Game {
 
   initLayers = () : void => {
     this.gameview = new Layer( "gameview", 800, 800 );
+    this.effects = new Layer( "effects", 800, 800 );
     this.background = new Layer( "background", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
     this.gameview.attachToParent( document.getElementById( "center" ) );
+    this.effects.attachToParent( document.getElementById( "hidden" ) );
     this.background.attachToParent( document.getElementById( "hidden" ) );
   }
 
   startGame = () : void => {
-    this.gameTickUpdateInt = setInterval( () => { this.gameTick(); } , Math.floor( 1000 / 32 ) );
+    this.gameTickUpdateInt = setInterval( () => { this.gameTick(); } , 100 );
     this.sendServerUpdateInt = setInterval( () => { sendServerUpdate(); }, 40 );
+    this.populateSidebar();
   }
 
   addTank = ( userID    : string, username      : string,
@@ -89,22 +93,23 @@ class Game {
 *
 */
   checkMapCollision = ( obj, linVel, rotVel ) : boolean => {
-    return true;
-/*    let toReturn = true;
+    let toReturn = true;
     let map = this.map;
+    let halfWidth = 0.5;
+    let halfHeight = 0.5;
     let corners =
-      [ [ -0.5, -0.5 - linVel ],
-        [ -0.5,  0.5 - linVel ],
-        [  0.5, -0.5 - linVel ],
-        [  0.5,  0.5 - linVel ] ];
+      [ [ -halfWidth, -halfHeight - linVel ],
+        [ -halfWidth,  halfHeight - linVel ],
+        [  halfWidth, -halfHeight - linVel ],
+        [  halfWidth,  halfHeight - linVel ] ];
     corners.forEach( ( corner ) => {
       let theta = ( obj.dir + rotVel ) * Math.PI / 180.0;
       let x = corner[0] * Math.cos( theta )
             - corner[1] * Math.sin( theta )
-            + obj.x + 0.5;
+            + obj.xPos + 0.5;
       let y = corner[0] * Math.sin( theta )
             + corner[1] * Math.cos( theta )
-            + obj.y + 0.5;
+            + obj.yPos + 0.5;
       let col = Math.floor( x );
       let row = Math.floor( y );
       if( map.tiles[ row ][ col ].isBlocking ) {
@@ -112,7 +117,7 @@ class Game {
         return false;
       }
     });
-    return toReturn;*/
+    return toReturn;
   }
 
   processInput = () : void => {
@@ -120,13 +125,13 @@ class Game {
     if( this.curTurn != localStorage.userID ) return;
     if( this.keys["ArrowLeft"] || this.keys["a"] ) {
       if( this.checkMapCollision( player, 0, -1.0 ) ) {
-        player.rotateCCW();
+        player.rotateCCW( 2.0 );
         this.setPlayerMoved();
       }
     }
     if( this.keys["ArrowRight"] || this.keys["d"] ) {
       if( this.checkMapCollision( player, 0, 1.0 ) ) {
-        player.rotateCW();
+        player.rotateCW( 2.0 );
         this.setPlayerMoved();
       }
     }
@@ -177,23 +182,23 @@ class Game {
   }
 
   updateTankPosition = ( userID : string, newXPos : number, newYPos: number, newDirection : number ) : void => {
-    console.log( { xPos : newXPos, yPos : newYPos, dir : newDirection });
     let tank = this.getPlayer( userID );
-    let deltaDir = newDirection - tank.dir;
-    if( deltaDir < 0 ) {
-      tank.rotateCCW( deltaDir );
-    } else if( deltaDir > 0 ) {
+    let deltaDir = ( ( newDirection * 180.0 / Math.PI ) - tank.dir ) % 360.0;
+    if( deltaDir > 0 ) {
       tank.rotateCW( deltaDir );
+    } else if( deltaDir < 0 ) {
+      tank.rotateCCW( -deltaDir );
     }
 
     let deltaXPos = tank.xPos - newXPos;
     let deltaYPos = tank.yPos - newYPos;
-    let dirRads = newDirection * Math.PI / 180.0;
-    let deltaLocalY = deltaXPos * Math.sin( dirRads ) + deltaYPos * Math.cos( dirRads );
+    let dirRads = newDirection;
+    let deltaLocalX = deltaXPos * Math.sin( -dirRads ) - deltaYPos * Math.cos( -dirRads );
+    let deltaLocalY = deltaXPos * Math.sin( -dirRads ) + deltaYPos * Math.cos( -dirRads );
     if( deltaLocalY > 0 ) {
       tank.moveForward( deltaLocalY );
     } else if( deltaLocalY < 0 ) {
-      tank.moveBackward( deltaLocalY );
+      tank.moveBackward( -deltaLocalY );
     }
   }
 
@@ -208,6 +213,7 @@ class Game {
     let shooter = this.getPlayer( shooterID );
     if( shooter.canShoot ) {
       let bullet = new Bullet( shooter.xPos + 0.5, shooter.yPos + 0.5, shooter.dir, dist, power, curve );
+      bullet.attachToLayer( this.effects );
       this.bullets.push( bullet );
       shooter.canShoot = false;
     }
@@ -257,25 +263,32 @@ class Game {
   renderTank = ( tank ) : void => {
     tank.updateImage();
     this.gameview.applyTranslate( this.tileDim * tank.xPos, this.tileDim * tank.yPos );
-    if( tank.userID == this.curTurn ) {
-      this.gameview.drawItem( new Circle( 20, 20, tank.distanceLeft * this.tileDim, "#eeff007f", "#000000ff") );
-    }
     this.gameview.addLayer( tank.getLayer(), -10, -10 ); // Account for the padding on the sprite's canvas
+    // To-do: add nametag w/ health bar
     this.gameview.popTransform();
   }
+
+  renderEffects = () : void => {
+    this.effects.clear();
+    if( this.curTurn == localStorage.userID ) {
+      let tank = this.getPlayer();
+      this.effects.applyTranslate( ( tank.xPos + 0.5) * this.tileDim, ( tank.yPos + 0.5 ) * this.tileDim );
+      this.effects.drawItem( new Circle( 0, 0, tank.distanceLeft * this.tileDim, "rgba( 238, 255, 0, 0.5 )", "#000000") );
+      this.effects.popTransform();
+    }
+    this.renderBullets();
+    this.gameview.addLayer( this.effects );
+  }
+
 /**
 * To-do:
 *   [ ] - Collision Check
-*   [ ] - One collision, trigger animation
+*   [ ] - On collision, trigger animation
 *   [ ] - Create animation
 */
   renderBullets = () : void => {
     this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
-      this.gameview.applyTranslate( bullet.xPos * this.tileDim, bullet.yPos * this.tileDim );
-      this.gameview.applyRotation( bullet.dir );
-      this.gameview.drawItem( bullet.sprite );
-      this.gameview.popTransform();
-      this.gameview.popTransform();
+      bullet.render();
       // update bullet position
       bullet.update();
       return ( !bullet.boom );
@@ -285,6 +298,7 @@ class Game {
   renderLoop = () : void => {
     this.gameview.applyScale( this.scale, this.scale );
     this.renderMap();
+    this.renderEffects();
     this.renderBullets();
     this.renderTanks();
     this.gameview.popTransform();
@@ -310,7 +324,7 @@ class Game {
 
   getPlayer = ( id = null ) : Tank => {
     if( id === null ) { id = localStorage.userID; }
-    let filteredSet = this.tanks.filter( ( tank ) => { return tank.userID = id; } );
+    let filteredSet = this.tanks.filter( ( tank ) => { return tank.userID == id; } );
     if( filteredSet == [] ) return null;
     else return filteredSet[0];
   }
@@ -323,6 +337,4 @@ class Game {
   getPlayerDir = () : number => {
     return this.getPlayer().dir;
   }
-
-
 }

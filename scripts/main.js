@@ -7,9 +7,9 @@ var gameTickUpdateInt, sendServerUpdateInt;
 /**
   * A helper function that changes which div is visible in the main#wrapper
   * element.
-  * @arg {string} id the id of the element to be displayed
+  * @arg {string} the id of the element to be displayed
   */
-var makeActive = (id) => {
+var makeActive = ( id ) => {
   console.log( "Make " + id + " Active" );
   Array.from(wrapper.getElementsByTagName("div")).map((elem) => {
     if( elem.id == id ) elem.classList.add("active");
@@ -92,7 +92,7 @@ var startGame = () => {
   */
 var logout = () => {
   console.log( "Logout" );
-  socket.emit("logout", {lobbyCode : localStorage.lobbyCode, userID : localStorage.userID});
+  socket.emit("logout", { lobbyCode : localStorage.lobbyCode, userID : localStorage.userID });
   localStorage.clear();
   window.location.reload();
 };
@@ -183,15 +183,17 @@ socket.on("moveToLobby", moveToLobbyHandler);
   */
 var playerListHandler = (data) => {
   console.log( "Player list received" );
+  console.log( data );
   if( game ) {
     for(let user in data) {
       let userData = data[user];
-      game.addTank( user,                   userData['username'],
-                    userData['xPos'],       userData['yPos'],
-                    userData['direction'],  userData['distanceLeft'],
-                    userData['color'],      userData['health'] );
+      if( game.getPlayer( user ) ) { continue; }
+      let direction = userData[ "direction" ] * 180.0 / Math.PI;
+      game.addTank( user,               userData['username'],
+                    userData['xPos'],   userData['yPos'],
+                    direction,          userData['distanceLeft'],
+                    userData['color'],  userData['health'] );
     }
-    game.populateSidebar();
   }
   updateLists();
 };
@@ -204,7 +206,8 @@ socket.on( "playerList", playerListHandler );
   */
 var playerJoinHandler = (data) => {
   console.log( "Player Join Received" );
-  socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
+  console.log( data );
+  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
 };
 socket.on("playerJoin", playerJoinHandler);
 
@@ -357,6 +360,7 @@ function sendServerUpdate() {
   if( myTurn ) {
     if( game.getPlayerMoved() ) {
       myPos = game.getPlayerPos();
+
       myDir = game.getPlayerDir() * Math.PI / 180.0;
       game.setPlayerMoved( false );
       socket.emit("gameEvent", { eventType: "playerMove",
@@ -367,6 +371,7 @@ function sendServerUpdate() {
       let finalTime = new Date();
       let power = Math.min(5, Math.max(0, (((finalTime - game.keyTimes[" "])-100)*5)/2000))
       let spin = document.getElementById( "spinSlider" ).value / 100;
+      console.log( { spin : spin, power : power } );
       socket.emit( "gameEvent", { eventType: "playerFire", power: power, spin: spin } );
       game.setPlayerShot( false );
     }
@@ -395,17 +400,18 @@ var main = () => {
 };
 
 var sendMsg = () => {
-  let user = game.tanks[ localStorage.userID ].username;
-  let text = document.getElementById('textBox').value;
-  socket.emit("sendMsg", {sender: user, content: text});
+  let user = localStorage.username;
+  let textbox = document.getElementById('textBox');
+  let text = textbox.value;
+  textbox.value = "";
+  socket.emit( "sendMsg", { sender: user, content: text } );
 };
 
-var chatMsg = (data) => {
-  let sender = data['sender'];
-  let content = data['content'];
-  game.showMsg(sender, content);
+var chatMsg = ( data ) => {
+  let sender = data["sender"];
+  let content = data["content"];
+  game.showMsg( sender, content );
 };
-socket.on("chatMsg", chatMsg);
+socket.on( "chatMsg", chatMsg );
 
 window.addEventListener("load", main);
-let mainLoop = () => {game.gameTick(); };

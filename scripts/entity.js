@@ -49,12 +49,12 @@ var Tank = /** @class */ (function (_super) {
         };
         _this.rotateCW = function (delta) {
             if (delta === void 0) { delta = 1.0; }
-            _this.dir += delta;
+            _this.dir = (_this.dir + delta) % 360.0;
             _this.sprite.moveTreadsRight();
         };
         _this.rotateCCW = function (delta) {
             if (delta === void 0) { delta = 1.0; }
-            _this.dir -= delta;
+            _this.dir = (_this.dir - delta + 360.0) % 360.0;
             _this.sprite.moveTreadsLeft();
         };
         _this.addToSidebar = function (sidebar) {
@@ -104,7 +104,12 @@ var Bullet = /** @class */ (function (_super) {
             _this.layer = layer;
         };
         _this.render = function () {
+            _this.layer.applyTranslate(_this.xPos * 40, _this.yPos * 40);
+            _this.layer.applyRotation(_this.dir);
             _this.layer.drawItem(_this.sprite);
+            _this.layer.drawItem(_this.hitbox);
+            _this.layer.popTransform();
+            _this.layer.popTransform();
         };
         _this.detonate = function () {
             _this.boom = true;
@@ -114,6 +119,7 @@ var Bullet = /** @class */ (function (_super) {
             _this.xPos += Math.sin(dirRad) * 0.5;
             _this.yPos -= Math.cos(dirRad) * 0.5;
             _this.distGone += 0.5;
+            _this.dir += Math.max(0, _this.distGone - _this.power) * _this.curve;
             if (_this.distToGo <= _this.distGone) {
                 _this.detonate();
             }
@@ -121,6 +127,7 @@ var Bullet = /** @class */ (function (_super) {
         _this.xPos = xPos;
         _this.yPos = yPos;
         _this.dir = dir;
+        _this.hitbox = new Rect(-5, -15, 10, 25, "green");
         _this.sprite = new BulletSprite();
         _this.distToGo = distToGo;
         _this.distGone = 0.0;

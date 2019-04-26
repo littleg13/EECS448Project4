@@ -16,6 +16,7 @@ var Layer = /** @class */ (function () {
         var _this = this;
         if (width === void 0) { width = 40; }
         if (height === void 0) { height = 40; }
+        this.resize = function () { };
         this.attachToParent = function (parent) {
             parent.appendChild(_this.canvas);
         };

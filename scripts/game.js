@@ -12,13 +12,16 @@ var Game = /** @class */ (function () {
         */
         this.initLayers = function () {
             _this.gameview = new Layer("gameview", 800, 800);
+            _this.effects = new Layer("effects", 800, 800);
             _this.background = new Layer("background", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
             _this.gameview.attachToParent(document.getElementById("center"));
+            _this.effects.attachToParent(document.getElementById("hidden"));
             _this.background.attachToParent(document.getElementById("hidden"));
         };
         this.startGame = function () {
-            _this.gameTickUpdateInt = setInterval(function () { _this.gameTick(); }, Math.floor(1000 / 32));
+            _this.gameTickUpdateInt = setInterval(function () { _this.gameTick(); }, 100);
             _this.sendServerUpdateInt = setInterval(function () { sendServerUpdate(); }, 40);
+            _this.populateSidebar();
         };
         this.addTank = function (userID, username, xPos, yPos, direction, distanceLeft, color, health) {
             _this.tanks.push(new Tank(xPos, yPos, direction, username, userID, color, health));
@@ -45,30 +48,30 @@ var Game = /** @class */ (function () {
         *
         */
         this.checkMapCollision = function (obj, linVel, rotVel) {
-            return true;
-            /*    let toReturn = true;
-                let map = this.map;
-                let corners =
-                  [ [ -0.5, -0.5 - linVel ],
-                    [ -0.5,  0.5 - linVel ],
-                    [  0.5, -0.5 - linVel ],
-                    [  0.5,  0.5 - linVel ] ];
-                corners.forEach( ( corner ) => {
-                  let theta = ( obj.dir + rotVel ) * Math.PI / 180.0;
-                  let x = corner[0] * Math.cos( theta )
-                        - corner[1] * Math.sin( theta )
-                        + obj.x + 0.5;
-                  let y = corner[0] * Math.sin( theta )
-                        + corner[1] * Math.cos( theta )
-                        + obj.y + 0.5;
-                  let col = Math.floor( x );
-                  let row = Math.floor( y );
-                  if( map.tiles[ row ][ col ].isBlocking ) {
+            var toReturn = true;
+            var map = _this.map;
+            var halfWidth = 0.5;
+            var halfHeight = 0.5;
+            var corners = [[-halfWidth, -halfHeight - linVel],
+                [-halfWidth, halfHeight - linVel],
+                [halfWidth, -halfHeight - linVel],
+                [halfWidth, halfHeight - linVel]];
+            corners.forEach(function (corner) {
+                var theta = (obj.dir + rotVel) * Math.PI / 180.0;
+                var x = corner[0] * Math.cos(theta)
+                    - corner[1] * Math.sin(theta)
+                    + obj.xPos + 0.5;
+                var y = corner[0] * Math.sin(theta)
+                    + corner[1] * Math.cos(theta)
+                    + obj.yPos + 0.5;
+                var col = Math.floor(x);
+                var row = Math.floor(y);
+                if (map.tiles[row][col].isBlocking) {
                     toReturn = false;
                     return false;
-                  }
-                });
-                return toReturn;*/
+                }
+            });
+            return toReturn;
         };
         this.processInput = function () {
             var player = _this.getPlayer();
@@ -76,13 +79,13 @@ var Game = /** @class */ (function () {
                 return;
             if (_this.keys["ArrowLeft"] || _this.keys["a"]) {
                 if (_this.checkMapCollision(player, 0, -1.0)) {
-                    player.rotateCCW();
+                    player.rotateCCW(2.0);
                     _this.setPlayerMoved();
                 }
             }
             if (_this.keys["ArrowRight"] || _this.keys["d"]) {
                 if (_this.checkMapCollision(player, 0, 1.0)) {
-                    player.rotateCW();
+                    player.rotateCW(2.0);
                     _this.setPlayerMoved();
                 }
             }
@@ -128,24 +131,24 @@ var Game = /** @class */ (function () {
             _this.getPlayer(userID).setHealth(health);
         };
         this.updateTankPosition = function (userID, newXPos, newYPos, newDirection) {
-            console.log({ xPos: newXPos, yPos: newYPos, dir: newDirection });
             var tank = _this.getPlayer(userID);
-            var deltaDir = newDirection - tank.dir;
-            if (deltaDir < 0) {
-                tank.rotateCCW(deltaDir);
-            }
-            else if (deltaDir > 0) {
+            var deltaDir = ((newDirection * 180.0 / Math.PI) - tank.dir) % 360.0;
+            if (deltaDir > 0) {
                 tank.rotateCW(deltaDir);
+            }
+            else if (deltaDir < 0) {
+                tank.rotateCCW(-deltaDir);
             }
             var deltaXPos = tank.xPos - newXPos;
             var deltaYPos = tank.yPos - newYPos;
-            var dirRads = newDirection * Math.PI / 180.0;
-            var deltaLocalY = deltaXPos * Math.sin(dirRads) + deltaYPos * Math.cos(dirRads);
+            var dirRads = newDirection;
+            var deltaLocalX = deltaXPos * Math.sin(-dirRads) - deltaYPos * Math.cos(-dirRads);
+            var deltaLocalY = deltaXPos * Math.sin(-dirRads) + deltaYPos * Math.cos(-dirRads);
             if (deltaLocalY > 0) {
                 tank.moveForward(deltaLocalY);
             }
             else if (deltaLocalY < 0) {
-                tank.moveBackward(deltaLocalY);
+                tank.moveBackward(-deltaLocalY);
             }
         };
         this.updateTurn = function (userID) {
@@ -158,6 +161,7 @@ var Game = /** @class */ (function () {
             var shooter = _this.getPlayer(shooterID);
             if (shooter.canShoot) {
                 var bullet = new Bullet(shooter.xPos + 0.5, shooter.yPos + 0.5, shooter.dir, dist, power, curve);
+                bullet.attachToLayer(_this.effects);
                 _this.bullets.push(bullet);
                 shooter.canShoot = false;
             }
@@ -201,25 +205,30 @@ var Game = /** @class */ (function () {
         this.renderTank = function (tank) {
             tank.updateImage();
             _this.gameview.applyTranslate(_this.tileDim * tank.xPos, _this.tileDim * tank.yPos);
-            if (tank.userID == _this.curTurn) {
-                _this.gameview.drawItem(new Circle(20, 20, tank.distanceLeft * _this.tileDim, "#eeff007f", "#000000ff"));
-            }
             _this.gameview.addLayer(tank.getLayer(), -10, -10); // Account for the padding on the sprite's canvas
+            // To-do: add nametag w/ health bar
             _this.gameview.popTransform();
+        };
+        this.renderEffects = function () {
+            _this.effects.clear();
+            if (_this.curTurn == localStorage.userID) {
+                var tank_1 = _this.getPlayer();
+                _this.effects.applyTranslate((tank_1.xPos + 0.5) * _this.tileDim, (tank_1.yPos + 0.5) * _this.tileDim);
+                _this.effects.drawItem(new Circle(0, 0, tank_1.distanceLeft * _this.tileDim, "rgba( 238, 255, 0, 0.5 )", "#000000"));
+                _this.effects.popTransform();
+            }
+            _this.renderBullets();
+            _this.gameview.addLayer(_this.effects);
         };
         /**
         * To-do:
         *   [ ] - Collision Check
-        *   [ ] - One collision, trigger animation
+        *   [ ] - On collision, trigger animation
         *   [ ] - Create animation
         */
         this.renderBullets = function () {
             _this.bullets = _this.bullets.filter(function (bullet) {
-                _this.gameview.applyTranslate(bullet.xPos * _this.tileDim, bullet.yPos * _this.tileDim);
-                _this.gameview.applyRotation(bullet.dir);
-                _this.gameview.drawItem(bullet.sprite);
-                _this.gameview.popTransform();
-                _this.gameview.popTransform();
+                bullet.render();
                 // update bullet position
                 bullet.update();
                 return (!bullet.boom);
@@ -228,6 +237,7 @@ var Game = /** @class */ (function () {
         this.renderLoop = function () {
             _this.gameview.applyScale(_this.scale, _this.scale);
             _this.renderMap();
+            _this.renderEffects();
             _this.renderBullets();
             _this.renderTanks();
             _this.gameview.popTransform();
@@ -256,7 +266,7 @@ var Game = /** @class */ (function () {
             if (id === null) {
                 id = localStorage.userID;
             }
-            var filteredSet = _this.tanks.filter(function (tank) { return tank.userID = id; });
+            var filteredSet = _this.tanks.filter(function (tank) { return tank.userID == id; });
             if (filteredSet == [])
                 return null;
             else

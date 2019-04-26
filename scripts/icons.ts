@@ -178,6 +178,7 @@ class TankSprite extends Renderable {
 }
 
 class BulletSprite extends Animated {
+  hitbox : Rect;
   constructor() {
     super();
   }

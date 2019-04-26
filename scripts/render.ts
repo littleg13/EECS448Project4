@@ -23,6 +23,8 @@ class Layer {
     this.height = height;
   }
 
+  resize = () : void => {}
+
   attachToParent = ( parent : Element ) : void => {
     parent.appendChild( this.canvas );
   }

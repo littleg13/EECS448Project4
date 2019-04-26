@@ -4,6 +4,7 @@ abstract class Entity {
   dir  : number;
   sprite  : Renderable;
   layer   : Layer;
+  hitbox  : Rect;
 }
 
 class Tank extends Entity {
@@ -61,12 +62,12 @@ class Tank extends Entity {
   }
 
   rotateCW = ( delta = 1.0 ) : void => {
-    this.dir += delta;
+    this.dir = ( this.dir + delta ) % 360.0;
     this.sprite.moveTreadsRight();
   }
 
   rotateCCW = ( delta = 1.0 ) : void => {
-    this.dir -= delta;
+    this.dir = ( this.dir - delta + 360.0 ) % 360.0;
     this.sprite.moveTreadsLeft();
   }
 
@@ -113,6 +114,7 @@ class Bullet extends Entity {
     this.xPos = xPos;
     this.yPos = yPos;
     this.dir  = dir;
+    this.hitbox = new Rect( -5, -15, 10, 25, "green" );
     this.sprite = new BulletSprite();
     this.distToGo = distToGo;
     this.distGone = 0.0;
@@ -125,7 +127,12 @@ class Bullet extends Entity {
   }
 
   render = () : void => {
+    this.layer.applyTranslate( this.xPos * 40, this.yPos * 40 );
+    this.layer.applyRotation( this.dir );
     this.layer.drawItem( this.sprite );
+    this.layer.drawItem( this.hitbox );
+    this.layer.popTransform();
+    this.layer.popTransform();
   }
 
   detonate = () : void => {
@@ -137,6 +144,7 @@ class Bullet extends Entity {
     this.xPos += Math.sin( dirRad ) * 0.5;
     this.yPos -= Math.cos( dirRad ) * 0.5;
     this.distGone += 0.5;
+    this.dir += Math.max( 0, this.distGone - this.power ) * this.curve;
     if( this.distToGo <= this.distGone ) { this.detonate(); }
   }
 }

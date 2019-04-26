@@ -27,20 +27,22 @@
       // height has additional adjustment for Exit button ( 1em margins, 1em padding, 1em text)
       let rect = { width : window.innerWidth - 128, height : window.innerHeight - 128 - 64 };
       if( rect.width < 600 || rect.height < 600 ) {
-        game.gridBoxDim = parseInt( Math.min( rect.width / game.mapDim, rect.height / game.mapDim ) );
-        let canvasSize = game.gridBoxDim * game.mapDim;
-        canvas.width = canvasSize;
-        canvas.height = canvasSize;
-        game.scale = game.gridBoxDim / game.geometryDim;
+        game.curBoxDim = parseInt( Math.min( rect.width / game.mapDim, rect.height / game.mapDim ) );
+        let canvasSize = game.curBoxDim * game.mapDim;
+        game.gameview.resize( canvasSize, canvasSize );
+        game.effects.resize( canvasSize, canvasSize );
+        game.scale = game.curBoxDim / game.tileDim;
       } else {
-        canvas.width = 600;
-        canvas.height = 600;
-        game.gridBoxDim = parseInt( canvas.width / game.mapDim );
-        game.scale = game.gridBoxDim / game.geometryDim;
+        canvasSize = 600;
+        game.gameview.resize( canvasSize, canvasSize );
+        game.effects.resize( canvasSize, canvasSize );
+        game.gridBoxDim = parseInt( canvasSize / game.mapDim );
+        game.scale = game.curBoxDim / game.tileDim;
       }
     }
 
     window.addEventListener("resize", (evt) => {
+      return;
       if( resizeTaskId !== null ) {
         clearTimeout( resizeTaskId );
       }
@@ -70,7 +72,7 @@
 
       <div id="join">
         <label for="lobbyCode">Enter a room code:</label><br>
-        <input type='text' id="lobbyCode"></input><br>
+        <input type='text' id="lobbyCode"><br>
         <button type='button' onclick="joinLobby()">Join Lobby</button>
         <button type="button" onclick="wrapper.makeActive('splash2')">Back</button>
       </div>
@@ -98,7 +100,7 @@
                 <div class="content"></div>
               </div>
                 <input type="text" id="textBox"></input>
-                <input type="submit" value="enter" onclick="sendMsg()"></input>
+                <input type="submit" value="enter" onclick="sendMsg()">
             </div>
             <div class="container" id="messageWindow"></div>
           </div>
@@ -119,4 +121,4 @@
     </div>
     <div id="hidden"></div>
   </body>
-<html>
+</html>
