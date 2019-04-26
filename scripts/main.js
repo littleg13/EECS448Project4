@@ -1,3 +1,6 @@
+let socket = io("https://448.cuzzo.net");
+//let socket = io("http://localhost:3000");
+var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
 
@@ -262,6 +265,9 @@ var gameUpdateHandler = (data) => {
                                 data["newPos"][0], data["newPos"][1],
                                 data["newDir"]);
       }
+      if(data.playerPowerups) {
+        game.updateTankPowerups(data.userID, data.playerPowerups);
+      }
       break;
     case "playerFire":
       if(data.mapUpdate) {
@@ -284,6 +290,9 @@ var gameUpdateHandler = (data) => {
       }
       break;
   }
+  if(data.powerupsOnMap){
+    game.updatePowerupsOnMap(data.powerupsOnMap);
+  }
 };
 socket.on("gameUpdate", gameUpdateHandler);
 
@@ -300,6 +309,7 @@ socket.on("lobbyHost", checkIfHost)
   * @param{Event} evt The event object which gives access to key information.
   */
 var handleKeyDown = (evt) => {
+  if(document.activeElement != document.body) return;
   if (game.turn == localStorage.userID) {
     if(evt.key == " "){
       game.recordKeyPress(evt.key);
@@ -319,6 +329,9 @@ var handleKeyUp = (evt) => {
   if(evt.key == " "){
     game.keys[ evt.key ] = true;
     game.keys['spaceDown'] = false;
+  }
+  else if (evt.key == "Enter" && document.activeElement == document.getElementById('textBox')) {
+    sendMsg();
   }
   else{
     game.keys[ evt.key ] = false;
@@ -370,6 +383,21 @@ var main = () => {
  }
 };
 
-var mainLoop = () => { game.gameTick(); };
+var sendMsg = () => {
+  let user = game.tanks[localStorage.userID].username;
+  let text = document.getElementById('textBox').value;
+  document.getElementById('textBox').value = "";
+  if(text.length > 0){
+    socket.emit("sendMsg", {sender: user, content: text});
+  }
+};
+
+var chatMsg = (data) => {
+  let sender = data['sender'];
+  let content = data['content'];
+  game.showMsg(sender, content);
+};
+socket.on("chatMsg", chatMsg);
 
 window.addEventListener("load", main);
+let mainLoop = () => {game.gameTick(); };

@@ -24,9 +24,15 @@ class Lobby:
         self.boardDimensions = 20
         self.colorList = ['blue', 'limeGreen', 'blueViolet', 'deepPink', 'darkOrange', 'gold', 'red', 'deepSkyBlue']
         self.spawnPosList = [{'x': 2, 'y': 3}, {'x': 5,'y': 5}, {'x': 9,'y': 4}, {'x': 9,'y': 15}, {'x': 4,'y': 10}, {'x': 15,'y': 10}, {'x': 2,'y': 16}, {'x': 17,'y': 3}, {'x': 10,'y': 10}]
+        self.powerUpSpawnList = [{'x': 2, 'y': 3}, {'x': 5,'y': 5}, {'x': 9,'y': 4}, {'x': 9,'y': 15}, {'x': 4,'y': 10}, {'x': 15,'y': 10}, {'x': 2,'y': 16}, {'x': 17,'y': 3}, {'x': 10,'y': 10}]
         self.blockSize = 30
+        self.powerupTypes = ['multiShot', 'buildWall', 'increaseMoveDist', 'healthPack']
+        self.turnsSinceLastPowerupSpawn = 0
+        self.powerups = {}
+        self.addedPowerup = False
         random.shuffle(self.colorList)
         random.shuffle(self.spawnPosList)
+        random.shuffle(self.powerUpSpawnList)
         self.initMap()
 
     def initMap(self):
@@ -75,7 +81,7 @@ class Lobby:
     def removePlayer(self, userID):
         if(self.checkForPlayer(userID)):
             self.colorList += self.players[userID].color
-            self.spawnPosList += {'x': self.players[userID].xPos, 'y': self.players[userID].yPos}
+            self.spawnPosList.append({'x': self.players[userID].xPos, 'y': self.players[userID].yPos})
             del self.players[userID]
             return True
         return False
@@ -85,8 +91,30 @@ class Lobby:
         pass
 
     def advanceTurn(self, numOfTurns):
+        self.updatePowerups()
         self.turn = (self.turn + numOfTurns) % len(self.order)
         self.players[self.order[self.turn]].resetDistance()
+
+    def updatePowerups(self):
+        self.turnsSinceLastPowerupSpawn += 1
+        if (random.random() < (self.turnsSinceLastPowerupSpawn * 0.2)): # Add powerup
+            self.addedPowerup = True
+            self.turnsSinceLastPowerupSpawn = 0
+            pos = self.powerUpSpawnList.pop(0)
+            while True:
+                pointTaken = False
+                for playerId, player in self.players.items():
+                    if (math.floor(player.xPos) == pos['x'] and math.floor(player.yPos) == pos['y']):
+                        pointTaken = True
+                        break
+                if (pointTaken):
+                    self.powerUpSpawnList.append(pos)
+                    pos = self.powerUpSpawnList.pop(0)
+                else:
+                    break
+            if (pos['x'] not in self.powerups):
+                self.powerups[pos['x']] = {}
+            self.powerups[pos['x']][pos['y']] = random.choice(self.powerupTypes)
 
     def getTurn(self):
         return self.order[self.turn]
@@ -141,6 +169,9 @@ class Lobby:
                     outboundData['userID'] = userID
                     outboundData['newPos'] = data['newPos']
                     outboundData['newDir'] = data['newDir']
+                    if (self.checkForPowerupCollision(userID, player)):
+                        outboundData['playerPowerups'] = player.powerups
+                        outboundData['powerupsOnMap'] = self.powerups
             elif data['eventType'] == 'playerFire':
                 collisionData = self.checkBulletCollision(userID, player, data['power'], data['spin'])
                 turnsToAdvance = 1
@@ -159,12 +190,26 @@ class Lobby:
                     outboundData['playerHit'] = collisionData[0]
                     outboundData['newHealth'] = newHealth
                 self.advanceTurn(turnsToAdvance)
+                if (self.addedPowerup):
+                    self.addedPowerup = False
+                    outboundData['powerupsOnMap'] = self.powerups
                 outboundData['distance'] = collisionData[1]
                 outboundData['power'] = data['power']
                 outboundData['spin'] = data['spin']
                 outboundData['eventType'] = 'playerFire'
                 outboundData['userID'] = userID
         return outboundData
+
+    def checkForPowerupCollision(self, userID, player):
+        playerxPos = round(player.xPos)
+        playeryPos = round(player.yPos)
+        if (playerxPos in self.powerups):
+            if (playeryPos in self.powerups[playerxPos]):
+                player.powerups.append(self.powerups[playerxPos][playeryPos])
+                self.powerUpSpawnList.append({'x': playerxPos, 'y': playeryPos})
+                del self.powerups[playerxPos][playeryPos]
+                return True
+        return False
 
     def checkBulletCollision(self, userID, player, power, spin):
         """Handles the collision of bullets

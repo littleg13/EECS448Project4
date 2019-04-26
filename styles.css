@@ -35,14 +35,16 @@ main #lobbyList {
 }
 
 div#game {
-  margin: auto;
   display: none;
+  margin: auto;
 }
 
 canvas {
-  margin: 4em auto 1em auto;
-  display: block;
-  overflow: hidden;
+  margin: 0px;
+  /* margin: 4em auto 1em auto; */
+  /* align-self: center; */
+  display: inline-block;
+  /* overflow: hidden; */
   border: 1px solid black;
   border-radius: 5%;
 }
@@ -130,15 +132,52 @@ div.healthBar div {
   justify-content: center;
   align-items: flex-end;
 }
-#leftSide {
+#chatWindow {
+  padding: 10px;
+  flex-direction: column-reverse;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(50, 50, 50, 1);
 }
-#rightSide {
+
+#chatBox {
+  height: 10%;
+  width: 100%;
+  padding: 10px;
+  align-self: flex-end;
+}
+
+#messageWindow {
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 10px;
+  overflow: auto;
+  height: 505px;
+  min-height: 0px;
+  width: 100%;
+  align-self: flex-start;
+}
+
+.message {
+  display: block;
+  padding: 2px;
+}
+
+.sender {
+  display: inline;
+}
+
+.content {
+  display: inline-block;
+  overflow-wrap: break-word;
 }
 .sidebar {
   height: 630px;
   width: 330px;
   padding: 15px;
 }
+
 #additionalInfo {
   background-color: rgba(50, 50, 50, 1);
   padding: 10px;

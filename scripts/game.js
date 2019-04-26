@@ -61,7 +61,9 @@ class Game {
       */
     this.won = false;
 
-    this.gameUpdate = {}
+    this.gameUpdate = {};
+
+    this.powerupsOnMap = {};
 
     this.initCanvas();
   }
@@ -131,6 +133,7 @@ class Game {
           this.ctx.fillRect( 11, 29, 18, 7 );
           this.ctx.fillRect( 31, 29,  8, 7 );
         }
+
         this.ctx.restore();
       }
     }
@@ -143,6 +146,10 @@ class Game {
     */
   updateMap(map) {
     this.map = map
+  }
+  u
+  updatePowerupsOnMap(powerups){
+    this.powerupsOnMap = powerups;
   }
 
   updateGameElements(){
@@ -190,6 +197,9 @@ class Game {
     let playerIcon = document.getElementById( "display-" + userID );
     this.tanks[userID].health = newHealth;
   }
+  updateTankPowerups(userID, powerups){
+    this.tanks[userID].powerups = powerups;
+  }
 
   killTank( userID ) {
     this.tanks[userID].alive = false;
@@ -200,6 +210,24 @@ class Game {
       let tank = this.tanks[key];
       if (tank.alive) {
         this.renderTank( key, tank );
+      }
+    }
+  }
+  renderPowerups() {
+    for( let row = 0; row < this.map.length; row++ ) {
+      for( let col = 0; col < this.map[row].length; col++ ) {
+        this.ctx.save();
+        this.ctx.scale( this.scale, this.scale );
+        this.ctx.translate( col * this.geometryDim, row * this.geometryDim, this.geometryDim, this.geometryDim );
+        if(this.powerupsOnMap[col]) {
+          if(this.powerupsOnMap[col][row]){
+            this.ctx.fillStyle = "#000000";
+            this.ctx.beginPath();
+            this.ctx.arc(this.geometryDim/2, this.geometryDim/2, 15, 0, 2*Math.PI);
+            this.ctx.fill();
+          }
+        }
+        this.ctx.restore();
       }
     }
   }
@@ -253,10 +281,16 @@ class Game {
     this.ctx.scale( this.scale, this.scale );
     this.ctx.translate( this.geometryDim * (tank.xPos + 0.5), this.geometryDim * (tank.yPos + 0.5) );
 
+    // Convert username back to non-html safe for canvas
+    let username = tank.username;
+    while (username.includes("&lt;") || username.includes("&gt;")) {
+      username = username.replace("&gt;", ">").replace("&lt;", "<");
+    }
+
     // Health bar and username text
     this.ctx.fillStyle = "black";
     this.ctx.font = "15px Arial";
-    this.ctx.fillText( tank.username, - this.geometryDim / 2, 40);
+    this.ctx.fillText( username, - this.geometryDim / 2, 40);
     this.ctx.fillRect( - this.geometryDim / 2, this.geometryDim + 10, this.geometryDim, 10 );
     this.ctx.fillStyle = tank.color;
     this.ctx.fillRect( - this.geometryDim / 2 + 2, this.geometryDim + 12, ( this.geometryDim - 4 ) * ( tank.health / 100 ), 6 );
@@ -423,6 +457,7 @@ class Game {
   gameTick() {
     this.renderMap();
     this.renderTanks();
+    this.renderPowerups();
     this.processInput();
     this.renderBullets();
   }
@@ -494,4 +529,24 @@ class Game {
     this.won = true;
     alert( "Game over. Winner is: " + game.tanks[winningUserID].username );
   }
+
+  showMsg(username, text) {
+    let messageWindow = document.getElementById('messageWindow');
+    let msg = document.createElement('div');
+    msg.classList.add('message');
+
+    let sender = document.createElement('div');
+    sender.classList.add('sender');
+    sender.innerHTML = username + ": ";
+    msg.appendChild(sender);
+
+    let content = document.createElement('div');
+    content.classList.add('content');
+    content.innerHTML = text;
+    msg.appendChild(content);
+
+    msg.setAttribute('content', text);
+    messageWindow.insertAdjacentElement("afterbegin", msg);
+  }
+
 };
