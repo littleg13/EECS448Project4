@@ -1,7 +1,8 @@
-let socket = io("https://448.cuzzo.net");
+const socket = io( "http://192.168.1.100:3000" );
 var wrapper = document.getElementById("wrapper");
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
+var error;
 
 /**
   * A helper function that changes which div is visible in the main#wrapper
@@ -10,7 +11,7 @@ var gameTickUpdateInt, sendServerUpdateInt;
   */
 var makeActive = ( id ) => {
   console.log( "Make " + id + " Active" );
-  Array.from(wrapper.getElementsByTagName("div")).map((elem) => {
+  Array.from(wrapper.getElementsByTagName("div")).forEach((elem) => {
     if( elem.id == id ) elem.classList.add("active");
     else elem.classList.remove("active");
  });
@@ -251,6 +252,7 @@ socket.on("mapUpdate", mapUpdateHandler);
   * @param {string} data.lobbyCode string with lobbyCode
   */
 var connectHandler = (data) => {
+  main();
   console.log( "Socket connect." );
   if(localStorage.userID) {
     let url = window.location.pathname;
@@ -259,6 +261,14 @@ var connectHandler = (data) => {
   }
 };
 socket.on("connect", connectHandler);
+
+var errorHandler = ( data ) => {
+  document.getElementById( "title" ).style.display = "none";
+  makeActive( "connect_error" );
+  error = data;
+  socket.close();
+}
+socket.io.on("connect_error", errorHandler );
 
 /**
   * The event handler for the clearStorage signal from the server. This allows
@@ -382,11 +392,8 @@ function sendServerUpdate() {
   * view depending on currently stored valid user information.
   */
 var main = () => {
-  console.log( "main() entered" );
-  document.getElementById("wrapper").style.display = 'block';
   if(!localStorage.username) {
     makeActive("splash");
-    data = {};
  } else if( !localStorage.lobbyCode || !localStorage.userID ) {
     makeActive("splash2");
  } else {
@@ -413,4 +420,9 @@ var chatMsg = ( data ) => {
 };
 socket.on( "chatMsg", chatMsg );
 
-window.addEventListener("load", main);
+
+class Test {
+  constructor() {
+    return false;
+  }
+}

@@ -58,7 +58,7 @@
   <body>
     <main id="wrapper">
       <h1 id="title">Welcome to tanks!</h1>
-      <div id="splash" class="active">
+      <div id="splash">
         <label for="username">Enter a username:</label><br>
         <input type="text" id="username">
         <button type="button" onclick="pickUsername()">Enter Username</button>
@@ -77,8 +77,12 @@
         <button type="button" onclick="wrapper.makeActive('splash2')">Back</button>
       </div>
 
-      <div id="waiting">
+      <div id="waiting" class="active">
         <h1>Loading...</h1>
+      </div>
+      <div id="connect_error">
+        <h1>Error Connecting...</h1>
+        <p>It seems like we can't make a connection to the server!</p>
       </div>
 
       <div id="lobbyMenu">

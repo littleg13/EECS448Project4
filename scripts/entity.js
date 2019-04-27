@@ -107,7 +107,7 @@ var Bullet = /** @class */ (function (_super) {
             _this.layer.applyTranslate(_this.xPos * 40, _this.yPos * 40);
             _this.layer.applyRotation(_this.dir);
             _this.layer.drawItem(_this.sprite);
-            _this.layer.drawItem(_this.hitbox);
+            //    this.layer.drawItem( this.hitbox );
             _this.layer.popTransform();
             _this.layer.popTransform();
         };

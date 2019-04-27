@@ -74,8 +74,6 @@ class Counter {
   delta   : number;
   max     : number;
   parent  : object;
-  onInc   : () => void;
-  onDec   : () => void;
 
   constructor( initial: number, delta = 1, max = Infinity ) {
     this.value = initial;
@@ -83,6 +81,9 @@ class Counter {
     if( delta < 0 ) { delta = -delta; }
     this.max = max;
   }
+
+  onInc = () : void => {};
+  onDec = () : void => {};
 
   inc = ( delta = 0 ) : void => {
     delta = Math.max( delta, this.delta );
@@ -127,6 +128,143 @@ abstract class Shape extends Renderable {
     super();
     this.color = color;
     this.borderColor = borderColor;
+  }
+}
+
+class Path extends Shape {
+  segments  : PathSegment[];
+  initX     : number;
+  initY     : number;
+  constructor( initX = 0, initY = 0, color = "#f00", borderColor = "#000" ) {
+    super( color, borderColor );
+    this.initX = initX;
+    this.initY = initY;
+    this.segments = [];
+  }
+
+  addSegments = ( segments : PathSegment[] ) : void => {
+    segments.forEach( ( segment ) => { this.addSegment( segment ); } );
+  }
+
+  addSegment = ( segment : PathSegment ) : void => {
+    this.segments.push( segment );
+  }
+
+  removeSegment = () : PathSegment => {
+    return this.segments.pop();
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    ctx.beginPath();
+    ctx.moveTo( this.initX, this.initY );
+    this.segments.forEach( ( segment : PathSegment ) => {
+      segment.render( ctx );
+    });
+    ctx.closePath();
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.strokeStyle = this.borderColor;
+    ctx.stroke();
+  }
+}
+
+abstract class PathSegment extends Renderable {
+}
+
+class LineSegment extends PathSegment {
+  x  : number;
+  y  : number;
+  constructor( x : number, y : number ) {
+    super();
+    this.x = x;
+    this.y = y;
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    ctx.lineTo( this.x, this.y );
+  }
+}
+
+class ArcSegment extends PathSegment {
+  x : number;
+  y : number;
+  r : number;
+  startAngle    : number;
+  endAngle      : number;
+  antiClockwise : boolean;
+
+  constructor( x : number, y : number, r : number, startAngle = 0.0, endAngle = Math.PI * 2, antiClockwise = false ) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.r = r;
+    this.startAngle = startAngle;
+    this.endAngle   = endAngle;
+    this.antiClockwise = antiClockwise;
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    ctx.arc( this.x, this.y, this.r, this.startAngle, this.endAngle, this.antiClockwise );
+  }
+}
+
+class ArcToSegment extends PathSegment {
+  x1  : number;
+  y1  : number;
+  x2  : number;
+  y2  : number;
+  rad : number;
+  constructor( x1 : number, y1 : number, x2 : number, y2 : number, rad : number ) {
+    super();
+    this.x1 = x1;
+    this.y1 = y1;
+    this.x2 = x2;
+    this.y2 = y2;
+    this.rad = rad;
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    ctx.arcTo( this.x1, this.y1, this.x2, this.y2, this.rad );
+  }
+}
+
+class QuadraticSegment extends PathSegment {
+  cx  : number;
+  cy  : number;
+  x   : number;
+  y   : number;
+  constructor( cx : number, cy : number, x : number, y : number ) {
+    super();
+    this.cx = cx;
+    this.cy = cy;
+    this.x = x;
+    this.y = y;
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    ctx.quadraticCurveTo( this.cx, this.cy, this.x, this.y );
+  }
+}
+
+class BezierSegment extends PathSegment {
+  cx1   : number;
+  cy1   : number;
+  cx2   : number;
+  cy2   : number;
+  x     : number;
+  y     : number;
+  constructor( cx1 : number, cy1 : number, cx2 : number, cy2 : number, x : number, y : number ) {
+    super();
+    this.cx1 = cx1;
+    this.cy1 = cy1;
+    this.cx2 = cx2;
+    this.cy2 = cy2;
+    this.x = x;
+    this.y = y;
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    ctx.bezierCurveTo( this.cx1, this.cy1, this.cx2, this.cy2, this.x, this.y );
   }
 }
 
@@ -218,6 +356,35 @@ class Circle extends Shape {
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+    return;
+  }
+}
+
+class Collection extends Renderable {
+  items : Renderable[];
+  constructor( items : Renderable[] = [] ) {
+    super();
+    this.items = items;
+  }
+
+  mapItems = ( f : ( item : Renderable ) => Renderable ) : void => {
+    this.items = this.items.map( f );
+  }
+
+  addItems = ( items : Renderable[] ) : void => {
+    items.forEach( ( item : Renderable ) => { this.addItem( item ) } );
+    return;
+  }
+
+  addItem = ( item : Renderable ) : void => {
+    this.items.push( item );
+    return;
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    this.items.forEach( ( item : Renderable ) => {
+      item.render( ctx );
+    });
     return;
   }
 }

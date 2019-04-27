@@ -19,7 +19,7 @@ var Game = /** @class */ (function () {
             _this.background.attachToParent(document.getElementById("hidden"));
         };
         this.startGame = function () {
-            _this.gameTickUpdateInt = setInterval(function () { _this.gameTick(); }, 100);
+            _this.gameTickUpdateInt = setInterval(function () { _this.gameTick(); }, Math.round(1000 / 32));
             _this.sendServerUpdateInt = setInterval(function () { sendServerUpdate(); }, 40);
             _this.populateSidebar();
         };

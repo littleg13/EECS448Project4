@@ -130,7 +130,7 @@ class Bullet extends Entity {
     this.layer.applyTranslate( this.xPos * 40, this.yPos * 40 );
     this.layer.applyRotation( this.dir );
     this.layer.drawItem( this.sprite );
-    this.layer.drawItem( this.hitbox );
+//    this.layer.drawItem( this.hitbox );
     this.layer.popTransform();
     this.layer.popTransform();
   }

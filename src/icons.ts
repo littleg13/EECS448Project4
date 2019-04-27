@@ -134,9 +134,9 @@ class TankSprite extends Renderable {
     this.hitbox     = new Rect( -20, -20, 40, 40, "#ccc", "#000" );
     this.leftTread  = new Tread( -17.5 );
     this.rightTread = new Tread(   7.5 );
-    this.body       = new RoundRect( -12.5, -20, 25, 40, 2.5, color, "#000" );
+    this.body       = new RoundRect( -12.5, -20, 25, 40, 3, color, "#000" );
     this.barrel     = new Rect( -5,   -20, 10, 25, color, "#000" );
-    this.cap        = new Rect( -7.5, -25, 15, 7.5, color, "#000" );
+    this.cap        = new RoundRect( -7.5, -25, 15, 7.5, 2.5, color, "#000" );
     this.turret     = new Circle( 0, 0, 10, color, "#000" );
   }
 
@@ -179,28 +179,32 @@ class TankSprite extends Renderable {
 
 class BulletSprite extends Animated {
   hitbox : Rect;
+  body   : Path;
   constructor() {
     super();
+    this.body = new Path( -5,  5, "#606060" );
+    let segments = [
+      new LineSegment( 5,   5 ),
+      new LineSegment( 5, -10 ),
+      new ArcSegment( 0, -10, 5, 0.0, Math.PI, true )
+    ];
+    this.body.addSegments( segments );
   }
 
   render = ( ctx : CanvasRenderingContext2D ) : void => {
     ctx.save();
-    ctx.fillStyle = "#999";
-    ctx.strokeStyle = "#000";
-    ctx.beginPath();
-    ctx.moveTo( -5,  5 );
-    ctx.lineTo(  5,  5 );
-    ctx.lineTo(  5, -10 );
-    ctx.arc( 0, -10, 5, 0, Math.PI, true );
-    ctx.closePath();
-    ctx.stroke();
-    ctx.fill();
+    this.body.render( ctx );
     ctx.fillStyle = "#333";
     ctx.fillRect( -4, 2, 8, 2 );
     ctx.restore();
   }
+}
 
-  update = () : void => {
-    return;
+class ExplosionSprite extends Animated {
+  constructor() {
+    super();
+  }
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+
   }
 }

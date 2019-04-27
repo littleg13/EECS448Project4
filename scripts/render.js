@@ -76,6 +76,8 @@ var Counter = /** @class */ (function () {
         var _this = this;
         if (delta === void 0) { delta = 1; }
         if (max === void 0) { max = Infinity; }
+        this.onInc = function () { };
+        this.onDec = function () { };
         this.inc = function (delta) {
             if (delta === void 0) { delta = 0; }
             delta = Math.max(delta, _this.delta);
@@ -133,6 +135,130 @@ var Shape = /** @class */ (function (_super) {
     }
     return Shape;
 }(Renderable));
+var Path = /** @class */ (function (_super) {
+    __extends(Path, _super);
+    function Path(initX, initY, color, borderColor) {
+        if (initX === void 0) { initX = 0; }
+        if (initY === void 0) { initY = 0; }
+        if (color === void 0) { color = "#f00"; }
+        if (borderColor === void 0) { borderColor = "#000"; }
+        var _this = _super.call(this, color, borderColor) || this;
+        _this.addSegments = function (segments) {
+            segments.forEach(function (segment) { _this.addSegment(segment); });
+        };
+        _this.addSegment = function (segment) {
+            _this.segments.push(segment);
+        };
+        _this.removeSegment = function () {
+            return _this.segments.pop();
+        };
+        _this.render = function (ctx) {
+            ctx.beginPath();
+            ctx.moveTo(_this.initX, _this.initY);
+            _this.segments.forEach(function (segment) {
+                segment.render(ctx);
+            });
+            ctx.closePath();
+            ctx.fillStyle = _this.color;
+            ctx.fill();
+            ctx.strokeStyle = _this.borderColor;
+            ctx.stroke();
+        };
+        _this.initX = initX;
+        _this.initY = initY;
+        _this.segments = [];
+        return _this;
+    }
+    return Path;
+}(Shape));
+var PathSegment = /** @class */ (function (_super) {
+    __extends(PathSegment, _super);
+    function PathSegment() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return PathSegment;
+}(Renderable));
+var LineSegment = /** @class */ (function (_super) {
+    __extends(LineSegment, _super);
+    function LineSegment(x, y) {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            ctx.lineTo(_this.x, _this.y);
+        };
+        _this.x = x;
+        _this.y = y;
+        return _this;
+    }
+    return LineSegment;
+}(PathSegment));
+var ArcSegment = /** @class */ (function (_super) {
+    __extends(ArcSegment, _super);
+    function ArcSegment(x, y, r, startAngle, endAngle, antiClockwise) {
+        if (startAngle === void 0) { startAngle = 0.0; }
+        if (endAngle === void 0) { endAngle = Math.PI * 2; }
+        if (antiClockwise === void 0) { antiClockwise = false; }
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            ctx.arc(_this.x, _this.y, _this.r, _this.startAngle, _this.endAngle, _this.antiClockwise);
+        };
+        _this.x = x;
+        _this.y = y;
+        _this.r = r;
+        _this.startAngle = startAngle;
+        _this.endAngle = endAngle;
+        _this.antiClockwise = antiClockwise;
+        return _this;
+    }
+    return ArcSegment;
+}(PathSegment));
+var ArcToSegment = /** @class */ (function (_super) {
+    __extends(ArcToSegment, _super);
+    function ArcToSegment(x1, y1, x2, y2, rad) {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            ctx.arcTo(_this.x1, _this.y1, _this.x2, _this.y2, _this.rad);
+        };
+        _this.x1 = x1;
+        _this.y1 = y1;
+        _this.x2 = x2;
+        _this.y2 = y2;
+        _this.rad = rad;
+        return _this;
+    }
+    return ArcToSegment;
+}(PathSegment));
+var QuadraticSegment = /** @class */ (function (_super) {
+    __extends(QuadraticSegment, _super);
+    function QuadraticSegment(cx, cy, x, y) {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            ctx.quadraticCurveTo(_this.cx, _this.cy, _this.x, _this.y);
+        };
+        _this.cx = cx;
+        _this.cy = cy;
+        _this.x = x;
+        _this.y = y;
+        return _this;
+    }
+    return QuadraticSegment;
+}(PathSegment));
+var BezierSegment = /** @class */ (function (_super) {
+    __extends(BezierSegment, _super);
+    function BezierSegment(cx1, cy1, cx2, cy2, x, y) {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            ctx.bezierCurveTo(_this.cx1, _this.cy1, _this.cx2, _this.cy2, _this.x, _this.y);
+        };
+        _this.cx1 = cx1;
+        _this.cy1 = cy1;
+        _this.cx2 = cx2;
+        _this.cy2 = cy2;
+        _this.x = x;
+        _this.y = y;
+        return _this;
+    }
+    return BezierSegment;
+}(PathSegment));
 var Point = /** @class */ (function () {
     function Point(x, y) {
         this.x = x;
@@ -217,3 +343,30 @@ var Circle = /** @class */ (function (_super) {
     }
     return Circle;
 }(Shape));
+var Collection = /** @class */ (function (_super) {
+    __extends(Collection, _super);
+    function Collection(items) {
+        if (items === void 0) { items = []; }
+        var _this = _super.call(this) || this;
+        _this.mapItems = function (f) {
+            _this.items = _this.items.map(f);
+        };
+        _this.addItems = function (items) {
+            items.forEach(function (item) { _this.addItem(item); });
+            return;
+        };
+        _this.addItem = function (item) {
+            _this.items.push(item);
+            return;
+        };
+        _this.render = function (ctx) {
+            _this.items.forEach(function (item) {
+                item.render(ctx);
+            });
+            return;
+        };
+        _this.items = items;
+        return _this;
+    }
+    return Collection;
+}(Renderable));

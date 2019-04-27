@@ -55,27 +55,41 @@ var MapTile = /** @class */ (function (_super) {
 }(Renderable));
 var WallTile = /** @class */ (function (_super) {
     __extends(WallTile, _super);
-    function WallTile() {
+    function WallTile(initHealth) {
+        if (initHealth === void 0) { initHealth = 5; }
         var _this = _super.call(this) || this;
+        _this.onHit = function (damage) {
+            _this.health.dec(damage);
+            _this.update();
+        };
+        _this.update = function () {
+            var val = _this.health.get();
+            _this.items.mapItems(function (item) {
+                if (item instanceof RoundRect) {
+                    item.rad = val;
+                }
+                return item;
+            });
+        };
         _this.render = function (ctx) {
-            ctx.fillStyle = "#000000";
-            ctx.fillRect(0, 0, 40, 40);
-            ctx.fillStyle = "#C0C0FF";
-            ctx.fillRect(1, 2, 18, 7);
-            ctx.fillRect(21, 2, 18, 7);
-            ctx.fillStyle = "#A0A0FF";
-            ctx.fillRect(1, 11, 8, 7);
-            ctx.fillRect(11, 11, 18, 7);
-            ctx.fillRect(31, 11, 8, 7);
-            ctx.fillStyle = "#9090FF";
-            ctx.fillRect(1, 20, 18, 7);
-            ctx.fillRect(21, 20, 18, 7);
-            ctx.fillStyle = "#6060FF";
-            ctx.fillRect(1, 29, 8, 7);
-            ctx.fillRect(11, 29, 18, 7);
-            ctx.fillRect(31, 29, 8, 7);
+            _this.items.render(ctx);
         };
         _this.isBlocking = true;
+        var items = [
+            new RoundRect(0, 0, 40, 40, 3, "#000000", "rgba(0,0,0,0)"),
+            new RoundRect(1, 2, 18, 7, 3, "#c0c0c0", "rgba(0,0,0,0)"),
+            new RoundRect(21, 2, 18, 7, 3, "#c0c0c0", "rgba(0,0,0,0)"),
+            new RoundRect(1, 11, 8, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
+            new RoundRect(11, 11, 18, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
+            new RoundRect(31, 11, 8, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
+            new RoundRect(1, 20, 18, 7, 3, "#909090", "rgba(0,0,0,0)"),
+            new RoundRect(21, 20, 18, 7, 3, "#909090", "rgba(0,0,0,0)"),
+            new RoundRect(1, 29, 8, 7, 3, "#606060", "rgba(0,0,0,0)"),
+            new RoundRect(11, 29, 18, 7, 3, "#606060", "rgba(0,0,0,0)"),
+            new RoundRect(31, 29, 8, 7, 3, "#606060", "rgba(0,0,0,0)")
+        ];
+        _this.items = new Collection(items);
+        _this.health = new Counter(initHealth);
         return _this;
     }
     return WallTile;
@@ -87,6 +101,10 @@ var FloorTile = /** @class */ (function (_super) {
         _this.render = function (ctx) {
             ctx.fillStyle = "#963";
             ctx.fillRect(0, 0, 40, 40);
+            var stone = new Path(10, 10, "#303030", "#303060");
+            var shapes = [];
+            stone.addSegments(shapes);
+            stone.render(ctx);
         };
         return _this;
     }

@@ -60,7 +60,7 @@ class Game {
   }
 
   startGame = () : void => {
-    this.gameTickUpdateInt = setInterval( () => { this.gameTick(); } , 100 );
+    this.gameTickUpdateInt = setInterval( () => { this.gameTick(); } , Math.round( 1000 / 32 ) );
     this.sendServerUpdateInt = setInterval( () => { sendServerUpdate(); }, 40 );
     this.populateSidebar();
   }

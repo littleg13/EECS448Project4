@@ -163,9 +163,9 @@ var TankSprite = /** @class */ (function (_super) {
         _this.hitbox = new Rect(-20, -20, 40, 40, "#ccc", "#000");
         _this.leftTread = new Tread(-17.5);
         _this.rightTread = new Tread(7.5);
-        _this.body = new RoundRect(-12.5, -20, 25, 40, 2.5, color, "#000");
+        _this.body = new RoundRect(-12.5, -20, 25, 40, 3, color, "#000");
         _this.barrel = new Rect(-5, -20, 10, 25, color, "#000");
-        _this.cap = new Rect(-7.5, -25, 15, 7.5, color, "#000");
+        _this.cap = new RoundRect(-7.5, -25, 15, 7.5, 2.5, color, "#000");
         _this.turret = new Circle(0, 0, 10, color, "#000");
         return _this;
     }
@@ -177,24 +177,29 @@ var BulletSprite = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.render = function (ctx) {
             ctx.save();
-            ctx.fillStyle = "#999";
-            ctx.strokeStyle = "#000";
-            ctx.beginPath();
-            ctx.moveTo(-5, 5);
-            ctx.lineTo(5, 5);
-            ctx.lineTo(5, -10);
-            ctx.arc(0, -10, 5, 0, Math.PI, true);
-            ctx.closePath();
-            ctx.stroke();
-            ctx.fill();
+            _this.body.render(ctx);
             ctx.fillStyle = "#333";
             ctx.fillRect(-4, 2, 8, 2);
             ctx.restore();
         };
-        _this.update = function () {
-            return;
-        };
+        _this.body = new Path(-5, 5, "#606060");
+        var segments = [
+            new LineSegment(5, 5),
+            new LineSegment(5, -10),
+            new ArcSegment(0, -10, 5, 0.0, Math.PI, true)
+        ];
+        _this.body.addSegments(segments);
         return _this;
     }
     return BulletSprite;
+}(Animated));
+var ExplosionSprite = /** @class */ (function (_super) {
+    __extends(ExplosionSprite, _super);
+    function ExplosionSprite() {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+        };
+        return _this;
+    }
+    return ExplosionSprite;
 }(Animated));

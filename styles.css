@@ -13,7 +13,7 @@ main, header, footer {
   height: 100%;
   max-width: 800px;
   text-align: center;
-  display: none;
+  display: block;
   background-color: rgba(127, 127, 127, 0.50);
   border: 1px solid black;
   border-radius: 1em;
