@@ -103,7 +103,43 @@
         <div id="rightSide" class="sidebar">
           <div id="additionalInfo">
             <div id="userInfo">
-              <div id="spin"><input type="range" min="-100" max="100" value="0" class="slider" id="spinSlider"></div>
+              <div id="userCard">
+              </div>
+              <div id="spin">
+                <label for="spinSlider">Spin</label><br>
+                <input type="range" list="spinTicks" min="-1" max="1" value="0" step="0.1" class="slider" id="spinSlider">
+                <datalist id="spinTicks">
+                  <option value="-1.0">
+                  <option value="-0.8">
+                  <option value="-0.6">
+                  <option value="-0.4">
+                  <option value="-0.2">
+                  <option value="0">
+                  <option value="0.2">
+                  <option value="0.4">
+                  <option value="0.6">
+                  <option value="0.8">
+                  <option value="1.0">
+                </datalist>
+                <input type="number" id="spinDisplay" value="0" disabled style="text-align: center; border: none; border-radius: 0.5em;">
+
+                <label for="powerSlider">Power</label><br>
+                <input type="range" list="powerTicks" min="0.0" max="5.0" value="0" step="0.5" class="slider" id="powerSlider">
+                <datalist id="powerTicks">
+                  <option value="0.0">
+                  <option value="0.5">
+                  <option value="1.0">
+                  <option value="1.5">
+                  <option value="2.0">
+                  <option value="2.5">
+                  <option value="3.0">
+                  <option value="3.5">
+                  <option value="4.0">
+                  <option value="4.5">
+                  <option value="5.0">
+                </datalist>
+                <input type="number" id="powerDisplay" value="0" disabled style="text-align: center; border: none; border-radius: 0.5em;">
+              </div>
             </div>
             <div id="lobbyInfo"></div>
           </div>

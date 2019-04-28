@@ -43,7 +43,7 @@ var Game = /** @class */ (function () {
             _this.tanks.push(new Tank(xPos, yPos, direction, username, userID, color, health));
         };
         this.populateSidebar = function () {
-            var userInfoDiv = document.getElementById("userInfo");
+            var userInfoDiv = document.getElementById("userCard");
             var lobbyInfoDiv = document.getElementById("lobbyInfo");
             _this.tanks.map(function (tank) {
                 var userID = tank.userID;
@@ -91,15 +91,55 @@ var Game = /** @class */ (function () {
         };
         this.processInput = function () {
             var player = _this.getPlayer();
+            if (_this.keys["a"]) {
+                var spin = document.getElementById("spinSlider");
+                var disp = document.getElementById("spinDisplay");
+                if (!(spin instanceof HTMLInputElement))
+                    return;
+                if (!(disp instanceof HTMLInputElement))
+                    return;
+                spin.stepDown();
+                disp.value = spin.value;
+            }
+            if (_this.keys["d"]) {
+                var spin = document.getElementById("spinSlider");
+                var disp = document.getElementById("spinDisplay");
+                if (!(spin instanceof HTMLInputElement))
+                    return;
+                if (!(disp instanceof HTMLInputElement))
+                    return;
+                spin.stepUp();
+                disp.value = spin.value;
+            }
+            if (_this.keys["s"]) {
+                var powr = document.getElementById("powerSlider");
+                var disp = document.getElementById("powerDisplay");
+                if (!(powr instanceof HTMLInputElement))
+                    return;
+                if (!(disp instanceof HTMLInputElement))
+                    return;
+                powr.stepDown();
+                disp.value = powr.value;
+            }
+            if (_this.keys["w"]) {
+                var powr = document.getElementById("powerSlider");
+                var disp = document.getElementById("powerDisplay");
+                if (!(powr instanceof HTMLInputElement))
+                    return;
+                if (!(disp instanceof HTMLInputElement))
+                    return;
+                powr.stepUp();
+                disp.value = powr.value;
+            }
             if (_this.curTurn != localStorage.userID)
                 return;
-            if (_this.keys["ArrowLeft"] || _this.keys["a"]) {
+            if (_this.keys["ArrowLeft"]) {
                 if (_this.checkMapCollision(player, 0, -1.0)) {
                     player.rotateCCW(2.0);
                     _this.setPlayerMoved();
                 }
             }
-            if (_this.keys["ArrowRight"] || _this.keys["d"]) {
+            if (_this.keys["ArrowRight"]) {
                 if (_this.checkMapCollision(player, 0, 1.0)) {
                     player.rotateCW(2.0);
                     _this.setPlayerMoved();
@@ -114,13 +154,13 @@ var Game = /** @class */ (function () {
             if (player.distanceLeft <= 0)
                 return;
             var deltaPos = Math.min(player.distanceLeft, 0.125);
-            if (_this.keys["ArrowUp"] || _this.keys["w"]) {
+            if (_this.keys["ArrowUp"]) {
                 if (_this.checkMapCollision(player, 0.125, 0)) {
                     player.moveForward(0.125);
                     _this.setPlayerMoved();
                 }
             }
-            if (_this.keys["ArrowDown"] || _this.keys["s"]) {
+            if (_this.keys["ArrowDown"]) {
                 if (_this.checkMapCollision(player, -0.125, 0)) {
                     player.moveBackward(0.125);
                     _this.setPlayerMoved();

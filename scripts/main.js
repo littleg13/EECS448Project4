@@ -368,14 +368,14 @@ var handleKeyDown = (evt) => {
   * @param{Event} evt The event object which gives access to key information.
   */
   var handleKeyUp = (evt) => {
-    if(evt.key == " "){
+    if( document.activeElement.getAttribute( "id" ) == "textBox" ) {
+      if( evt.key == "Enter" ) sendMsg();
+    }
+    else if(evt.key == " ") {
       game.keys[ evt.key ] = true;
       game.keys['spaceDown'] = false;
     }
-    else if (evt.key == "Enter" && document.activeElement == document.getElementById('textBox')) {
-      sendMsg();
-    }
-    else{
+    else {
       game.keys[ evt.key ] = false;
     }
   }
@@ -397,10 +397,10 @@ function sendServerUpdate() {
     }
     else if ( game.getPlayerShot() ) {
       let finalTime = new Date();
-      let power = Math.min(5, Math.max(0, (((finalTime - game.keyTimes[" "])-100)*5)/2000))
-      let spin = document.getElementById( "spinSlider" ).value / 100;
-      console.log( { spin : spin, power : power } );
-      socket.emit( "gameEvent", { eventType: "playerFire", power: power, spin: spin } );
+      let powr = document.getElementById( "powerSlider" ).valueAsNumber;
+      let spin = document.getElementById( "spinSlider" ).valueAsNumber;
+      console.log( { spin : spin, power : powr } );
+      socket.emit( "gameEvent", { eventType: "playerFire", power: powr, spin: spin } );
       game.setPlayerShot( false );
     }
   }

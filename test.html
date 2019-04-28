@@ -5,6 +5,7 @@
     <title>Rendering Test</title>
     <script src="scripts/render.js"></script>
     <script>
+/*
 var canvas;
 var curPath;
 var interval;
@@ -204,7 +205,56 @@ var previewMoveStart = () => {
   let x = startX.value;
   let y = startY.value;
   previewPoints.push( new Circle( x, y, 5, "red" ) );
+} */
+
+var canvas;
+var ctx;
+var width, height;
+var interval;
+var counter, counterMax;
+
+var drawStar = ( numPoints, innerR = 50, peak = 100, innerVar = 0, outerVar = 0, color = "red" ) => {
+  ctx.save();
+  ctx.translate( width/2, height/2 );
+//  ctx.rotate( Math.PI * Math.random() );
+  ctx.moveTo( 0, 0 );
+  ctx.beginPath();
+  for( let i = 0; i < numPoints / 2; i++ ) {
+    ctx.lineTo( 0, -( innerR - Math.random() * innerVar ) );
+    ctx.rotate( Math.PI / numPoints );
+    ctx.lineTo( 0, -( peak + Math.random() * outerVar ) );
+    ctx.rotate( Math.PI / numPoints );
+  }
+  ctx.lineTo( 0, -( innerR - Math.random() * innerVar ) );
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.restore();
 }
+
+var main = () => {
+  canvas = document.getElementById("canvas");
+  ctx = canvas.getContext("2d");
+  [width, height] = [canvas.width, canvas.height];
+  counter = 32;
+  counterMax = 32;
+  interval = setInterval( loop, Math.round( 1000 / 64 ) );
+}
+
+var loop = () => {
+  ctx.clearRect( 0, 0, width, height );
+  if( counter > 0 ) {
+    let diff = counterMax - counter;
+    let rati = diff / counterMax;
+    let factor = ( Math.pow( rati + 1, 2.5 ) );
+    drawStar( 16, 75 + 25 * factor, 100 + 25 * factor, 25 / ( rati + 1 ), 50 / ( rati + 1 ), "rgba( 190, " + ( rati * 190 ) + ", 0, " + ( 1 - rati ) + ")" );
+    drawStar( 16, 50 + diff,  75 + diff, counter / 2, counter / 2, "rgba( 255, " + ( rati * 255 ) + ", 0, " + ( 1 - rati ) + ")" );
+    counter--;
+  } else {
+    setTimeout( () => { counter = counterMax; }, 1000 );
+  }
+}
+
     </script>
     <style>
     body {
@@ -244,6 +294,7 @@ var previewMoveStart = () => {
     <textarea cols=75 rows=20 id="pathPrint">
     </textarea>
     <div id="canvasdiv">
+      <canvas id="canvas" width=500 height=500></canvas>
     </div>
     <div id="menus">
       <select onchange="changeMenu()" id="menuSelect">

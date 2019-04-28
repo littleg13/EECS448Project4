@@ -92,7 +92,7 @@ class Game {
   }
 
   populateSidebar = () : void => {
-    let userInfoDiv = document.getElementById("userInfo");
+    let userInfoDiv = document.getElementById("userCard");
     let lobbyInfoDiv = document.getElementById("lobbyInfo");
     this.tanks.map( ( tank ) => {
       let userID = tank.userID;
@@ -141,14 +141,48 @@ class Game {
 
   processInput = () : void => {
     let player = this.getPlayer();
+
+    if( this.keys["a"] ) {
+      let spin = document.getElementById( "spinSlider" );
+      let disp = document.getElementById( "spinDisplay" );
+      if( !( spin instanceof HTMLInputElement ) ) return;
+      if( !( disp instanceof HTMLInputElement ) ) return;
+      spin.stepDown();
+      disp.value = spin.value;
+    }
+    if( this.keys["d"] ) {
+      let spin = document.getElementById( "spinSlider" );
+      let disp = document.getElementById( "spinDisplay" );
+      if( !( spin instanceof HTMLInputElement ) ) return;
+      if( !( disp instanceof HTMLInputElement ) ) return;
+      spin.stepUp();
+      disp.value = spin.value;
+    }
+    if( this.keys["s"] ) {
+      let powr = document.getElementById( "powerSlider" );
+      let disp = document.getElementById( "powerDisplay" );
+      if( !( powr instanceof HTMLInputElement ) ) return;
+      if( !( disp instanceof HTMLInputElement ) ) return;
+      powr.stepDown();
+      disp.value = powr.value;
+    }
+    if( this.keys["w"] ) {
+      let powr = document.getElementById( "powerSlider" );
+      let disp = document.getElementById( "powerDisplay" );
+      if( !( powr instanceof HTMLInputElement ) ) return;
+      if( !( disp instanceof HTMLInputElement ) ) return;
+      powr.stepUp();
+      disp.value = powr.value;
+    }
+
     if( this.curTurn != localStorage.userID ) return;
-    if( this.keys["ArrowLeft"] || this.keys["a"] ) {
+    if( this.keys["ArrowLeft"] ) {
       if( this.checkMapCollision( player, 0, -1.0 ) ) {
         player.rotateCCW( 2.0 );
         this.setPlayerMoved();
       }
     }
-    if( this.keys["ArrowRight"] || this.keys["d"] ) {
+    if( this.keys["ArrowRight"] ) {
       if( this.checkMapCollision( player, 0, 1.0 ) ) {
         player.rotateCW( 2.0 );
         this.setPlayerMoved();
@@ -158,19 +192,19 @@ class Game {
       if( player.canShoot && !this.getPlayerShot() ) {
         this.setPlayerShot( true );
       }
-      this.keys[ " " ] = false;
+      this.keys[" "] = false;
     }
 
     if( player.distanceLeft <= 0 ) return;
     let deltaPos = Math.min( player.distanceLeft, 0.125 );
 
-    if( this.keys["ArrowUp"] || this.keys["w"] ) {
+    if( this.keys["ArrowUp"] ) {
       if( this.checkMapCollision( player, 0.125, 0 ) ) {
         player.moveForward( 0.125 );
         this.setPlayerMoved();
       }
     }
-    if( this.keys["ArrowDown"] || this.keys["s"] ) {
+    if( this.keys["ArrowDown"] ) {
       if( this.checkMapCollision( player, -0.125, 0) ) {
         player.moveBackward( 0.125 );
         this.setPlayerMoved();
