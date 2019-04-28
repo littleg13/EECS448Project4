@@ -437,5 +437,9 @@ var chatMsg = ( data ) => {
 socket.on( "chatMsg", chatMsg );
 
 var resetChatHeader = () => {
+  let header = document.getElementById( "chatHeader" );
+  if( header.innerHTML == "Show Chat" ) { header.innerHTML = "Hide Chat"; }
+  else { header.innerHTML = "Show Chat"; }
   document.getElementById( "chatHeader" ).classList.remove( "newMessage" );
+
 }

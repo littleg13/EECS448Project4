@@ -152,9 +152,11 @@ var Game = /** @class */ (function () {
             }
         };
         this.updateTurn = function (userID) {
-            var player = _this.getPlayer(userID);
-            player.canShoot = true;
-            player.distanceLeft = 5.0;
+            var prevPlayer = _this.getPlayer(_this.curTurn);
+            if (prevPlayer != undefined) {
+                prevPlayer.setTurn(false);
+            }
+            _this.getPlayer(userID).setTurn(true);
             _this.curTurn = userID;
         };
         this.fire = function (shooterID, power, curve, dist) {

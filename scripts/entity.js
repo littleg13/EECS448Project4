@@ -70,6 +70,12 @@ var Tank = /** @class */ (function (_super) {
             _this.infoCard.updateHealth(health);
             _this.nameTag.updateHealth(health);
         };
+        _this.setTurn = function (isTurn) {
+            if (isTurn === void 0) { isTurn = false; }
+            _this.canShoot = true;
+            _this.distanceLeft = 5.0;
+            _this.infoCard.setTurn(isTurn);
+        };
         _this.xPos = xPos;
         _this.yPos = yPos;
         _this.dir = dir;

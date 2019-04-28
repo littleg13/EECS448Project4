@@ -32,7 +32,15 @@ var PlayerCard = /** @class */ (function () {
             console.log("Update health to: " + newHealth);
             var healthDiv = _this.rootDiv.getElementsByClassName("tankHealth")[0];
             var curHealthDiv = healthDiv.getElementsByClassName("curTankHealth")[0];
-            curHealthDiv.style.width = newHealth + "%";
+            if (curHealthDiv instanceof HTMLElement)
+                curHealthDiv.style.width = newHealth + "%";
+        };
+        this.setTurn = function (isTurn) {
+            if (isTurn === void 0) { isTurn = false; }
+            if (isTurn)
+                _this.rootDiv.classList.add("isTurn");
+            else
+                _this.rootDiv.classList.remove("isTurn");
         };
         this.userID = userID;
         this.playerName = playerName;

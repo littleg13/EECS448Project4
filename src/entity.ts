@@ -88,6 +88,12 @@ class Tank extends Entity {
     this.infoCard.updateHealth( health );
     this.nameTag.updateHealth( health );
   }
+
+  setTurn = ( isTurn : boolean = false) : void => {
+    this.canShoot = true;
+    this.distanceLeft = 5.0;
+    this.infoCard.setTurn( isTurn );
+  }
 }
 
 class Bullet extends Entity {

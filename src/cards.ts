@@ -48,6 +48,11 @@ class PlayerCard {
     console.log( "Update health to: " + newHealth );
     let healthDiv = this.rootDiv.getElementsByClassName( "tankHealth" )[0];
     let curHealthDiv = healthDiv.getElementsByClassName( "curTankHealth" )[0];
-    curHealthDiv.style.width = newHealth + "%";
+    if( curHealthDiv instanceof HTMLElement ) curHealthDiv.style.width = newHealth + "%";
+  }
+
+  setTurn = ( isTurn : boolean = false ) : void => {
+    if( isTurn ) this.rootDiv.classList.add( "isTurn" );
+    else this.rootDiv.classList.remove( "isTurn" );
   }
 }

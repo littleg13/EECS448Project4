@@ -203,9 +203,9 @@ class Game {
   }
 
   updateTurn = ( userID : string ) => {
-    let player = this.getPlayer( userID );
-    player.canShoot = true;
-    player.distanceLeft = 5.0;
+    let prevPlayer = this.getPlayer( this.curTurn );
+    if( prevPlayer != undefined ) { prevPlayer.setTurn( false ); }
+    this.getPlayer( userID ).setTurn( true );
     this.curTurn = userID;
   }
 
