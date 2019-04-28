@@ -425,12 +425,12 @@ var main = () => {
 };
 
 var sendMsg = () => {
-  let user = localStorage.userID;
+  let username = localStorage.username;
   let textbox = document.getElementById('textBox');
   let text = textbox.value;
   textbox.value = "";
   if( text.length > 0 ) {
-    socket.emit( "sendMsg", { sender: userID, content: text } );
+    socket.emit( "sendMsg", { sender: username, content: text } );
   }
 };
 

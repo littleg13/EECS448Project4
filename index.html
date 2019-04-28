@@ -98,19 +98,6 @@
     </main>
     <div id="game">
       <div id="gameBody">
-        <input type="checkbox" id="chatToggle" class="toggle" onchange="resetChatHeader()">
-        <div class="sidebar" id="leftSide">
-          <div class="container" id="chatWindow">
-            <label for="chatToggle">
-              <div id="chatHeader">Show Chat</div>
-            </label>
-            <div class="container" id="messageWindow"></div>
-            <div id="chatBox">
-              <input type="text" id="textBox"></input>
-              <input type="submit" value="enter" onclick="sendMsg()">
-            </div>
-          </div>
-        </div>
         <div id="center">
         </div>
         <div id="rightSide" class="sidebar">
@@ -120,6 +107,17 @@
             </div>
             <div id="lobbyInfo"></div>
           </div>
+        </div>
+      </div>
+      <input type="checkbox" id="chatToggle" class="toggle" onchange="resetChatHeader()">
+      <div class="container" id="chatWindow">
+        <label for="chatToggle">
+          <div id="chatHeader">Show Chat</div>
+        </label>
+        <div class="container" id="messageWindow"></div>
+        <div id="chatBox">
+          <input type="text" id="textBox"></input>
+          <input type="submit" value="Send" onclick="sendMsg()">
         </div>
       </div>
       <button type="button" onclick="logout()">Exit</button>
