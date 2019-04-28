@@ -1,7 +1,24 @@
 // Declared handlers, defined in main.
-var handleKeyUp = ( evt : Event ) : void => {}
-var handleKeyDown = ( evt : Event ) : void => {}
 var sendServerUpdate = () : void => {}
+
+var unpackPowerupData = ( str : string ) : Powerup => {
+  switch( str ) {
+    case "multiShot":
+      return new MultiShotToken();
+      break;
+    case "buildWall":
+      return new BuildWallToken();
+      break;
+    case "increaseMoveDist":
+      return new IncreaseMoveDistToken();
+      break;
+    case "healthPack":
+      return new HealthPackToken();
+      break;
+    default:
+      break;
+  }
+}
 
 class Game {
   background  : Layer;
@@ -16,6 +33,7 @@ class Game {
   curBoxDim   : number;
   tileDim     : number;
   bullets     : Bullet[];
+  powerups    : Powerup[];
   keys        : string[];
   keyTimes;
   movedSinceLastTransmit : boolean;
@@ -35,6 +53,7 @@ class Game {
     this.curBoxDim = 40;
     this.tileDim   = 40;
     this.bullets   = [];
+    this.powerups  = [];
     this.keys      = [];
     this.keyTimes  = {};
     this.movedSinceLastTransmit = false;
@@ -181,6 +200,13 @@ class Game {
     this.getPlayer( userID ).setHealth( health );
   }
 
+  updateTankPowerups = ( userID : string, powerups : string[] ) : void => {
+    let objs = powerups.map( ( str : string ) : Powerup => {
+      return new Powerup();
+    } );
+    this.getPlayer( userID ).addPowerups( objs );
+  }
+
   updateTankPosition = ( userID : string, newXPos : number, newYPos: number, newDirection : number ) : void => {
     let tank = this.getPlayer( userID );
     let deltaDir = ( ( newDirection * 180.0 / Math.PI ) - tank.dir ) % 360.0;
@@ -207,6 +233,10 @@ class Game {
     if( prevPlayer != undefined ) { prevPlayer.setTurn( false ); }
     this.getPlayer( userID ).setTurn( true );
     this.curTurn = userID;
+  }
+
+  updatePowerups = ( powerups : string[] ) : void => {
+    this.powerups = powerups.map( unpackPowerupData );
   }
 
   fire = ( shooterID : string, power : number, curve : number, dist : number ) => {
@@ -272,6 +302,12 @@ class Game {
     this.gameview.popTransform();
   }
 
+  renderPowerups = () : void => {
+    this.powerups.forEach( ( powerup : Powerup ) : void => {
+      powerup.render();
+    } );
+  }
+
   renderEffects = () : void => {
     this.effects.clear();
     if( this.curTurn == localStorage.userID ) {
@@ -281,15 +317,10 @@ class Game {
       this.effects.popTransform();
     }
     this.renderBullets();
+    this.renderPowerups();
     this.gameview.addLayer( this.effects );
   }
 
-/**
-* To-do:
-*   [ ] - Collision Check
-*   [ ] - On collision, trigger animation
-*   [ ] - Create animation
-*/
   renderBullets = () : void => {
     this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
       bullet.render();
@@ -303,7 +334,6 @@ class Game {
     this.gameview.applyScale( this.scale, this.scale );
     this.renderMap();
     this.renderEffects();
-    this.renderBullets();
     this.renderTanks();
     this.gameview.popTransform();
   }

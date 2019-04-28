@@ -1,7 +1,23 @@
 // Declared handlers, defined in main.
-var handleKeyUp = function (evt) { };
-var handleKeyDown = function (evt) { };
 var sendServerUpdate = function () { };
+var unpackPowerupData = function (str) {
+    switch (str) {
+        case "multiShot":
+            return new MultiShotToken();
+            break;
+        case "buildWall":
+            return new BuildWallToken();
+            break;
+        case "increaseMoveDist":
+            return new IncreaseMoveDistToken();
+            break;
+        case "healthPack":
+            return new HealthPackToken();
+            break;
+        default:
+            break;
+    }
+};
 var Game = /** @class */ (function () {
     function Game(mapDim) {
         var _this = this;
@@ -130,6 +146,12 @@ var Game = /** @class */ (function () {
         this.updateTankHealth = function (userID, health) {
             _this.getPlayer(userID).setHealth(health);
         };
+        this.updateTankPowerups = function (userID, powerups) {
+            var objs = powerups.map(function (str) {
+                return new Powerup();
+            });
+            _this.getPlayer(userID).addPowerups(objs);
+        };
         this.updateTankPosition = function (userID, newXPos, newYPos, newDirection) {
             var tank = _this.getPlayer(userID);
             var deltaDir = ((newDirection * 180.0 / Math.PI) - tank.dir) % 360.0;
@@ -158,6 +180,9 @@ var Game = /** @class */ (function () {
             }
             _this.getPlayer(userID).setTurn(true);
             _this.curTurn = userID;
+        };
+        this.updatePowerups = function (powerups) {
+            _this.powerups = powerups.map(unpackPowerupData);
         };
         this.fire = function (shooterID, power, curve, dist) {
             var shooter = _this.getPlayer(shooterID);
@@ -217,6 +242,11 @@ var Game = /** @class */ (function () {
             // To-do: add nametag w/ health bar
             _this.gameview.popTransform();
         };
+        this.renderPowerups = function () {
+            _this.powerups.forEach(function (powerup) {
+                powerup.render();
+            });
+        };
         this.renderEffects = function () {
             _this.effects.clear();
             if (_this.curTurn == localStorage.userID) {
@@ -226,14 +256,9 @@ var Game = /** @class */ (function () {
                 _this.effects.popTransform();
             }
             _this.renderBullets();
+            _this.renderPowerups();
             _this.gameview.addLayer(_this.effects);
         };
-        /**
-        * To-do:
-        *   [ ] - Collision Check
-        *   [ ] - On collision, trigger animation
-        *   [ ] - Create animation
-        */
         this.renderBullets = function () {
             _this.bullets = _this.bullets.filter(function (bullet) {
                 bullet.render();
@@ -246,7 +271,6 @@ var Game = /** @class */ (function () {
             _this.gameview.applyScale(_this.scale, _this.scale);
             _this.renderMap();
             _this.renderEffects();
-            _this.renderBullets();
             _this.renderTanks();
             _this.gameview.popTransform();
         };
@@ -296,6 +320,7 @@ var Game = /** @class */ (function () {
         this.curBoxDim = 40;
         this.tileDim = 40;
         this.bullets = [];
+        this.powerups = [];
         this.keys = [];
         this.keyTimes = {};
         this.movedSinceLastTransmit = false;

@@ -1,3 +1,4 @@
+// const socket = io( "https://448.cuzzo.net" );
 const socket = io( "http://192.168.1.100:3000" );
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
@@ -309,6 +310,9 @@ var gameUpdateHandler = (data) => {
                                 data["newPos"][0], data["newPos"][1],
                                 data["newDir"]);
       }
+      if( data.playerPowerups ) {
+        game.updateTankPowerups( data.userID, data.playerPowerups );
+      }
       break;
     case "playerFire":
       if( data.mapUpdate ) {
@@ -327,6 +331,9 @@ var gameUpdateHandler = (data) => {
      case "advanceTurn":
       game.updateTurn( data["userID"] );
       break;
+  }
+  if( data.powerupsOnMap ) {
+    game.updatePowerupsOnMap( data.powerupsOnMap );
   }
 };
 socket.on("gameUpdate", gameUpdateHandler);
@@ -382,7 +389,6 @@ function sendServerUpdate() {
   if( myTurn ) {
     if( game.getPlayerMoved() ) {
       myPos = game.getPlayerPos();
-
       myDir = game.getPlayerDir() * Math.PI / 180.0;
       game.setPlayerMoved( false );
       socket.emit("gameEvent", { eventType: "playerMove",
@@ -419,11 +425,13 @@ var main = () => {
 };
 
 var sendMsg = () => {
-  let user = localStorage.username;
+  let user = localStorage.userID;
   let textbox = document.getElementById('textBox');
   let text = textbox.value;
   textbox.value = "";
-  socket.emit( "sendMsg", { sender: user, content: text } );
+  if( text.length > 0 ) {
+    socket.emit( "sendMsg", { sender: userID, content: text } );
+  }
 };
 
 var chatMsg = ( data ) => {
@@ -441,5 +449,4 @@ var resetChatHeader = () => {
   if( header.innerHTML == "Show Chat" ) { header.innerHTML = "Hide Chat"; }
   else { header.innerHTML = "Show Chat"; }
   document.getElementById( "chatHeader" ).classList.remove( "newMessage" );
-
 }

@@ -76,6 +76,10 @@ var Tank = /** @class */ (function (_super) {
             _this.distanceLeft = 5.0;
             _this.infoCard.setTurn(isTurn);
         };
+        _this.addPowerups = function (powerups) {
+            powerups.forEach(_this.addPowerup);
+        };
+        _this.addPowerup = function (powerup) { };
         _this.xPos = xPos;
         _this.yPos = yPos;
         _this.dir = dir;
@@ -132,3 +136,40 @@ var Bullet = /** @class */ (function (_super) {
     }
     return Bullet;
 }(Entity));
+var Powerup = /** @class */ (function (_super) {
+    __extends(Powerup, _super);
+    function Powerup() {
+        var _this = _super.call(this) || this;
+        _this.render = function () { };
+        return _this;
+    }
+    return Powerup;
+}(Entity));
+var MultiShotToken = /** @class */ (function (_super) {
+    __extends(MultiShotToken, _super);
+    function MultiShotToken() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return MultiShotToken;
+}(Powerup));
+var BuildWallToken = /** @class */ (function (_super) {
+    __extends(BuildWallToken, _super);
+    function BuildWallToken() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return BuildWallToken;
+}(Powerup));
+var IncreaseMoveDistToken = /** @class */ (function (_super) {
+    __extends(IncreaseMoveDistToken, _super);
+    function IncreaseMoveDistToken() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return IncreaseMoveDistToken;
+}(Powerup));
+var HealthPackToken = /** @class */ (function (_super) {
+    __extends(HealthPackToken, _super);
+    function HealthPackToken() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return HealthPackToken;
+}(Powerup));

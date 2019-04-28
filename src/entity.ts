@@ -94,6 +94,12 @@ class Tank extends Entity {
     this.distanceLeft = 5.0;
     this.infoCard.setTurn( isTurn );
   }
+
+  addPowerups = ( powerups : Powerup[] ) : void => {
+    powerups.forEach( this.addPowerup );
+  }
+
+  addPowerup = ( powerup : Powerup ) : void => {}
 }
 
 class Bullet extends Entity {
@@ -142,3 +148,19 @@ class Bullet extends Entity {
     if( this.distToGo <= this.distGone ) { this.detonate(); }
   }
 }
+
+class Powerup extends Entity {
+  constructor() {
+    super();
+  }
+
+  render = () : void => {}
+}
+
+class MultiShotToken extends Powerup {}
+
+class BuildWallToken extends Powerup {}
+
+class IncreaseMoveDistToken extends Powerup {}
+
+class HealthPackToken extends Powerup {}
