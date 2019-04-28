@@ -229,17 +229,18 @@ class Game {
   showMsg = ( username : string, text : string ) => {
     let messageWindow = document.getElementById( "messageWindow" );
     let msg = document.createElement( "div" );
+    if( username == this.getPlayer().playerName ) { msg.classList.add("self"); }
     msg.classList.add( "message" );
 
     let sender = document.createElement( "div" );
     sender.classList.add( "sender" );
-    sender.innerHTML = username + ": ";
-    msg.appendChild( sender );
+    sender.innerHTML = username;
 
     let content = document.createElement( "div" );
     content.classList.add( "content" );
     content.innerHTML = text;
     msg.appendChild( content );
+    msg.appendChild( sender );
 
     messageWindow.insertAdjacentElement( "beforeend", msg );
   }
@@ -264,6 +265,9 @@ class Game {
     tank.updateImage();
     this.gameview.applyTranslate( this.tileDim * tank.xPos, this.tileDim * tank.yPos );
     this.gameview.addLayer( tank.getLayer(), -10, -10 ); // Account for the padding on the sprite's canvas
+    this.gameview.applyTranslate( this.tileDim / 2, this.tileDim );
+    this.gameview.drawItem( tank.nameTag );
+    this.gameview.popTransform();
     // To-do: add nametag w/ health bar
     this.gameview.popTransform();
   }

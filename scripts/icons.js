@@ -171,6 +171,31 @@ var TankSprite = /** @class */ (function (_super) {
     }
     return TankSprite;
 }(Renderable));
+var NameTag = /** @class */ (function (_super) {
+    __extends(NameTag, _super);
+    function NameTag(playerName, health) {
+        if (health === void 0) { health = 100; }
+        var _this = _super.call(this) || this;
+        _this.updateHealth = function (health) {
+            _this.healthFill.w = 36 * health / 100;
+        };
+        _this.render = function (ctx) {
+            //    ctx.font = "0.75em Consolas";
+            //    ctx.fillText( this.playerName, -20, 0 );
+            _this.healthBar.render(ctx);
+            _this.healthFill.render(ctx);
+        };
+        while (playerName.indexOf("&lt;") != -1
+            || playerName.indexOf("&gt;") != -1) {
+            playerName = playerName.replace("&gt;", ">").replace("&lt;", "<");
+        }
+        _this.playerName = playerName;
+        _this.healthBar = new RoundRect(-20, 10, 40, 10, 5, "black");
+        _this.healthFill = new RoundRect(-18, 12.5, 36 * (health / 100), 5, 2.5, "red");
+        return _this;
+    }
+    return NameTag;
+}(Renderable));
 var BulletSprite = /** @class */ (function (_super) {
     __extends(BulletSprite, _super);
     function BulletSprite() {

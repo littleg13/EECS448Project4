@@ -177,6 +177,35 @@ class TankSprite extends Renderable {
   }
 }
 
+class NameTag extends Renderable {
+  playerName : string;
+  healthBar  : Rect;
+  healthFill : Rect;
+
+  constructor( playerName : string, health : number = 100 ) {
+    super();
+    while( playerName.indexOf( "&lt;" ) != -1
+        || playerName.indexOf( "&gt;" ) != -1 ) {
+      playerName = playerName.replace( "&gt;", ">" ).replace( "&lt;", "<" );
+    }
+
+    this.playerName = playerName;
+    this.healthBar = new RoundRect( -20, 10, 40, 10, 5, "black" );
+    this.healthFill = new RoundRect( -18, 12.5, 36 * ( health / 100 ), 5, 2.5, "red" );
+  }
+
+  updateHealth = ( health : number ) : void => {
+    this.healthFill.w = 36 * health / 100;
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+//    ctx.font = "0.75em Consolas";
+//    ctx.fillText( this.playerName, -20, 0 );
+    this.healthBar.render( ctx );
+    this.healthFill.render( ctx );
+  }
+}
+
 class BulletSprite extends Animated {
   hitbox : Rect;
   body   : Path;

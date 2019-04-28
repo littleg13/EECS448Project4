@@ -8,6 +8,7 @@
     <script src="scripts/socket.io.js"></script>
     <script src="scripts/render.js"></script>
     <script src="scripts/icons.js"></script>
+    <script src="scripts/cards.js"></script>
     <script src="scripts/entity.js"></script>
     <script src="scripts/map.js"></script>
     <script src="scripts/game.js"></script>
@@ -74,7 +75,7 @@
         <label for="lobbyCode">Enter a room code:</label><br>
         <input type='text' id="lobbyCode"><br>
         <button type='button' onclick="joinLobby()">Join Lobby</button>
-        <button type="button" onclick="wrapper.makeActive('splash2')">Back</button>
+        <button type="button" onclick="makeActive('splash2')">Back</button>
       </div>
 
       <div id="waiting" class="active">
@@ -83,6 +84,7 @@
       <div id="connect_error">
         <h1>Error Connecting...</h1>
         <p>It seems like we can't make a connection to the server!</p>
+        <button type="button" onclick="reattemptConnect()" id="retry">Try to Reconnect</button>
       </div>
 
       <div id="lobbyMenu">
@@ -96,17 +98,17 @@
     </main>
     <div id="game">
       <div id="gameBody">
+        <input type="checkbox" id="chatToggle" class="toggle" onchange="resetChatHeader()">
         <div class="sidebar" id="leftSide">
           <div class="container" id="chatWindow">
-            <div id="chatBox">
-              <div class="message">
-                <div class="sender"></div>
-                <div class="content"></div>
-              </div>
-                <input type="text" id="textBox"></input>
-                <input type="submit" value="enter" onclick="sendMsg()">
-            </div>
+            <label for="chatToggle">
+              <div id="chatHeader">Toggle Chat</div>
+            </label>
             <div class="container" id="messageWindow"></div>
+            <div id="chatBox">
+              <input type="text" id="textBox"></input>
+              <input type="submit" value="enter" onclick="sendMsg()">
+            </div>
           </div>
         </div>
         <div id="center">
@@ -120,7 +122,6 @@
           </div>
         </div>
       </div>
-      <div id='turn'>Turn: </div>
       <button type="button" onclick="logout()">Exit</button>
     </div>
     <div id="hidden"></div>

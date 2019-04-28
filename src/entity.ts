@@ -10,9 +10,11 @@ abstract class Entity {
 class Tank extends Entity {
   playerName  : string;
   userID      : string;
+  infoCard    : PlayerCard;
   health      : number;
   canShoot    : boolean;
   sprite      : TankSprite;
+  nameTag     : NameTag;
   distanceLeft: number;
   alive       : boolean;
 
@@ -26,6 +28,7 @@ class Tank extends Entity {
     this.playerName = playerName;
     this.userID     = userID;
     this.sprite     = new TankSprite( color );
+    this.nameTag    = new NameTag( playerName, health );
     this.layer      = new Layer( playerName, 60, 60 );
 
     this.health   = health;
@@ -71,27 +74,10 @@ class Tank extends Entity {
     this.sprite.moveTreadsLeft();
   }
 
-  addToSidebar = ( sidebar : Element ) => {
-    console.log( sidebar );
-    let cardDiv = document.createElement( "div" );
-    cardDiv.classList.add( "playerCard" );
-    cardDiv.setAttribute( "id", "info" + this.userID );
-
-    let usernameDiv = document.createElement( "div" );
-    usernameDiv.classList.add( "username" );
-    usernameDiv.innerHTML = this.playerName;
-
-    let healthDiv = document.createElement( "div" );
-    healthDiv.classList.add( "tankHealth" );
-    healthDiv.innerHTML = this.health + "/100";
-
-    let spriteDiv = document.createElement( "div" );
-    spriteDiv.classList.add( "tankSprite" );
-    cardDiv.appendChild( usernameDiv );
-    cardDiv.appendChild( healthDiv );
-    cardDiv.appendChild( spriteDiv );
-    this.layer.attachToParent( spriteDiv );
-    sidebar.appendChild( cardDiv );
+  addToSidebar = ( sidebar : HTMLElement ) => {
+    this.infoCard = new PlayerCard( this.userID, this.playerName, this.health, this.layer );
+    this.infoCard.buildCard();
+    this.infoCard.setParent( sidebar );
   }
 
   setHealth = ( health : number ) : void => {
@@ -99,6 +85,8 @@ class Tank extends Entity {
     if( health == 0 ) {
       this.alive = false;
     }
+    this.infoCard.updateHealth( health );
+    this.nameTag.updateHealth( health );
   }
 }
 

@@ -1,5 +1,6 @@
 const socket = io( "http://192.168.1.100:3000" );
-var wrapper = document.getElementById("wrapper");
+var wrapper = document.getElementById( "wrapper" );
+var title   = document.getElementById( "title" );
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
 var error;
@@ -96,6 +97,17 @@ var logout = () => {
   localStorage.clear();
   window.location.reload();
 };
+
+var reattemptConnect = () => {
+  if( socket.connected ) {
+    console.log( "Cannot reattempt connection -> Already connected." );
+    return;
+  }
+  console.log( "Reattemping connection" );
+  title.style.display = "block";
+  makeActive( "waiting" );
+  socket.open();
+}
 
 /**
   * A function that signals the server to request the selected lobby's player
@@ -254,7 +266,8 @@ socket.on("mapUpdate", mapUpdateHandler);
 var connectHandler = (data) => {
   main();
   console.log( "Socket connect." );
-  if(localStorage.userID) {
+  if( localStorage.userID && localStorage.lobbyCode ) {
+    console.log( "Socket connected. userID and lobbyCode detected." );
     let url = window.location.pathname;
     url = url.substring(url.lastIndexOf("/")+1);
     socket.emit("auth", {userID : localStorage.userID, lobbyCode : localStorage.lobbyCode, page : url});
@@ -416,13 +429,13 @@ var sendMsg = () => {
 var chatMsg = ( data ) => {
   let sender = data["sender"];
   let content = data["content"];
+  if( !document.getElementById( "chatToggle" ).checked ) {
+    document.getElementById( "chatHeader" ).classList.add( "newMessage" );
+  }
   game.showMsg( sender, content );
 };
 socket.on( "chatMsg", chatMsg );
 
-
-class Test {
-  constructor() {
-    return false;
-  }
+var resetChatHeader = () => {
+  document.getElementById( "chatHeader" ).classList.remove( "newMessage" );
 }

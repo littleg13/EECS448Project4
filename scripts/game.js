@@ -175,15 +175,18 @@ var Game = /** @class */ (function () {
         this.showMsg = function (username, text) {
             var messageWindow = document.getElementById("messageWindow");
             var msg = document.createElement("div");
+            if (username == _this.getPlayer().playerName) {
+                msg.classList.add("self");
+            }
             msg.classList.add("message");
             var sender = document.createElement("div");
             sender.classList.add("sender");
-            sender.innerHTML = username + ": ";
-            msg.appendChild(sender);
+            sender.innerHTML = username;
             var content = document.createElement("div");
             content.classList.add("content");
             content.innerHTML = text;
             msg.appendChild(content);
+            msg.appendChild(sender);
             messageWindow.insertAdjacentElement("beforeend", msg);
         };
         /**
@@ -206,6 +209,9 @@ var Game = /** @class */ (function () {
             tank.updateImage();
             _this.gameview.applyTranslate(_this.tileDim * tank.xPos, _this.tileDim * tank.yPos);
             _this.gameview.addLayer(tank.getLayer(), -10, -10); // Account for the padding on the sprite's canvas
+            _this.gameview.applyTranslate(_this.tileDim / 2, _this.tileDim);
+            _this.gameview.drawItem(tank.nameTag);
+            _this.gameview.popTransform();
             // To-do: add nametag w/ health bar
             _this.gameview.popTransform();
         };

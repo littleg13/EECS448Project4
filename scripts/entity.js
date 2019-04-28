@@ -58,29 +58,17 @@ var Tank = /** @class */ (function (_super) {
             _this.sprite.moveTreadsLeft();
         };
         _this.addToSidebar = function (sidebar) {
-            console.log(sidebar);
-            var cardDiv = document.createElement("div");
-            cardDiv.classList.add("playerCard");
-            cardDiv.setAttribute("id", "info" + _this.userID);
-            var usernameDiv = document.createElement("div");
-            usernameDiv.classList.add("username");
-            usernameDiv.innerHTML = _this.playerName;
-            var healthDiv = document.createElement("div");
-            healthDiv.classList.add("tankHealth");
-            healthDiv.innerHTML = _this.health + "/100";
-            var spriteDiv = document.createElement("div");
-            spriteDiv.classList.add("tankSprite");
-            cardDiv.appendChild(usernameDiv);
-            cardDiv.appendChild(healthDiv);
-            cardDiv.appendChild(spriteDiv);
-            _this.layer.attachToParent(spriteDiv);
-            sidebar.appendChild(cardDiv);
+            _this.infoCard = new PlayerCard(_this.userID, _this.playerName, _this.health, _this.layer);
+            _this.infoCard.buildCard();
+            _this.infoCard.setParent(sidebar);
         };
         _this.setHealth = function (health) {
             _this.health = health;
             if (health == 0) {
                 _this.alive = false;
             }
+            _this.infoCard.updateHealth(health);
+            _this.nameTag.updateHealth(health);
         };
         _this.xPos = xPos;
         _this.yPos = yPos;
@@ -89,6 +77,7 @@ var Tank = /** @class */ (function (_super) {
         _this.playerName = playerName;
         _this.userID = userID;
         _this.sprite = new TankSprite(color);
+        _this.nameTag = new NameTag(playerName, health);
         _this.layer = new Layer(playerName, 60, 60);
         _this.health = health;
         _this.canShoot = false;
