@@ -2,6 +2,8 @@ import math
 import random
 from Player import Player
 from datetime import datetime
+import noise
+import numpy as np
 
 class Lobby:
     """Collection of players and all of their interactions
@@ -23,17 +25,18 @@ class Lobby:
         self.map = []
         self.boardDimensions = 20
         self.colorList = ['blue', 'limeGreen', 'blueViolet', 'deepPink', 'darkOrange', 'gold', 'red', 'deepSkyBlue']
-        self.spawnPosList = [{'x': 2, 'y': 3}, {'x': 5,'y': 5}, {'x': 9,'y': 4}, {'x': 9,'y': 15}, {'x': 4,'y': 10}, {'x': 15,'y': 10}, {'x': 2,'y': 16}, {'x': 17,'y': 3}, {'x': 10,'y': 10}]
-        self.powerUpSpawnList = [{'x': 2, 'y': 3}, {'x': 5,'y': 5}, {'x': 9,'y': 4}, {'x': 9,'y': 15}, {'x': 4,'y': 10}, {'x': 15,'y': 10}, {'x': 2,'y': 16}, {'x': 17,'y': 3}, {'x': 10,'y': 10}]
+        self.spawnPosList = []
+        self.powerUpSpawnList = []
         self.blockSize = 30
         self.powerupTypes = ['multiShot', 'buildWall', 'increaseMoveDist', 'healthPack']
         self.turnsSinceLastPowerupSpawn = 0
         self.powerups = {}
         self.addedPowerup = False
+        self.initMap()
         random.shuffle(self.colorList)
         random.shuffle(self.spawnPosList)
+        self.powerUpSpawnList = self.spawnPosList
         random.shuffle(self.powerUpSpawnList)
-        self.initMap()
 
     def initMap(self):
         """Creates the Map
@@ -43,15 +46,52 @@ class Lobby:
         Args:
             boardDimensions (int): Dimensions of the board
         """
-        for i in range(0, self.boardDimensions):
+        shape = (self.boardDimensions*25, self.boardDimensions*25)
+        scale = 100.0
+        octaves = 6
+        persistence = 0.5
+        lacunarity = 2.0
+        world = np.zeros(shape)
+        seed = random.randint(0,shape[0])
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                world[i][j] = noise.pnoise2(i/scale,
+                                            j/scale,
+                                            octaves=octaves,
+                                            persistence=persistence,
+                                            lacunarity=lacunarity,
+                                            repeatx=shape[0],
+                                            repeaty=shape[0],
+                                            base=seed)
+        for i in range(0,self.boardDimensions):
             self.map.append([])
-            for j in range(0, self.boardDimensions):
+            for j in range(0,self.boardDimensions):
                 if i is 0 or j is 0 or i is self.boardDimensions-1 or j is self.boardDimensions-1:
                     self.map[i].append(-1)
-                elif(((i is 4 or i is 15) and (4 <= j <=8 or 11 <= j <= 15)) or ((j is 4 or j is 15) and (4 <= i <=8 or 11 <= i <= 15)) ):
-                    self.map[i].append(1)
                 else:
-                    self.map[i].append(0)
+                    ratio = round(shape[0]/ (self.boardDimensions-2))
+                    subset = world[(i-1)*ratio:i*ratio,(j-1)*ratio:j*ratio]
+                    value = round((np.mean(subset)+1)/2 - 0.05)
+                    self.map[i].append(value)
+        for i in range(0,self.boardDimensions):
+            for j in range(0,self.boardDimensions):
+                if(self.map[i][j] == 0):
+                    if(len(self.spawnPosList) == 0):
+                        self.spawnPosList.append({'x': j, 'y': i})
+                    else:
+                        canPlace = True
+                        for spawnPos in self.spawnPosList:
+                            if(self.getDistance(j, spawnPos['x'], i, spawnPos['y']) <= 3):
+                                canPlace = False
+                                break
+                        if(canPlace):
+                            self.spawnPosList.append({'x': j, 'y': i})
+
+
+
+
+    def getDistance(self,x1,x2,y1,y2):
+        return math.sqrt(math.pow(x1-x2,2)+math.pow(y1-y2,2))
 
     def appendPlayer(self, userID, username):
         self.players[userID] = Player(username, self.spawnPosList.pop())
