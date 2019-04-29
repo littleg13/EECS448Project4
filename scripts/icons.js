@@ -228,3 +228,120 @@ var ExplosionSprite = /** @class */ (function (_super) {
     }
     return ExplosionSprite;
 }(Animated));
+var MultiShotSprite = /** @class */ (function (_super) {
+    __extends(MultiShotSprite, _super);
+    function MultiShotSprite() {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            _this.box.render(ctx);
+            console.log("Rendering MultiShot");
+            ctx.save();
+            ctx.translate(0, 10); // set up for rotations
+            ctx.save();
+            ctx.rotate(Math.PI / 6);
+            _this.turret1.render(ctx);
+            ctx.restore();
+            ctx.save();
+            ctx.rotate(-Math.PI / 6);
+            _this.turret2.render(ctx);
+            ctx.restore();
+            ctx.save();
+            ctx.translate(0, -3);
+            _this.turret3.render(ctx);
+            ctx.restore();
+            _this.hub.render(ctx);
+            ctx.restore();
+        };
+        _this.box = new RoundRect(-18, -18, 36, 36, 10, "#336", "#669");
+        var genTurret = function () {
+            return new Collection([
+                new Rect(-3, -20, 6, 15, "#99c", "transparent").setBorderWidth(2),
+                new Rect(-5, -23, 10, 4, "#669", "transparent").setBorderWidth(2)
+            ]);
+        };
+        _this.turret1 = genTurret();
+        _this.turret2 = genTurret();
+        _this.turret3 = genTurret();
+        _this.hub = new Circle(0, -3, 8, "#669", "transparent").setBorderWidth(2);
+        return _this;
+    }
+    return MultiShotSprite;
+}(Renderable));
+var BuildWallSprite = /** @class */ (function (_super) {
+    __extends(BuildWallSprite, _super);
+    function BuildWallSprite() {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            _this.box.render(ctx);
+            _this.bricks.render(ctx);
+        };
+        _this.box = new RoundRect(-18, -18, 36, 36, 10, "#963", "#630");
+        _this.bricks = new Collection([
+            new RoundRect(-10, -10, 15, 10, 3),
+            new RoundRect(5, -10, 10, 10, 3)
+        ]);
+        return _this;
+    }
+    return BuildWallSprite;
+}(Renderable));
+var IncreaseMoveDistSprite = /** @class */ (function (_super) {
+    __extends(IncreaseMoveDistSprite, _super);
+    function IncreaseMoveDistSprite() {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            _this.box.render(ctx);
+            _this.arrows.render(ctx);
+        };
+        _this.box = new RoundRect(-18, -18, 36, 36, 10, "darkgreen", "limegreen");
+        _this.box.setBorderWidth(2);
+        _this.arrows = new Collection();
+        for (var i = 0; i < 5; i++) {
+            var color = "green";
+            if (i % 2 == 0) {
+                color = "limegreen";
+            }
+            var path = new Path(0, (-15 + i * 5), color, "transparent");
+            path.addSegments([
+                new LineSegment(-10, (-5 + i * 5)),
+                new LineSegment(10, (-5 + i * 5))
+            ]);
+            _this.arrows.addItem(path);
+        }
+        return _this;
+    }
+    return IncreaseMoveDistSprite;
+}(Renderable));
+var HealthPackSprite = /** @class */ (function (_super) {
+    __extends(HealthPackSprite, _super);
+    function HealthPackSprite() {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            _this.box.render(ctx);
+            _this.cross.render(ctx);
+        };
+        _this.box = new RoundRect(-18, -18, 36, 36, 10, "#f00", "#933");
+        _this.cross = new Path(0, 15, "#fcc", "#933");
+        _this.cross.addSegments([
+            new ArcToSegment(5, 15, 5, 10, 5),
+            new LineSegment(5, 5),
+            new LineSegment(10, 5),
+            new ArcToSegment(15, 5, 15, 0, 5),
+            new ArcToSegment(15, -5, 10, -5, 5),
+            new LineSegment(5, -5),
+            new LineSegment(5, -10),
+            new ArcToSegment(5, -15, 0, -15, 5),
+            new ArcToSegment(-5, -15, -5, -10, 5),
+            new LineSegment(-5, -5),
+            new LineSegment(-10, -5),
+            new ArcToSegment(-15, -5, -15, 0, 5),
+            new ArcToSegment(-15, 5, -10, 5, 5),
+            new LineSegment(-5, 5),
+            new LineSegment(-5, 10),
+            new ArcToSegment(-5, 15, 0, 15, 5)
+        ]);
+        _this.box.setBorderWidth(2);
+        _this.cross.setBorderWidth(2);
+        return _this;
+    }
+    return HealthPackSprite;
+}(Renderable));

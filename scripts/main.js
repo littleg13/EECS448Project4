@@ -333,7 +333,14 @@ var gameUpdateHandler = (data) => {
       break;
   }
   if( data.powerupsOnMap ) {
-    game.updatePowerupsOnMap( data.powerupsOnMap );
+    let parsedUpdate = [];
+    for( let row in data.powerupsOnMap ) {
+      for( let col in data.powerupsOnMap[row] ) {
+        let type = data.powerupsOnMap[row][col];
+        parsedUpdate.push( { row : parseInt( row ), col : parseInt( col ), type : type } );
+      }
+    }
+    game.updatePowerups( parsedUpdate );
   }
 };
 socket.on("gameUpdate", gameUpdateHandler);
@@ -399,7 +406,6 @@ function sendServerUpdate() {
       let finalTime = new Date();
       let powr = document.getElementById( "powerSlider" ).valueAsNumber;
       let spin = document.getElementById( "spinSlider" ).valueAsNumber;
-      console.log( { spin : spin, power : powr } );
       socket.emit( "gameEvent", { eventType: "playerFire", power: powr, spin: spin } );
       game.setPlayerShot( false );
     }

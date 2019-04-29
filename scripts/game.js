@@ -1,23 +1,10 @@
 // Declared handlers, defined in main.
 var sendServerUpdate = function () { };
-var unpackPowerupData = function (str) {
-    switch (str) {
-        case "multiShot":
-            return new MultiShotToken();
-            break;
-        case "buildWall":
-            return new BuildWallToken();
-            break;
-        case "increaseMoveDist":
-            return new IncreaseMoveDistToken();
-            break;
-        case "healthPack":
-            return new HealthPackToken();
-            break;
-        default:
-            break;
+var PowerupUpdate = /** @class */ (function () {
+    function PowerupUpdate() {
     }
-};
+    return PowerupUpdate;
+}());
 var Game = /** @class */ (function () {
     function Game(mapDim) {
         var _this = this;
@@ -28,7 +15,7 @@ var Game = /** @class */ (function () {
         */
         this.initLayers = function () {
             _this.gameview = new Layer("gameview", 800, 800);
-            _this.effects = new Layer("effects", 800, 800);
+            _this.effects = new Layer("effects", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
             _this.background = new Layer("background", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
             _this.gameview.attachToParent(document.getElementById("center"));
             _this.effects.attachToParent(document.getElementById("hidden"));
@@ -187,10 +174,11 @@ var Game = /** @class */ (function () {
             _this.getPlayer(userID).setHealth(health);
         };
         this.updateTankPowerups = function (userID, powerups) {
-            var objs = powerups.map(function (str) {
-                return new Powerup();
-            });
-            _this.getPlayer(userID).addPowerups(objs);
+            /*
+            let objs = powerups.map( ( str : string ) : Buff => {
+              return new Buff();
+            } );
+            this.getPlayer( userID ).addPowerups( objs );*/
         };
         this.updateTankPosition = function (userID, newXPos, newYPos, newDirection) {
             var tank = _this.getPlayer(userID);
@@ -221,8 +209,28 @@ var Game = /** @class */ (function () {
             _this.getPlayer(userID).setTurn(true);
             _this.curTurn = userID;
         };
-        this.updatePowerups = function (powerups) {
-            _this.powerups = powerups.map(unpackPowerupData);
+        this.updatePowerups = function (updates) {
+            _this.powerups = updates.map(function (powerupData) {
+                switch (powerupData.type) {
+                    case "multiShot":
+                        return new MultiShotToken(powerupData.col, powerupData.row);
+                        break;
+                    case "buildWall":
+                        return new BuildWallToken(powerupData.col, powerupData.row);
+                        break;
+                    case "increaseMoveDist":
+                        return new IncreaseMoveDistToken(powerupData.col, powerupData.row);
+                        break;
+                    case "healthPack":
+                        return new HealthPackToken(powerupData.col, powerupData.row);
+                        break;
+                    default:
+                        break;
+                }
+            });
+            _this.powerups.forEach(function (powerup) {
+                powerup.attachToLayer(_this.effects);
+            });
         };
         this.fire = function (shooterID, power, curve, dist) {
             var shooter = _this.getPlayer(shooterID);

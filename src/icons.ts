@@ -237,3 +237,130 @@ class ExplosionSprite extends Animated {
 
   }
 }
+
+class MultiShotSprite extends Renderable {
+  box : RoundRect;
+  hub : Circle;
+  turret1 : Collection;
+  turret2 : Collection;
+  turret3 : Collection;
+
+  constructor() {
+    super();
+    this.box = new RoundRect( -18, -18, 36, 36, 10, "#336", "#669" );
+    let genTurret = () => {
+      return new Collection( [
+        new Rect( -3, -20, 6, 15, "#99c", "transparent" ).setBorderWidth(2),
+        new Rect( -5, -23, 10, 4, "#669", "transparent" ).setBorderWidth(2)
+      ] );
+    }
+    this.turret1 = genTurret();
+    this.turret2 = genTurret();
+    this.turret3 = genTurret();
+    this.hub = new Circle( 0, -3, 8, "#669", "transparent" ).setBorderWidth(2);
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    this.box.render( ctx );
+    console.log("Rendering MultiShot");
+    ctx.save();
+    ctx.translate( 0, 10 ); // set up for rotations
+    ctx.save();
+    ctx.rotate( Math.PI / 6 );
+    this.turret1.render( ctx );
+    ctx.restore();
+    ctx.save();
+    ctx.rotate( -Math.PI / 6 );
+    this.turret2.render( ctx );
+    ctx.restore();
+    ctx.save();
+    ctx.translate( 0, -3 );
+    this.turret3.render( ctx );
+    ctx.restore()
+    this.hub.render( ctx );
+    ctx.restore();
+  }
+}
+
+class BuildWallSprite extends Renderable {
+  box : RoundRect;
+  bricks : Collection;
+
+  constructor() {
+    super();
+    this.box = new RoundRect( -18, -18, 36, 36, 10, "#963", "#630" );
+    this.bricks = new Collection( [
+      new RoundRect( -10, -10, 15, 10, 3 ),
+      new RoundRect(   5, -10, 10, 10, 3 )
+    ] );
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    this.box.render( ctx );
+    this.bricks.render( ctx );
+  }
+}
+
+class IncreaseMoveDistSprite extends Renderable {
+  box : RoundRect;
+  arrows : Collection;
+
+  constructor() {
+    super();
+    this.box = new RoundRect( -18, -18, 36, 36, 10, "darkgreen", "limegreen" );
+    this.box.setBorderWidth( 2 );
+    this.arrows = new Collection();
+    for( let i = 0; i < 5; i++ ) {
+      let color = "green";
+      if( i % 2 == 0 ) {
+        color = "limegreen";
+      }
+      let path = new Path( 0, ( -15 + i * 5 ), color, "transparent" );
+      path.addSegments( [
+        new LineSegment( -10, ( -5 + i * 5 ) ),
+        new LineSegment(  10, ( -5 + i * 5 ) )
+      ] );
+      this.arrows.addItem( path );
+    }
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    this.box.render( ctx );
+    this.arrows.render( ctx );
+  }
+}
+
+class HealthPackSprite extends Renderable {
+  box : RoundRect;
+  cross : Path;
+  constructor() {
+    super();
+    this.box = new RoundRect( -18, -18, 36, 36, 10, "#f00", "#933" );
+    this.cross = new Path( 0, 15, "#fcc", "#933" );
+    this.cross.addSegments( [
+      new ArcToSegment( 5, 15, 5, 10, 5 ),
+      new LineSegment( 5, 5 ),
+      new LineSegment( 10, 5 ),
+      new ArcToSegment( 15, 5, 15, 0, 5 ),
+      new ArcToSegment( 15, -5, 10, -5, 5 ),
+      new LineSegment( 5, -5 ),
+      new LineSegment( 5, -10 ),
+      new ArcToSegment( 5, -15, 0, -15, 5 ),
+      new ArcToSegment( -5, -15, -5, -10, 5 ),
+      new LineSegment( -5, -5 ),
+      new LineSegment( -10, -5 ),
+      new ArcToSegment( -15, -5, -15, 0, 5 ),
+      new ArcToSegment( -15,  5, -10, 5, 5 ),
+      new LineSegment( -5, 5 ),
+      new LineSegment( -5, 10 ),
+      new ArcToSegment( -5, 15, 0, 15, 5 )
+    ] );
+    this.box.setBorderWidth( 2 );
+    this.cross.setBorderWidth( 2 );
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    this.box.render( ctx );
+    this.cross.render( ctx );
+  }
+}

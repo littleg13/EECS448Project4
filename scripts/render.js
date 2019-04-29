@@ -129,8 +129,18 @@ var Shape = /** @class */ (function (_super) {
         if (color === void 0) { color = "#fff"; }
         if (borderColor === void 0) { borderColor = "#0000"; }
         var _this = _super.call(this) || this;
+        _this.applyStyle = function (ctx) {
+            ctx.fillStyle = _this.color;
+            ctx.lineWidth = _this.borderWidth;
+            ctx.strokeStyle = _this.borderColor;
+        };
+        _this.setBorderWidth = function (width) {
+            _this.borderWidth = width;
+            return _this;
+        };
         _this.color = color;
         _this.borderColor = borderColor;
+        _this.borderWidth = 1;
         return _this;
     }
     return Shape;
@@ -159,9 +169,8 @@ var Path = /** @class */ (function (_super) {
                 segment.render(ctx);
             });
             ctx.closePath();
-            ctx.fillStyle = _this.color;
+            _this.applyStyle(ctx);
             ctx.fill();
-            ctx.strokeStyle = _this.borderColor;
             ctx.stroke();
         };
         _this.initX = initX;
@@ -178,6 +187,19 @@ var PathSegment = /** @class */ (function (_super) {
     }
     return PathSegment;
 }(Renderable));
+var MoveToSegment = /** @class */ (function (_super) {
+    __extends(MoveToSegment, _super);
+    function MoveToSegment(x, y) {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            ctx.moveTo(_this.x, _this.y);
+        };
+        _this.x = x;
+        _this.y = y;
+        return _this;
+    }
+    return MoveToSegment;
+}(PathSegment));
 var LineSegment = /** @class */ (function (_super) {
     __extends(LineSegment, _super);
     function LineSegment(x, y) {
@@ -273,8 +295,7 @@ var Rect = /** @class */ (function (_super) {
         if (borderColor === void 0) { borderColor = "#0000"; }
         var _this = _super.call(this, color, borderColor) || this;
         _this.render = function (ctx) {
-            ctx.fillStyle = _this.color;
-            ctx.strokeStyle = _this.borderColor;
+            _this.applyStyle(ctx);
             ctx.fillRect(_this.x, _this.y, _this.w, _this.h);
             ctx.strokeRect(_this.x, _this.y, _this.w, _this.h);
             return;
@@ -296,8 +317,7 @@ var RoundRect = /** @class */ (function (_super) {
         _this.render = function (ctx) {
             var _a = [_this.x, _this.x + _this.w,
                 _this.y, _this.y + _this.h, _this.rad], left = _a[0], right = _a[1], top = _a[2], bottom = _a[3], r = _a[4];
-            ctx.fillStyle = _this.color;
-            ctx.strokeStyle = _this.borderColor;
+            _this.applyStyle(ctx);
             ctx.beginPath(); // clockwise path
             ctx.moveTo(left, top + r); // begin lower top-left corner
             ctx.arcTo(left, top, // 'true' corner
@@ -327,8 +347,7 @@ var Circle = /** @class */ (function (_super) {
         if (borderColor === void 0) { borderColor = "#0000"; }
         var _this = _super.call(this, color, borderColor) || this;
         _this.render = function (ctx) {
-            ctx.fillStyle = _this.color;
-            ctx.strokeStyle = _this.borderColor;
+            _this.applyStyle(ctx);
             ctx.beginPath();
             ctx.arc(_this.x, _this.y, _this.radius, 0, Math.PI * 2, true);
             ctx.closePath();
@@ -349,7 +368,10 @@ var Collection = /** @class */ (function (_super) {
         if (items === void 0) { items = []; }
         var _this = _super.call(this) || this;
         _this.mapItems = function (f) {
-            _this.items = _this.items.map(f);
+            return _this.items.map(f);
+        };
+        _this.applyToItems = function (f) {
+            _this.items.forEach(f);
         };
         _this.addItems = function (items) {
             items.forEach(function (item) { _this.addItem(item); });

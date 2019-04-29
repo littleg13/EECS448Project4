@@ -13,6 +13,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var Entity = /** @class */ (function () {
     function Entity() {
+        var _this = this;
+        this.attachToLayer = function (layer) {
+            _this.layer = layer;
+        };
     }
     return Entity;
 }());
@@ -99,9 +103,6 @@ var Bullet = /** @class */ (function (_super) {
     __extends(Bullet, _super);
     function Bullet(xPos, yPos, dir, distToGo, power, curve) {
         var _this = _super.call(this) || this;
-        _this.attachToLayer = function (layer) {
-            _this.layer = layer;
-        };
         _this.render = function () {
             _this.layer.applyTranslate(_this.xPos * 40, _this.yPos * 40);
             _this.layer.applyRotation(_this.dir);
@@ -138,38 +139,61 @@ var Bullet = /** @class */ (function (_super) {
 }(Entity));
 var Powerup = /** @class */ (function (_super) {
     __extends(Powerup, _super);
-    function Powerup() {
+    function Powerup(x, y) {
         var _this = _super.call(this) || this;
-        _this.render = function () { };
+        _this.render = function () {
+            if (_this.layer === undefined)
+                return;
+            _this.layer.applyTranslate((_this.xPos + 0.5) * 40, (_this.yPos + 0.5) * 40);
+            _this.layer.drawItem(_this.sprite);
+            _this.layer.popTransform();
+        };
+        _this.xPos = x;
+        _this.yPos = y;
+        console.log(_this.xPos);
+        _this.sprite = new Rect(0, 0, 40, 40);
         return _this;
     }
     return Powerup;
 }(Entity));
 var MultiShotToken = /** @class */ (function (_super) {
     __extends(MultiShotToken, _super);
-    function MultiShotToken() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function MultiShotToken(x, y) {
+        var _this = _super.call(this, x, y) || this;
+        _this.sprite = new MultiShotSprite();
+        return _this;
     }
     return MultiShotToken;
 }(Powerup));
 var BuildWallToken = /** @class */ (function (_super) {
     __extends(BuildWallToken, _super);
-    function BuildWallToken() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function BuildWallToken(x, y) {
+        var _this = _super.call(this, x, y) || this;
+        _this.sprite = new BuildWallSprite();
+        return _this;
     }
     return BuildWallToken;
 }(Powerup));
 var IncreaseMoveDistToken = /** @class */ (function (_super) {
     __extends(IncreaseMoveDistToken, _super);
-    function IncreaseMoveDistToken() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function IncreaseMoveDistToken(x, y) {
+        var _this = _super.call(this, x, y) || this;
+        _this.sprite = new IncreaseMoveDistSprite();
+        return _this;
     }
     return IncreaseMoveDistToken;
 }(Powerup));
 var HealthPackToken = /** @class */ (function (_super) {
     __extends(HealthPackToken, _super);
-    function HealthPackToken() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function HealthPackToken(x, y) {
+        var _this = _super.call(this, x, y) || this;
+        _this.sprite = new HealthPackSprite();
+        return _this;
     }
     return HealthPackToken;
 }(Powerup));
+var Buff = /** @class */ (function () {
+    function Buff() {
+    }
+    return Buff;
+}());

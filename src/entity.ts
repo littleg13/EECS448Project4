@@ -5,6 +5,10 @@ abstract class Entity {
   sprite  : Renderable;
   layer   : Layer;
   hitbox  : Rect;
+
+  attachToLayer = ( layer : Layer ) : void => {
+    this.layer = layer;
+  }
 }
 
 class Tank extends Entity {
@@ -122,10 +126,6 @@ class Bullet extends Entity {
     this.curve = curve;
   }
 
-  attachToLayer = ( layer : Layer ) : void => {
-    this.layer = layer;
-  }
-
   render = () : void => {
     this.layer.applyTranslate( this.xPos * 40, this.yPos * 40 );
     this.layer.applyRotation( this.dir );
@@ -149,18 +149,49 @@ class Bullet extends Entity {
   }
 }
 
-class Powerup extends Entity {
-  constructor() {
+abstract class Powerup extends Entity {
+  constructor( x : number, y : number ) {
     super();
+    this.xPos = x;
+    this.yPos = y;
+    console.log( this.xPos );
+    this.sprite = new Rect( 0, 0, 40, 40 );
   }
 
-  render = () : void => {}
+  render = () : void => {
+    if( this.layer === undefined ) return;
+    this.layer.applyTranslate( ( this.xPos + 0.5 ) * 40, ( this.yPos + 0.5 ) * 40 );
+    this.layer.drawItem( this.sprite );
+    this.layer.popTransform();
+  }
 }
 
-class MultiShotToken extends Powerup {}
+class MultiShotToken extends Powerup {
+  constructor( x : number, y : number ) {
+    super( x, y );
+    this.sprite = new MultiShotSprite();
+  }
+}
 
-class BuildWallToken extends Powerup {}
+class BuildWallToken extends Powerup {
+  constructor( x : number, y : number ) {
+    super( x, y );
+    this.sprite = new BuildWallSprite();
+  }
+}
 
-class IncreaseMoveDistToken extends Powerup {}
+class IncreaseMoveDistToken extends Powerup {
+  constructor( x : number, y : number ) {
+    super( x, y );
+    this.sprite = new IncreaseMoveDistSprite();
+  }
+}
 
-class HealthPackToken extends Powerup {}
+class HealthPackToken extends Powerup {
+  constructor( x : number, y : number ) {
+    super( x, y );
+    this.sprite = new HealthPackSprite();
+  }
+}
+
+class Buff {}

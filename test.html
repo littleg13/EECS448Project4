@@ -4,6 +4,7 @@
   <head>
     <title>Rendering Test</title>
     <script src="scripts/render.js"></script>
+    <script src="scripts/icons.js"></script>
     <script>
 /*
 var canvas;
@@ -212,6 +213,7 @@ var ctx;
 var width, height;
 var interval;
 var counter, counterMax;
+var items;
 
 var drawStar = ( numPoints, innerR = 50, peak = 100, innerVar = 0, outerVar = 0, color = "red" ) => {
   ctx.save();
@@ -239,8 +241,10 @@ var main = () => {
   counter = 32;
   counterMax = 32;
   interval = setInterval( loop, Math.round( 1000 / 64 ) );
+  items = new BuildWallSprite();
 }
 
+/*
 var loop = () => {
   ctx.clearRect( 0, 0, width, height );
   if( counter > 0 ) {
@@ -253,6 +257,15 @@ var loop = () => {
   } else {
     setTimeout( () => { counter = counterMax; }, 1000 );
   }
+}
+*/
+
+var loop = () => {
+  ctx.clearRect( 0, 0, width, height );
+  ctx.save();
+  ctx.translate( width / 2, height / 2 );
+  items.render( ctx );
+  ctx.restore();
 }
 
     </script>
@@ -291,11 +304,12 @@ var loop = () => {
     </style>
   </head>
   <body onload="main()">
-    <textarea cols=75 rows=20 id="pathPrint">
+    <textarea cols=75 rows=20 id="pathPrint" class="hidden">
     </textarea>
     <div id="canvasdiv">
       <canvas id="canvas" width=500 height=500></canvas>
     </div>
+    <div class="hidden">
     <div id="menus">
       <select onchange="changeMenu()" id="menuSelect">
         <option value="moveStart">Move Start Point</option>
@@ -369,5 +383,6 @@ var loop = () => {
       </div>
     </div>
     <span id="test" onclick="makeInput('test')">Click me</span>
+  </div>
   </body>
 </html>

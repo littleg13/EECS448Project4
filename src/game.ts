@@ -1,23 +1,10 @@
 // Declared handlers, defined in main.
 var sendServerUpdate = () : void => {}
 
-var unpackPowerupData = ( str : string ) : Powerup => {
-  switch( str ) {
-    case "multiShot":
-      return new MultiShotToken();
-      break;
-    case "buildWall":
-      return new BuildWallToken();
-      break;
-    case "increaseMoveDist":
-      return new IncreaseMoveDistToken();
-      break;
-    case "healthPack":
-      return new HealthPackToken();
-      break;
-    default:
-      break;
-  }
+class PowerupUpdate {
+  row : number;
+  col : number;
+  type : string;
 }
 
 class Game {
@@ -71,7 +58,7 @@ class Game {
 
   initLayers = () : void => {
     this.gameview = new Layer( "gameview", 800, 800 );
-    this.effects = new Layer( "effects", 800, 800 );
+    this.effects = new Layer( "effects", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
     this.background = new Layer( "background", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
     this.gameview.attachToParent( document.getElementById( "center" ) );
     this.effects.attachToParent( document.getElementById( "hidden" ) );
@@ -235,10 +222,11 @@ class Game {
   }
 
   updateTankPowerups = ( userID : string, powerups : string[] ) : void => {
-    let objs = powerups.map( ( str : string ) : Powerup => {
-      return new Powerup();
+    /*
+    let objs = powerups.map( ( str : string ) : Buff => {
+      return new Buff();
     } );
-    this.getPlayer( userID ).addPowerups( objs );
+    this.getPlayer( userID ).addPowerups( objs );*/
   }
 
   updateTankPosition = ( userID : string, newXPos : number, newYPos: number, newDirection : number ) : void => {
@@ -269,8 +257,28 @@ class Game {
     this.curTurn = userID;
   }
 
-  updatePowerups = ( powerups : string[] ) : void => {
-    this.powerups = powerups.map( unpackPowerupData );
+  updatePowerups = ( updates : PowerupUpdate[] ) : void => {
+    this.powerups = updates.map( ( powerupData : PowerupUpdate ) : Powerup => {
+      switch( powerupData.type ) {
+        case "multiShot":
+          return new MultiShotToken( powerupData.col, powerupData.row );
+          break;
+        case "buildWall":
+          return new BuildWallToken( powerupData.col, powerupData.row);
+          break;
+        case "increaseMoveDist":
+          return new IncreaseMoveDistToken( powerupData.col, powerupData.row );
+          break;
+        case "healthPack":
+          return new HealthPackToken( powerupData.col, powerupData.row );
+          break;
+        default:
+          break;
+      }
+    } );
+    this.powerups.forEach( ( powerup : Powerup ) : void => {
+      powerup.attachToLayer( this.effects );
+    } );
   }
 
   fire = ( shooterID : string, power : number, curve : number, dist : number ) => {

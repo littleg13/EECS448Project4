@@ -124,17 +124,30 @@ abstract class Animated extends Renderable {
 abstract class Shape extends Renderable {
   color       : string;
   borderColor : string;
+  borderWidth : number;
   constructor( color = "#fff" , borderColor = "#0000" ) {
     super();
     this.color = color;
     this.borderColor = borderColor;
+    this.borderWidth = 1;
+  }
+
+  applyStyle = ( ctx : CanvasRenderingContext2D ) : void => {
+    ctx.fillStyle = this.color;
+    ctx.lineWidth = this.borderWidth;
+    ctx.strokeStyle = this.borderColor;
+  }
+
+  setBorderWidth = ( width : number ) : any => {
+    this.borderWidth = width;
+    return this;
   }
 }
 
 class Path extends Shape {
-  segments  : PathSegment[];
-  initX     : number;
-  initY     : number;
+  segments    : PathSegment[];
+  initX       : number;
+  initY       : number;
   constructor( initX = 0, initY = 0, color = "#f00", borderColor = "#000" ) {
     super( color, borderColor );
     this.initX = initX;
@@ -161,14 +174,27 @@ class Path extends Shape {
       segment.render( ctx );
     });
     ctx.closePath();
-    ctx.fillStyle = this.color;
+    this.applyStyle( ctx );
     ctx.fill();
-    ctx.strokeStyle = this.borderColor;
     ctx.stroke();
   }
 }
 
 abstract class PathSegment extends Renderable {
+}
+
+class MoveToSegment extends PathSegment {
+  x : number;
+  y : number;
+  constructor( x : number, y : number ) {
+    super();
+    this.x = x;
+    this.y = y;
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    ctx.moveTo( this.x, this.y );
+  }
 }
 
 class LineSegment extends PathSegment {
@@ -292,8 +318,7 @@ class Rect extends Shape {
   }
 
   render = ( ctx: CanvasRenderingContext2D ) : void => {
-    ctx.fillStyle = this.color;
-    ctx.strokeStyle = this.borderColor;
+    this.applyStyle( ctx );
     ctx.fillRect( this.x, this.y, this.w, this.h );
     ctx.strokeRect( this.x, this.y, this.w, this.h );
     return;
@@ -312,8 +337,7 @@ class RoundRect extends Rect {
     let [ left, right, top, bottom, r ] = [ this.x, this.x + this.w,
                                             this.y, this.y + this.h, this.rad ];
 
-    ctx.fillStyle = this.color;
-    ctx.strokeStyle = this.borderColor;
+    this.applyStyle( ctx );
     ctx.beginPath();             // clockwise path
     ctx.moveTo( left, top + r ); // begin lower top-left corner
     ctx.arcTo( left, top,        // 'true' corner
@@ -349,8 +373,7 @@ class Circle extends Shape {
   }
 
   render = ( ctx: CanvasRenderingContext2D ) : void => {
-    ctx.fillStyle = this.color;
-    ctx.strokeStyle = this.borderColor;
+    this.applyStyle( ctx );
     ctx.beginPath();
     ctx.arc( this.x, this.y, this.radius, 0, Math.PI * 2, true );
     ctx.closePath();
@@ -367,8 +390,12 @@ class Collection extends Renderable {
     this.items = items;
   }
 
-  mapItems = ( f : ( item : Renderable ) => Renderable ) : void => {
-    this.items = this.items.map( f );
+  mapItems = ( f : ( item : Renderable ) => any ) : any[] => {
+    return this.items.map( f );
+  }
+
+  applyToItems = ( f : ( item : Renderable ) => Renderable ) : void => {
+    this.items.forEach( f );
   }
 
   addItems = ( items : Renderable[] ) : void => {
