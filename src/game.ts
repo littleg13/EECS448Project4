@@ -57,7 +57,8 @@ class Game {
 */
 
   initLayers = () : void => {
-    this.gameview = new Layer( "gameview", 800, 800 );
+    let viewRadius = 7; // in tiles
+    this.gameview = new Layer( "gameview", 2 * viewRadius * this.tileDim, 2 * viewRadius * this.tileDim );
     this.effects = new Layer( "effects", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
     this.background = new Layer( "background", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
     this.gameview.attachToParent( document.getElementById( "center" ) );
@@ -342,7 +343,7 @@ class Game {
   renderLoop = () : void => {
     let plyr = this.getPlayer();
     let [ xOffset, yOffset ] = [ plyr.xPos, plyr.yPos ].map( ( val : number ) => {
-      return -val * this.tileDim;
+      return -( val + 0.5 ) * this.tileDim;
     } );
     this.gameview.clear();
     this.gameview.applyScale( this.scale, this.scale );

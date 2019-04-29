@@ -14,7 +14,8 @@ var Game = /** @class */ (function () {
         *
         */
         this.initLayers = function () {
-            _this.gameview = new Layer("gameview", 800, 800);
+            var viewRadius = 7; // in tiles
+            _this.gameview = new Layer("gameview", 2 * viewRadius * _this.tileDim, 2 * viewRadius * _this.tileDim);
             _this.effects = new Layer("effects", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
             _this.background = new Layer("background", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
             _this.gameview.attachToParent(document.getElementById("center"));
@@ -279,7 +280,7 @@ var Game = /** @class */ (function () {
         this.renderLoop = function () {
             var plyr = _this.getPlayer();
             var _a = [plyr.xPos, plyr.yPos].map(function (val) {
-                return -val * _this.tileDim;
+                return -(val + 0.5) * _this.tileDim;
             }), xOffset = _a[0], yOffset = _a[1];
             _this.gameview.clear();
             _this.gameview.applyScale(_this.scale, _this.scale);
