@@ -14,7 +14,8 @@ var Game = /** @class */ (function () {
         *
         */
         this.initLayers = function () {
-            _this.gameview = new Layer("gameview", 800, 800);
+            var viewRadius = 7; // in tiles
+            _this.gameview = new Layer("gameview", 2 * viewRadius * _this.tileDim, 2 * viewRadius * _this.tileDim);
             _this.effects = new Layer("effects", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
             _this.background = new Layer("background", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
             _this.gameview.attachToParent(document.getElementById("center"));
@@ -52,8 +53,9 @@ var Game = /** @class */ (function () {
         this.checkMapCollision = function (obj, linVel, rotVel) {
             var toReturn = true;
             var map = _this.map;
-            var halfWidth = 0.5;
-            var halfHeight = 0.5;
+            var hitbox = obj.getHitbox();
+            var halfWidth = hitbox.w / 2 / _this.tileDim;
+            var halfHeight = hitbox.h / 2 / _this.tileDim;
             var corners = [[-halfWidth, -halfHeight - linVel],
                 [-halfWidth, halfHeight - linVel],
                 [halfWidth, -halfHeight - linVel],
@@ -77,46 +79,6 @@ var Game = /** @class */ (function () {
         };
         this.processInput = function () {
             var player = _this.getPlayer();
-            if (_this.keys["a"]) {
-                var spin = document.getElementById("spinSlider");
-                var disp = document.getElementById("spinDisplay");
-                if (!(spin instanceof HTMLInputElement))
-                    return;
-                if (!(disp instanceof HTMLInputElement))
-                    return;
-                spin.stepDown();
-                disp.value = spin.value;
-            }
-            if (_this.keys["d"]) {
-                var spin = document.getElementById("spinSlider");
-                var disp = document.getElementById("spinDisplay");
-                if (!(spin instanceof HTMLInputElement))
-                    return;
-                if (!(disp instanceof HTMLInputElement))
-                    return;
-                spin.stepUp();
-                disp.value = spin.value;
-            }
-            if (_this.keys["s"]) {
-                var powr = document.getElementById("powerSlider");
-                var disp = document.getElementById("powerDisplay");
-                if (!(powr instanceof HTMLInputElement))
-                    return;
-                if (!(disp instanceof HTMLInputElement))
-                    return;
-                powr.stepDown();
-                disp.value = powr.value;
-            }
-            if (_this.keys["w"]) {
-                var powr = document.getElementById("powerSlider");
-                var disp = document.getElementById("powerDisplay");
-                if (!(powr instanceof HTMLInputElement))
-                    return;
-                if (!(disp instanceof HTMLInputElement))
-                    return;
-                powr.stepUp();
-                disp.value = powr.value;
-            }
             if (_this.curTurn != localStorage.userID)
                 return;
             if (_this.keys["ArrowLeft"]) {
@@ -315,10 +277,19 @@ var Game = /** @class */ (function () {
             });
         };
         this.renderLoop = function () {
+            var plyr = _this.getPlayer();
+            var _a = [plyr.xPos, plyr.yPos].map(function (val) {
+                return -(val + 0.5) * _this.tileDim;
+            }), xOffset = _a[0], yOffset = _a[1];
+            _this.gameview.clear();
             _this.gameview.applyScale(_this.scale, _this.scale);
+            _this.gameview.applyTranslate(xOffset, yOffset);
+            _this.gameview.center();
             _this.renderMap();
             _this.renderEffects();
             _this.renderTanks();
+            _this.gameview.popTransform();
+            _this.gameview.popTransform();
             _this.gameview.popTransform();
         };
         this.gameTick = function () {

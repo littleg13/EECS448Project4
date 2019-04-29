@@ -131,7 +131,7 @@ class TankSprite extends Renderable {
   turret      : Circle;
   constructor( color = "#c00" ) {
     super();
-    this.hitbox     = new Rect( -20, -20, 40, 40, "#ccc", "#000" );
+    this.hitbox     = new Rect( -17.5, -20, 35, 40, "#ccc", "#000" );
     this.leftTread  = new Tread( -17.5 );
     this.rightTread = new Tread(   7.5 );
     this.body       = new RoundRect( -12.5, -20, 25, 40, 3, color, "#000" );
@@ -247,11 +247,11 @@ class MultiShotSprite extends Renderable {
 
   constructor() {
     super();
-    this.box = new RoundRect( -18, -18, 36, 36, 10, "#336", "#669" );
+    this.box = new RoundRect( -18, -18, 36, 36, 10, "#336", "#669" ).setBorderWidth( 2 );
     let genTurret = () => {
       return new Collection( [
-        new Rect( -3, -20, 6, 15, "#99c", "transparent" ).setBorderWidth(2),
-        new Rect( -5, -23, 10, 4, "#669", "transparent" ).setBorderWidth(2)
+        new Rect( -3, -20, 6, 15, "#99c", "transparent" ).setBorderWidth( 2 ),
+        new Rect( -5, -23, 10, 4, "#669", "transparent" ).setBorderWidth( 2 )
       ] );
     }
     this.turret1 = genTurret();
@@ -288,10 +288,14 @@ class BuildWallSprite extends Renderable {
 
   constructor() {
     super();
-    this.box = new RoundRect( -18, -18, 36, 36, 10, "#963", "#630" );
+    this.box = new RoundRect( -18, -18, 36, 36, 10, "#999", "#333" ).setBorderWidth( 2 );
     this.bricks = new Collection( [
-      new RoundRect( -10, -10, 15, 10, 3 ),
-      new RoundRect(   5, -10, 10, 10, 3 )
+      new RoundRect( -15, -15, 18, 10, 3, "#666", "#333" ),
+      new RoundRect(   5, -15, 10, 10, 3, "#666", "#333" ),
+      new RoundRect( -15,  -4, 10,  8, 3, "#666", "#333" ),
+      new RoundRect(  -3,  -4, 18,  8, 3, "#666", "#333" ),
+      new RoundRect( -15,   5, 18, 10, 3, "#666", "#333" ),
+      new RoundRect(   5,   5, 10, 10, 3, "#666", "#333" )
     ] );
   }
 
@@ -307,7 +311,7 @@ class IncreaseMoveDistSprite extends Renderable {
 
   constructor() {
     super();
-    this.box = new RoundRect( -18, -18, 36, 36, 10, "darkgreen", "limegreen" );
+    this.box = new RoundRect( -18, -18, 36, 36, 10, "darkgreen", "limegreen" ).setBorderWidth( 2 );
     this.box.setBorderWidth( 2 );
     this.arrows = new Collection();
     for( let i = 0; i < 5; i++ ) {
@@ -335,7 +339,7 @@ class HealthPackSprite extends Renderable {
   cross : Path;
   constructor() {
     super();
-    this.box = new RoundRect( -18, -18, 36, 36, 10, "#f00", "#933" );
+    this.box = new RoundRect( -18, -18, 36, 36, 10, "#f00", "#933" ).setBorderWidth( 2 );
     this.cross = new Path( 0, 15, "#fcc", "#933" );
     this.cross.addSegments( [
       new ArcToSegment( 5, 15, 5, 10, 5 ),

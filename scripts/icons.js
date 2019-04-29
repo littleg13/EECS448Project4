@@ -160,7 +160,7 @@ var TankSprite = /** @class */ (function (_super) {
             _this.leftTread.shiftUp(delta);
             _this.rightTread.shiftDown(delta);
         };
-        _this.hitbox = new Rect(-20, -20, 40, 40, "#ccc", "#000");
+        _this.hitbox = new Rect(-17.5, -20, 35, 40, "#ccc", "#000");
         _this.leftTread = new Tread(-17.5);
         _this.rightTread = new Tread(7.5);
         _this.body = new RoundRect(-12.5, -20, 25, 40, 3, color, "#000");
@@ -252,7 +252,7 @@ var MultiShotSprite = /** @class */ (function (_super) {
             _this.hub.render(ctx);
             ctx.restore();
         };
-        _this.box = new RoundRect(-18, -18, 36, 36, 10, "#336", "#669");
+        _this.box = new RoundRect(-18, -18, 36, 36, 10, "#336", "#669").setBorderWidth(2);
         var genTurret = function () {
             return new Collection([
                 new Rect(-3, -20, 6, 15, "#99c", "transparent").setBorderWidth(2),
@@ -275,10 +275,14 @@ var BuildWallSprite = /** @class */ (function (_super) {
             _this.box.render(ctx);
             _this.bricks.render(ctx);
         };
-        _this.box = new RoundRect(-18, -18, 36, 36, 10, "#963", "#630");
+        _this.box = new RoundRect(-18, -18, 36, 36, 10, "#999", "#333").setBorderWidth(2);
         _this.bricks = new Collection([
-            new RoundRect(-10, -10, 15, 10, 3),
-            new RoundRect(5, -10, 10, 10, 3)
+            new RoundRect(-15, -15, 18, 10, 3, "#666", "#333"),
+            new RoundRect(5, -15, 10, 10, 3, "#666", "#333"),
+            new RoundRect(-15, -4, 10, 8, 3, "#666", "#333"),
+            new RoundRect(-3, -4, 18, 8, 3, "#666", "#333"),
+            new RoundRect(-15, 5, 18, 10, 3, "#666", "#333"),
+            new RoundRect(5, 5, 10, 10, 3, "#666", "#333")
         ]);
         return _this;
     }
@@ -292,7 +296,7 @@ var IncreaseMoveDistSprite = /** @class */ (function (_super) {
             _this.box.render(ctx);
             _this.arrows.render(ctx);
         };
-        _this.box = new RoundRect(-18, -18, 36, 36, 10, "darkgreen", "limegreen");
+        _this.box = new RoundRect(-18, -18, 36, 36, 10, "darkgreen", "limegreen").setBorderWidth(2);
         _this.box.setBorderWidth(2);
         _this.arrows = new Collection();
         for (var i = 0; i < 5; i++) {
@@ -319,7 +323,7 @@ var HealthPackSprite = /** @class */ (function (_super) {
             _this.box.render(ctx);
             _this.cross.render(ctx);
         };
-        _this.box = new RoundRect(-18, -18, 36, 36, 10, "#f00", "#933");
+        _this.box = new RoundRect(-18, -18, 36, 36, 10, "#f00", "#933").setBorderWidth(2);
         _this.cross = new Path(0, 15, "#fcc", "#933");
         _this.cross.addSegments([
             new ArcToSegment(5, 15, 5, 10, 5),

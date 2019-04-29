@@ -4,10 +4,24 @@ abstract class Entity {
   dir  : number;
   sprite  : Renderable;
   layer   : Layer;
-  hitbox  : Rect;
+  hitbox  : Hitbox;
 
   attachToLayer = ( layer : Layer ) : void => {
     this.layer = layer;
+  }
+
+  getHitbox = ( ) : Hitbox => {
+    return this.hitbox;
+  }
+}
+
+class Hitbox {
+  w : number;
+  h : number;
+
+  constructor( w : number, h : number ) {
+    this.w = w;
+    this.h = h;
   }
 }
 
@@ -34,6 +48,7 @@ class Tank extends Entity {
     this.sprite     = new TankSprite( color );
     this.nameTag    = new NameTag( playerName, health );
     this.layer      = new Layer( playerName, 60, 60 );
+    this.hitbox     = new Hitbox( 35, 40 );
 
     this.health   = health;
     this.canShoot = false;

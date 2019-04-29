@@ -360,6 +360,31 @@ socket.on("lobbyHost", checkIfHost)
   */
 var handleKeyDown = (evt) => {
   if( document.activeElement != document.body ) return;
+  let spinInpt = document.getElementById( "spinSlider" );
+  let spinDisp = document.getElementById( "spinDisplay" );
+  let powrInpt = document.getElementById( "powerSlider" );
+  let powrDisp = document.getElementById( "powerDisplay" );
+  switch( evt.key ) {
+    case "a":
+      spinInpt.stepDown();
+      spinDisp.value = spinInpt.value;
+      return;
+    case "d":
+      spinInpt.stepUp();
+      spinDisp.value = spinInpt.value;
+      return;
+    case "s":
+      powrInpt.stepDown();
+      powrDisp.value = powrInpt.value;
+      return;
+    case "w":
+      powrInpt.stepUp();
+      powrDisp.value = powrInpt.value;
+      return;
+    default:
+      break;
+  }
+
   if( game.curTurn == localStorage.userID ) {
     if( evt.key == " " ) {
       game.recordKeyPress( evt.key );

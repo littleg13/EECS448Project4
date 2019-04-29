@@ -1,5 +1,7 @@
 html, body {
   height: 100%;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
 }
 
@@ -44,13 +46,13 @@ div#game {
 }
 
 canvas#gameview {
-  margin: 0px;
-  /* margin: 4em auto 1em auto; */
-  /* align-self: center; */
+  margin: 4em auto 4em auto;
   display: inline-block;
-  /* overflow: hidden; */
-  border: 1px solid black;
-  border-radius: 5%;
+  overflow: hidden;
+  background: black;
+  box-shadow: 0 0 4em black;
+  border: 0.5em solid black;
+  border-radius: 50%;
 }
 
 footer > * {
@@ -106,7 +108,10 @@ button {
 }
 
 #rightSide {
-  display: inline-block;
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 0;
   padding: 10px;
   margin: 1%;
   width: 22%;
