@@ -45,6 +45,10 @@ var Tank = /** @class */ (function (_super) {
         _this.getLayer = function () {
             return _this.layer;
         };
+        _this.setColor = function (color) {
+            _this.sprite.changeColor(color);
+            return _this;
+        };
         _this.moveForward = function (delta) {
             if (delta === void 0) { delta = 1.0; }
             var dirRads = (_this.dir / 180.0) * Math.PI;
@@ -98,6 +102,7 @@ var Tank = /** @class */ (function (_super) {
         _this.yPos = yPos;
         _this.dir = dir;
         _this.distanceLeft = 5.0;
+        _this.color = color;
         _this.playerName = playerName;
         _this.userID = userID;
         _this.sprite = new TankSprite(color);

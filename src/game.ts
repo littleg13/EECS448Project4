@@ -11,6 +11,7 @@ class Game {
   background  : Layer;
   gameview    : Layer;
   effects     : Layer;
+  minimap     : Layer;
   map         : Map;
   mapDim      : number;
   scale       : number;
@@ -19,6 +20,7 @@ class Game {
   curTurn     : string;
   curBoxDim   : number;
   tileDim     : number;
+  miniDim     : number;
   bullets     : Bullet[];
   powerups    : Powerup[];
   keys        : string[];
@@ -39,6 +41,7 @@ class Game {
     this.distLeftThisTurn = 5.0;
     this.curBoxDim = 40;
     this.tileDim   = 40;
+    this.miniDim   = 10;
     this.bullets   = [];
     this.powerups  = [];
     this.keys      = [];
@@ -59,11 +62,16 @@ class Game {
   initLayers = () : void => {
     let viewRadius = 7; // in tiles
     this.gameview = new Layer( "gameview", 2 * viewRadius * this.tileDim, 2 * viewRadius * this.tileDim );
-    this.effects = new Layer( "effects", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
-    this.background = new Layer( "background", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
     this.gameview.attachToParent( document.getElementById( "center" ) );
+
+    this.effects = new Layer( "effects", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
     this.effects.attachToParent( document.getElementById( "hidden" ) );
+
+    this.background = new Layer( "background", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
     this.background.attachToParent( document.getElementById( "hidden" ) );
+
+    this.minimap = new Layer( "minimap", this.miniDim * this.mapDim, this.miniDim * this.mapDim );
+    this.minimap.attachToParent( document.getElementById( "mini" ) );
   }
 
   startGame = () : void => {
@@ -294,8 +302,14 @@ class Game {
     this.gameview.addLayer( this.background );
   }
 
+  renderMinimap = () : void => {
+    this.minimap.applyScale( this.miniDim / this.tileDim, this.miniDim / this.tileDim);
+    this.minimap.addLayer( this.background );
+    this.minimap.popTransform();
+  }
+
   renderTanks = () : void => {
-    this.tanks.map( ( tank ) => {
+    this.tanks.forEach( ( tank ) => {
       if( tank.health <= 0 ) { return; }
       this.renderTank( tank );
     });
@@ -303,13 +317,19 @@ class Game {
 
   renderTank = ( tank ) : void => {
     tank.updateImage();
-    this.gameview.applyTranslate( this.tileDim * tank.xPos, this.tileDim * tank.yPos );
-    this.gameview.addLayer( tank.getLayer(), -10, -10 ); // Account for the padding on the sprite's canvas
+    this.gameview.applyTranslate( this.tileDim * tank.xPos - 10, this.tileDim * tank.yPos - 10 );
+    this.gameview.addLayer( tank.getLayer() );
     this.gameview.applyTranslate( this.tileDim / 2, this.tileDim );
     this.gameview.drawItem( tank.nameTag );
     this.gameview.popTransform();
-    // To-do: add nametag w/ health bar
     this.gameview.popTransform();
+    // To-do: add nametag w/ health bar
+    let [ xOffset, yOffset ] = [ tank.xPos, tank.yPos ].map( ( val ) => {
+      return this.miniDim * ( val + 0.5 );
+    } );
+    this.minimap.applyTranslate( xOffset, yOffset );
+    this.minimap.drawItem( new Circle( 0, 0, this.miniDim / 2, tank.color ) );
+    this.minimap.popTransform();
   }
 
   renderPowerups = () : void => {
@@ -341,8 +361,7 @@ class Game {
   }
 
   renderLoop = () : void => {
-    let plyr = this.getPlayer();
-    let [ xOffset, yOffset ] = [ plyr.xPos, plyr.yPos ].map( ( val : number ) => {
+    let [ xOffset, yOffset ] = this.getPlayerPos().map( ( val : number ) => {
       return -( val + 0.5 ) * this.tileDim;
     } );
     this.gameview.clear();
@@ -351,6 +370,7 @@ class Game {
     this.gameview.center();
     this.renderMap();
     this.renderEffects();
+    this.renderMinimap();
     this.renderTanks();
     this.gameview.popTransform();
     this.gameview.popTransform();

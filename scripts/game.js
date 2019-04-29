@@ -16,11 +16,13 @@ var Game = /** @class */ (function () {
         this.initLayers = function () {
             var viewRadius = 7; // in tiles
             _this.gameview = new Layer("gameview", 2 * viewRadius * _this.tileDim, 2 * viewRadius * _this.tileDim);
-            _this.effects = new Layer("effects", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
-            _this.background = new Layer("background", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
             _this.gameview.attachToParent(document.getElementById("center"));
+            _this.effects = new Layer("effects", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
             _this.effects.attachToParent(document.getElementById("hidden"));
+            _this.background = new Layer("background", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
             _this.background.attachToParent(document.getElementById("hidden"));
+            _this.minimap = new Layer("minimap", _this.miniDim * _this.mapDim, _this.miniDim * _this.mapDim);
+            _this.minimap.attachToParent(document.getElementById("mini"));
         };
         this.startGame = function () {
             _this.gameTickUpdateInt = setInterval(function () { _this.gameTick(); }, Math.round(1000 / 32));
@@ -234,8 +236,13 @@ var Game = /** @class */ (function () {
         this.renderMap = function () {
             _this.gameview.addLayer(_this.background);
         };
+        this.renderMinimap = function () {
+            _this.minimap.applyScale(_this.miniDim / _this.tileDim, _this.miniDim / _this.tileDim);
+            _this.minimap.addLayer(_this.background);
+            _this.minimap.popTransform();
+        };
         this.renderTanks = function () {
-            _this.tanks.map(function (tank) {
+            _this.tanks.forEach(function (tank) {
                 if (tank.health <= 0) {
                     return;
                 }
@@ -244,13 +251,19 @@ var Game = /** @class */ (function () {
         };
         this.renderTank = function (tank) {
             tank.updateImage();
-            _this.gameview.applyTranslate(_this.tileDim * tank.xPos, _this.tileDim * tank.yPos);
-            _this.gameview.addLayer(tank.getLayer(), -10, -10); // Account for the padding on the sprite's canvas
+            _this.gameview.applyTranslate(_this.tileDim * tank.xPos - 10, _this.tileDim * tank.yPos - 10);
+            _this.gameview.addLayer(tank.getLayer());
             _this.gameview.applyTranslate(_this.tileDim / 2, _this.tileDim);
             _this.gameview.drawItem(tank.nameTag);
             _this.gameview.popTransform();
-            // To-do: add nametag w/ health bar
             _this.gameview.popTransform();
+            // To-do: add nametag w/ health bar
+            var _a = [tank.xPos, tank.yPos].map(function (val) {
+                return _this.miniDim * (val + 0.5);
+            }), xOffset = _a[0], yOffset = _a[1];
+            _this.minimap.applyTranslate(xOffset, yOffset);
+            _this.minimap.drawItem(new Circle(0, 0, _this.miniDim / 2, tank.color));
+            _this.minimap.popTransform();
         };
         this.renderPowerups = function () {
             _this.powerups.forEach(function (powerup) {
@@ -278,8 +291,7 @@ var Game = /** @class */ (function () {
             });
         };
         this.renderLoop = function () {
-            var plyr = _this.getPlayer();
-            var _a = [plyr.xPos, plyr.yPos].map(function (val) {
+            var _a = _this.getPlayerPos().map(function (val) {
                 return -(val + 0.5) * _this.tileDim;
             }), xOffset = _a[0], yOffset = _a[1];
             _this.gameview.clear();
@@ -288,6 +300,7 @@ var Game = /** @class */ (function () {
             _this.gameview.center();
             _this.renderMap();
             _this.renderEffects();
+            _this.renderMinimap();
             _this.renderTanks();
             _this.gameview.popTransform();
             _this.gameview.popTransform();
@@ -338,6 +351,7 @@ var Game = /** @class */ (function () {
         this.distLeftThisTurn = 5.0;
         this.curBoxDim = 40;
         this.tileDim = 40;
+        this.miniDim = 10;
         this.bullets = [];
         this.powerups = [];
         this.keys = [];

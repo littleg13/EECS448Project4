@@ -28,6 +28,7 @@ class Hitbox {
 class Tank extends Entity {
   playerName  : string;
   userID      : string;
+  color       : string;
   infoCard    : PlayerCard;
   health      : number;
   canShoot    : boolean;
@@ -42,6 +43,7 @@ class Tank extends Entity {
     this.yPos   = yPos;
     this.dir    = dir;
     this.distanceLeft = 5.0;
+    this.color  = color;
 
     this.playerName = playerName;
     this.userID     = userID;
@@ -65,6 +67,11 @@ class Tank extends Entity {
 
   getLayer = () : Layer => {
     return this.layer;
+  }
+
+  setColor = ( color : string ) : Tank => {
+    this.sprite.changeColor( color );
+    return this;
   }
 
   moveForward = ( delta = 1.0 ) : void => {
