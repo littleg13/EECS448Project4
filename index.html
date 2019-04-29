@@ -6,7 +6,11 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="styles.css">
     <script src="scripts/socket.io.js"></script>
-    <script src="scripts/tank.js"></script>
+    <script src="scripts/render.js"></script>
+    <script src="scripts/icons.js"></script>
+    <script src="scripts/cards.js"></script>
+    <script src="scripts/entity.js"></script>
+    <script src="scripts/map.js"></script>
     <script src="scripts/game.js"></script>
     <script src="scripts/main.js" defer></script>
     <!-- <link
@@ -24,20 +28,22 @@
       // height has additional adjustment for Exit button ( 1em margins, 1em padding, 1em text)
       let rect = { width : window.innerWidth - 128, height : window.innerHeight - 128 - 64 };
       if( rect.width < 600 || rect.height < 600 ) {
-        game.gridBoxDim = parseInt( Math.min( rect.width / game.mapDim, rect.height / game.mapDim ) );
-        let canvasSize = game.gridBoxDim * game.mapDim;
-        canvas.width = canvasSize;
-        canvas.height = canvasSize;
-        game.scale = game.gridBoxDim / game.geometryDim;
+        game.curBoxDim = parseInt( Math.min( rect.width / game.mapDim, rect.height / game.mapDim ) );
+        let canvasSize = game.curBoxDim * game.mapDim;
+        game.gameview.resize( canvasSize, canvasSize );
+        game.effects.resize( canvasSize, canvasSize );
+        game.scale = game.curBoxDim / game.tileDim;
       } else {
-        canvas.width = 600;
-        canvas.height = 600;
-        game.gridBoxDim = parseInt( canvas.width / game.mapDim );
-        game.scale = game.gridBoxDim / game.geometryDim;
+        canvasSize = 600;
+        game.gameview.resize( canvasSize, canvasSize );
+        game.effects.resize( canvasSize, canvasSize );
+        game.gridBoxDim = parseInt( canvasSize / game.mapDim );
+        game.scale = game.curBoxDim / game.tileDim;
       }
     }
 
     window.addEventListener("resize", (evt) => {
+      return;
       if( resizeTaskId !== null ) {
         clearTimeout( resizeTaskId );
       }
@@ -53,7 +59,7 @@
   <body>
     <main id="wrapper">
       <h1 id="title">Welcome to tanks!</h1>
-      <div id="splash" class="active">
+      <div id="splash">
         <label for="username">Enter a username:</label><br>
         <input type="text" id="username">
         <button type="button" onclick="pickUsername()">Enter Username</button>
@@ -67,13 +73,18 @@
 
       <div id="join">
         <label for="lobbyCode">Enter a room code:</label><br>
-        <input type='text' id="lobbyCode"></input><br>
+        <input type='text' id="lobbyCode"><br>
         <button type='button' onclick="joinLobby()">Join Lobby</button>
-        <button type="button" onclick="wrapper.makeActive('splash2')">Back</button>
+        <button type="button" onclick="makeActive('splash2')">Back</button>
       </div>
 
-      <div id="waiting">
+      <div id="waiting" class="active">
         <h1>Loading...</h1>
+      </div>
+      <div id="connect_error">
+        <h1>Error Connecting...</h1>
+        <p>It seems like we can't make a connection to the server!</p>
+        <button type="button" onclick="reattemptConnect()" id="retry">Try to Reconnect</button>
       </div>
 
       <div id="lobbyMenu">
@@ -87,33 +98,66 @@
     </main>
     <div id="game">
       <div id="gameBody">
-        <div class="sidebar" id="leftSide">
-          <div class="container" id="chatWindow">
-            <div id="chatBox">
-              <div class="message">
-                <div class="sender"></div>
-                <div class="content"></div>
-              </div>
-                <input type="text" id="textBox"></input>
-                <input type="submit" value="enter" onclick="sendMsg()" id="sendMsg"></input>
-            </div>
-            <div class="container" id="messageWindow"></div>
-          </div>
-        </div>
         <div id="center">
-          <canvas id="canvas" width=600 height=600></canvas>
         </div>
         <div id="rightSide" class="sidebar">
           <div id="additionalInfo">
             <div id="userInfo">
-              <div id="spin"><input type="range" min="-100" max="100" value="0" class="slider" id="spinSlider"></div>
+              <div id="userCard">
+              </div>
+              <div id="spin">
+                <label for="spinSlider">Spin</label><br>
+                <input type="range" list="spinTicks" min="-1" max="1" value="0" step="0.1" class="slider" id="spinSlider">
+                <datalist id="spinTicks">
+                  <option value="-1.0">
+                  <option value="-0.8">
+                  <option value="-0.6">
+                  <option value="-0.4">
+                  <option value="-0.2">
+                  <option value="0">
+                  <option value="0.2">
+                  <option value="0.4">
+                  <option value="0.6">
+                  <option value="0.8">
+                  <option value="1.0">
+                </datalist>
+                <input type="number" id="spinDisplay" value="0" disabled style="text-align: center; border: none; border-radius: 0.5em;"><br>
+
+                <label for="powerSlider">Power</label><br>
+                <input type="range" list="powerTicks" min="0.0" max="5.0" value="0" step="0.5" class="slider" id="powerSlider">
+                <datalist id="powerTicks">
+                  <option value="0.0">
+                  <option value="0.5">
+                  <option value="1.0">
+                  <option value="1.5">
+                  <option value="2.0">
+                  <option value="2.5">
+                  <option value="3.0">
+                  <option value="3.5">
+                  <option value="4.0">
+                  <option value="4.5">
+                  <option value="5.0">
+                </datalist>
+                <input type="number" id="powerDisplay" value="0" disabled style="text-align: center; border: none; border-radius: 0.5em;"><br>
+              </div>
             </div>
             <div id="lobbyInfo"></div>
           </div>
         </div>
       </div>
-      <div id='turn'>Turn: </div>
+      <input type="checkbox" id="chatToggle" class="toggle" onchange="resetChatHeader()">
+      <div class="container" id="chatWindow">
+        <label for="chatToggle">
+          <div id="chatHeader">Show Chat</div>
+        </label>
+        <div class="container" id="messageWindow"></div>
+        <div id="chatBox">
+          <input type="text" id="textBox"></input>
+          <input type="submit" value="Send" onclick="sendMsg()">
+        </div>
+      </div>
       <button type="button" onclick="logout()">Exit</button>
     </div>
+    <div id="hidden"></div>
   </body>
-<html>
+</html>

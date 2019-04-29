@@ -1,3 +1,8 @@
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -5,14 +10,14 @@
 body {
   color: white;
   background-image: url("images/wild_oliva.png");
-  light-height: 16px;
+  line-height: 16px;
 }
 
 main, header, footer {
   margin: 2em auto;
-  height: 100%;
   max-width: 800px;
   text-align: center;
+  display: block;
   background-color: rgba(127, 127, 127, 0.50);
   border: 1px solid black;
   border-radius: 1em;
@@ -31,7 +36,6 @@ main #lobbyList {
   list-style: none;
   padding: 0;
   margin: 0;
-
 }
 
 div#game {
@@ -39,7 +43,7 @@ div#game {
   margin: auto;
 }
 
-canvas {
+canvas#gameview {
   margin: 0px;
   /* margin: 4em auto 1em auto; */
   /* align-self: center; */
@@ -87,11 +91,13 @@ button {
   font-weight: bold;
   border-radius: 5px;
 }
+
 #turn {
   margin: 0px auto;
   width: 100%;
   text-align: center;
 }
+
 #tankList {
   display: flex;
   width: 100%;
@@ -99,103 +105,246 @@ button {
   list-style: none;
 }
 
-#tankList li {
-
+#rightSide {
+  display: inline-block;
+  padding: 10px;
+  margin: 1%;
+  width: 22%;
+  max-width: 250px;
 }
 
-span.playerSummary {
-  font-family: monospace;
-  color: white;
+div.playerCard {
+  position: relative;
+  left: 0;
+  font-family: sans-serif;
+  text-align: center;
+  color: silver;
   font-size: 1.5em;
+  padding: 0.5em 0;
+
+  border: 0.25em solid rgba( 144, 144, 144, 1 );
+  border-radius: 1em;
+  background-color: rgba( 192, 192, 192, 0.5 );
+
+  transition: left 2s,
+              background 2s,
+              border 2s;
 }
 
-img.playerIcon {
-  display: none;
+div.playerCard:hover {
+  left: -2.5em;
+  background-color: rgba( 240, 192, 240, 0.5 );
+  border-color: rgb( 192, 144, 192, 1 );
+  transition: left 2s,
+              background: 2s,
+              border: 2s;
 }
 
-div.healthBar {
-  width: 150px;
-  height: 15px;
-  padding: 0;
+div.playerCard.isTurn {
+  left: -2.5em;
+  background-color: rgba( 192, 240, 240, 0.5 );
+  border-color: rgba( 144, 192, 192, 1 );
+  transition: left 2s,
+              background 2s,
+              border 2s;
+}
+
+div.tankHealth {
+  width: 70%;
+  max-width: 100px;
+  height: 20px;
+  border: 5px solid black;
+  border-radius: 10px;
   background-color: black;
+  margin: 0 auto 0 auto;
 }
 
-div.healthBar div {
+div.tankHealth div.curTankHealth {
   width: 100%;
   height: 100%;
   padding: 0;
+  border-radius: 5px;
   background-color: red;
 }
+
+div.playerCard canvas.tankSprite {
+  border-width: 0;
+}
+
 #gameBody {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: flex-end;
 }
-#chatWindow {
-  padding: 10px;
-  flex-direction: column-reverse;
-  display: flex;
-  height: 100%;
-  width: 100%;
-  background-color: rgba(50, 50, 50, 1);
+
+input[type="checkbox"].toggle {
+  display: none;
 }
 
-#chatBox {
-  height: 10%;
-  width: 100%;
-  padding: 10px;
-  align-self: flex-end;
+#chatWindow {
+  width: 50%;
+  height: 80%;
+  position: fixed;
+  transition: all 2s;
+  padding: 0;
+  margin: -2.5em auto 0 auto;
+  overflow: hidden;
+  top: 100%;
+  left: 25%;
+  right: 25%;
+  background-color: rgba(192, 192, 192, 0.5);
+  border: 1px solid black;
+  border-radius: 2.5em;
 }
+
+#chatToggle:checked + #chatWindow {
+  transition: all 2s;
+  top: 10%;
+}
+
+/* #chatHeader is the marker on top of the chat box */
+#chatHeader {
+  background-color: rgba( 240, 240, 240, 0.75 );
+  cursor: pointer;
+  width: 100%;
+  height: 2.5em;
+  text-align: center;
+  font-weight: bold;
+  font-family: sans-serif;
+  color: black;
+  padding: 1em;
+}
+
+#chatHeader.newMessage {
+  background-color: rgba( 255, 127, 127, 1 );
+}
+
+/* #messageWindow contains the message items */
 
 #messageWindow {
-  display: flex;
-  flex-direction: column-reverse;
-  padding: 10px;
   overflow: auto;
-  height: 505px;
-  min-height: 0px;
+  display: block;
   width: 100%;
-  align-self: flex-start;
+  height: auto;
+  position: absolute;
+  top: 2.5em;
+  bottom: 5em;
+  border-width: 1px 0;
+  scrollbar-width: 0;
+  -ms-overflow-style: none;
+}
+
+#messageWindow::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .message {
   display: block;
-  padding: 2px;
+  color: #303030;
+  font-family: sans-serif;
+  padding-top: 0.5em;
 }
 
 .sender {
-  display: inline;
+  display: inline-block;
+  position: relative;
+  top: -0.5em;
+  z-index: -1;
+  left: 1em;
+  font-size: 0.5em;
+  line-height: 8px;
+  background-color: #f0f0f0;
+  padding: 1em 0.5em 0.5em 0.5em;
+  border-radius: 0 0 1em 1em;
+  border-color: #c0c0c0;
+  border-style: solid;
+  border-width: 0 1px 1px 1px;
 }
 
-.content {
-  display: inline-block;
+.message div.content {
+  display: block;
+  max-width: 100%;
+  overflow: wrap;
   overflow-wrap: break-word;
+  background-color: #c0c0c0;
+  padding: 0.75em 1em;
+  margin: 0.5em 0.5em 0 0.5em;
+  border-radius: 1em 1em 1em 0;
+  border: 1px solid #909090;
 }
+
+.message.self {
+  text-align: right;
+}
+
+.message.self div.content {
+  background-color: #c0c0ff;
+  border: 1px solid #9090ff;
+  border-radius: 1em 1em 0 1em;
+}
+
+.message.self div.sender {
+  left: unset;
+  right: 1em;
+  background-color: #f0f0ff;
+  border-color: #c0c0ff;
+}
+
+/* #chatBox is where the inputs are */
+
+#chatBox {
+  background-color: rgba( 240, 240, 240, 0.75 );
+  width: 100%;
+  height: 5em;
+  position: absolute;
+  bottom: 0;
+}
+
+#chatBox input[type="text"] {
+  width: 100%;
+}
+
+#chatBox input[type="submit"] {
+  width: 8em;
+  margin: 0.5em auto;
+  display: block;
+}
+
+
 .sidebar {
-  height: 630px;
+  background-color: transparent;
+  height: 90%;
   width: 330px;
   padding: 15px;
 }
 
 #additionalInfo {
-  background-color: rgba(50, 50, 50, 1);
+  background-color: rgba(127, 127, 127, 0.5);
   padding: 10px;
   border-radius: 10px;
   display: block;
   height: 100%;
   width: 100%;
 }
+
 #userInfo {
-  border: 5px solid black;
   padding: 5px;
   height: 25%;
   width: 100%;
+  text-align: center;
 }
+
 #lobbyInfo {
   height: 75%;
   width: 100%;
 }
+
+#hidden {
+  display: none;
+}
+
 .colorSwatch {
   display: inline-block;
   height: 10px;

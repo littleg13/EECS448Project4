@@ -1,18 +1,21 @@
-let socket = io("https://448.cuzzo.net");
-//let socket = io("http://localhost:3000");
-var wrapper = document.getElementById("wrapper");
+// const socket = io( "https://448.cuzzo.net" );
+const socket = io( "http://192.168.1.100:3000" );
+var wrapper = document.getElementById( "wrapper" );
+var title   = document.getElementById( "title" );
 var game = null;
 var gameTickUpdateInt, sendServerUpdateInt;
+var error;
 
 /**
   * A helper function that changes which div is visible in the main#wrapper
   * element.
-  * @arg {string} id the id of the element to be displayed
+  * @arg {string} the id of the element to be displayed
   */
-var makeActive = (id) => {
-  Array.from(wrapper.getElementsByTagName("div")).map((elem) => {
-    if(elem.id == id) {elem.classList.add("active")}
-    else {elem.classList.remove("active");}
+var makeActive = ( id ) => {
+  console.log( "Make " + id + " Active" );
+  Array.from(wrapper.getElementsByTagName("div")).forEach((elem) => {
+    if( elem.id == id ) elem.classList.add("active");
+    else elem.classList.remove("active");
  });
 };
 
@@ -21,16 +24,17 @@ var makeActive = (id) => {
   * is valid, the username will be set in localStorage.
   */
 var pickUsername = () => {
-  let name = document.getElementById("username").value;
-  if(name === "") {alert("Name cannot be blank, please try again."); return;}
-  localStorage.setItem("username", document.getElementById("username").value.toUpperCase());
-  makeActive("splash2");
+  console.log( "Username Picked" );
+  let name = document.getElementById("username").value.toUpperCase();
+  if(name === "") { alert("Name cannot be blank, please try again."); return; }
+  localStorage.username = name;
+  makeActive( "splash2" );
 };
 
 var enterMatchmaking = () => {
-  console.log("Joining matchmaking");
-  socket.emit("enterMatchmaking", {username : localStorage.username});
-  makeActive("waiting");
+  console.log( "Joining matchmaking" );
+  socket.emit( "enterMatchmaking", { username : localStorage.username } );
+  makeActive( "waiting" );
 };
 
 /**
@@ -38,6 +42,7 @@ var enterMatchmaking = () => {
   * This is called by a button in the splash2 view.
   */
 var loadJoin = () => {
+  console.log( "Load Join Page" );
   wrapper.children.title.innerHTML = "Join a Lobby";
   makeActive("join")
 };
@@ -48,9 +53,9 @@ var loadJoin = () => {
   * It is called by a button on the splash2 view.
   */
 var createLobby = () => {
+  console.log( "Send Create Lobby Request" );
   let name = localStorage.username;
-  socket.emit("createLobby", {username : name.toUpperCase()});
-
+  socket.emit("createLobby", { username : name.toUpperCase() } );
   makeActive("waiting");
 };
 
@@ -61,12 +66,13 @@ var createLobby = () => {
   * It is called by a button on the join view.
   */
 var joinLobby = () => {
+  console.log( "Send Join Lobby Request" );
   let lobbyCode = document.getElementById("lobbyCode").value.toUpperCase();
   let name = localStorage.username;
 
   if(lobbyCode === "") {alert("Lobby code cannot be blank!"); return;}
 
-  socket.emit("joinLobby", {lobbyCode : lobbyCode, username: name});
+  socket.emit("joinLobby", { lobbyCode : lobbyCode, username: name } );
   makeActive("waiting");
 };
 
@@ -76,8 +82,9 @@ var joinLobby = () => {
   * It is called by a button on the lobbyMenu view.
   */
 var startGame = () => {
-  makeActive("waiting");
-  socket.emit("startGame", {});
+  console.log( "Waiting" );
+  makeActive( "waiting" );
+  socket.emit( "startGame", {} );
 };
 
 /**
@@ -86,10 +93,22 @@ var startGame = () => {
   * It is called by buttons on the lobbyMenu and game views.
   */
 var logout = () => {
-  socket.emit("logout", {lobbyCode : localStorage.lobbyCode, userID : localStorage.userID});
+  console.log( "Logout" );
+  socket.emit("logout", { lobbyCode : localStorage.lobbyCode, userID : localStorage.userID });
   localStorage.clear();
   window.location.reload();
 };
+
+var reattemptConnect = () => {
+  if( socket.connected ) {
+    console.log( "Cannot reattempt connection -> Already connected." );
+    return;
+  }
+  console.log( "Reattemping connection" );
+  title.style.display = "block";
+  makeActive( "waiting" );
+  socket.open();
+}
 
 /**
   * A function that signals the server to request the selected lobby's player
@@ -97,6 +116,7 @@ var logout = () => {
   * This is called by the moveToLobby socket handler.
   */
 var setupLobbyMenu = () => {
+  console.log( "Set up Lobby Menu" );
   document.getElementById('startGame').style.display = 'none';
   document.getElementById("lobbyName").innerHTML = localStorage.lobbyCode;
   socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
@@ -109,14 +129,15 @@ var setupLobbyMenu = () => {
   * socket signal handler.
   */
 var updateLists = () => {
-  if(game === null) return;
+  console.log( "Player List Update" );
+  if( game === null ) return;
   var lobbyList = document.getElementById("lobbyList");
   lobbyList.innerHTML = "";
-  for(userID in game.tanks) {
-    let newListItem = document.createElement("li");
-    newListItem.innerHTML = game.tanks[userID].username;
-    lobbyList.appendChild(newListItem);
- }
+  game.tanks.map( ( player ) => {
+    let newListItem = document.createElement( "li" );
+    newListItem.innerHTML = player.playerName;
+    lobbyList.appendChild( newListItem );
+  });
 };
 
 /**
@@ -126,6 +147,7 @@ var updateLists = () => {
   * @param {string} data.userID the assigned ID string for the player
   */
 var setIDHandler = (data) => {
+  console.log( "Set UserID: " + data.userID );
   localStorage.userID = data.userID;
 };
 socket.on("setID", setIDHandler);
@@ -143,6 +165,7 @@ socket.on("setID", setIDHandler);
   * @param {number} data.result a numeric error code for failure
   */
 var moveToLobbyHandler = (data) => {
+  console.log( "Moving to Lobby" );
   if(data["type"] == "lobbyJoined") {
     if(data["result"] == 0) {
       alert("The lobby you tried to join does not exist.");
@@ -172,16 +195,22 @@ socket.on("moveToLobby", moveToLobbyHandler);
   * userIDs.
   */
 var playerListHandler = (data) => {
-  if(game) {
+  console.log( "Player list received" );
+  console.log( data );
+  if( game ) {
     for(let user in data) {
       let userData = data[user];
-      game.addTank(user, userData['username'], userData['xPos'], userData['yPos'], userData['direction'], userData['distanceLeft'], userData['color'], userData['health']);
+      if( game.getPlayer( user ) ) { continue; }
+      let direction = userData[ "direction" ] * 180.0 / Math.PI;
+      game.addTank( user,               userData['username'],
+                    userData['xPos'],   userData['yPos'],
+                    direction,          userData['distanceLeft'],
+                    userData['color'],  userData['health'] );
     }
-    game.populateSidebar();
   }
   updateLists();
 };
-socket.on("playerList", playerListHandler);
+socket.on( "playerList", playerListHandler );
 
 /**
   * The event handler for the playerJoin signal from the server. It prompts the
@@ -189,7 +218,9 @@ socket.on("playerList", playerListHandler);
   * @param {Object} data Data is disregarded as a request for the full list is then sent
   */
 var playerJoinHandler = (data) => {
-  socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
+  console.log( "Player Join Received" );
+  console.log( data );
+  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
 };
 socket.on("playerJoin", playerJoinHandler);
 
@@ -202,6 +233,8 @@ socket.on("playerJoin", playerJoinHandler);
   * @param {Object} data an empty data object. the server sends no information on gameStart
   */
 var gameStartHandler = (data) => {
+  window.addEventListener( "keydown", handleKeyDown, true );
+  window.addEventListener( "keyup", handleKeyUp, true );
   socket.emit("requestInfo", {request : "getTurn"});
   socket.emit("requestInfo", {request : "getMap"});
   wrapper.style.display = "none";
@@ -218,7 +251,8 @@ socket.on("gameStart" , gameStartHandler);
   * @param {number[][]} data.map Array of integers that represents the current map
   */
 var mapUpdateHandler = (data) => {
-  game.updateMap(data.map);
+  console.log( "Map Update Received" );
+  game.updateMap( data.map );
 };
 socket.on("mapUpdate", mapUpdateHandler);
 
@@ -231,13 +265,24 @@ socket.on("mapUpdate", mapUpdateHandler);
   * @param {string} data.lobbyCode string with lobbyCode
   */
 var connectHandler = (data) => {
-  if(localStorage.userID) {
+  main();
+  console.log( "Socket connect." );
+  if( localStorage.userID && localStorage.lobbyCode ) {
+    console.log( "Socket connected. userID and lobbyCode detected." );
     let url = window.location.pathname;
     url = url.substring(url.lastIndexOf("/")+1);
     socket.emit("auth", {userID : localStorage.userID, lobbyCode : localStorage.lobbyCode, page : url});
   }
 };
 socket.on("connect", connectHandler);
+
+var errorHandler = ( data ) => {
+  document.getElementById( "title" ).style.display = "none";
+  makeActive( "connect_error" );
+  error = data;
+  socket.close();
+}
+socket.io.on("connect_error", errorHandler );
 
 /**
   * The event handler for the clearStorage signal from the server. This allows
@@ -265,33 +310,37 @@ var gameUpdateHandler = (data) => {
                                 data["newPos"][0], data["newPos"][1],
                                 data["newDir"]);
       }
-      if(data.playerPowerups) {
-        game.updateTankPowerups(data.userID, data.playerPowerups);
+      if( data.playerPowerups ) {
+        game.updateTankPowerups( data.userID, data.playerPowerups );
       }
       break;
     case "playerFire":
-      if(data.mapUpdate) {
-        game.gameUpdate.map = data.mapUpdate;
+      if( data.mapUpdate ) {
+        game.updateMap( data.mapUpdate );
       }
-      else if (data.playerHit) {
-        game.gameUpdate.health = [data.playerHit, data.newHealth]
-        if(data.gameOver) {
-          game.gameUpdate.gameOver = data.gameOver;
-          clearInterval(sendServerUpdateInt);
+      else if( data.playerHit ) {
+        game.updateTankHealth( data.playerHit, data.newHealth );
+        if( data.gameOver ) {
+          game.endGame( data.gameOver );
+          clearInterval( sendServerUpdateInt );
           makeActive( "splash2" );
         }
       }
-      game.fire(data.userID, data.power, data.spin, data.distance);
+      game.fire( data.userID, data.power, data.spin, data.distance );
       break;
      case "advanceTurn":
-      game.gameUpdate.advanceTurn = data["userID"];
-      if(game.turn == ''){
-        game.updateGameElements();
-      }
+      game.updateTurn( data["userID"] );
       break;
   }
-  if(data.powerupsOnMap){
-    game.updatePowerupsOnMap(data.powerupsOnMap);
+  if( data.powerupsOnMap ) {
+    let parsedUpdate = [];
+    for( let row in data.powerupsOnMap ) {
+      for( let col in data.powerupsOnMap[row] ) {
+        let type = data.powerupsOnMap[row][col];
+        parsedUpdate.push( { row : parseInt( row ), col : parseInt( col ), type : type } );
+      }
+    }
+    game.updatePowerups( parsedUpdate );
   }
 };
 socket.on("gameUpdate", gameUpdateHandler);
@@ -309,10 +358,10 @@ socket.on("lobbyHost", checkIfHost)
   * @param{Event} evt The event object which gives access to key information.
   */
 var handleKeyDown = (evt) => {
-  if(document.activeElement != document.body) return;
-  if (game.turn == localStorage.userID) {
-    if(evt.key == " "){
-      game.recordKeyPress(evt.key);
+  if( document.activeElement != document.body ) return;
+  if( game.curTurn == localStorage.userID ) {
+    if( evt.key == " " ) {
+      game.recordKeyPress( evt.key );
 
       return;
     }
@@ -325,41 +374,40 @@ var handleKeyDown = (evt) => {
   * Updates the global list of keys which is a boolean list indexed by key strings.
   * @param{Event} evt The event object which gives access to key information.
   */
-var handleKeyUp = (evt) => {
-  if(evt.key == " "){
-    game.keys[ evt.key ] = true;
-    game.keys['spaceDown'] = false;
+  var handleKeyUp = (evt) => {
+    if( document.activeElement.getAttribute( "id" ) == "textBox" ) {
+      if( evt.key == "Enter" ) sendMsg();
+    }
+    else if(evt.key == " ") {
+      game.keys[ evt.key ] = true;
+      game.keys['spaceDown'] = false;
+    }
+    else {
+      game.keys[ evt.key ] = false;
+    }
   }
-  else if (evt.key == "Enter" && document.activeElement == document.getElementById('textBox')) {
-    sendMsg();
-  }
-  else{
-    game.keys[ evt.key ] = false;
-  }
-}
-
 
 /**
   * Function that is set on an interval to regularly update the server if the
   * player's client has new information.
   */
 function sendServerUpdate() {
-  myTurn = game.turn == localStorage.userID;
-  if(myTurn) {
-    if(game.playerMoved()) {
+  myTurn = game.curTurn == localStorage.userID;
+  if( myTurn ) {
+    if( game.getPlayerMoved() ) {
       myPos = game.getPlayerPos();
-      myDir = game.getPlayerDir();
-      game.resetLastMoved();
-      socket.emit("gameEvent", {eventType: "playerMove",
-                                newPos: myPos,
-                                newDir: myDir});
+      myDir = game.getPlayerDir() * Math.PI / 180.0;
+      game.setPlayerMoved( false );
+      socket.emit("gameEvent", { eventType: "playerMove",
+                                 newPos: myPos,
+                                 newDir: myDir } );
     }
-    else if (game.getPlayerShot()) {
+    else if ( game.getPlayerShot() ) {
       let finalTime = new Date();
-      let power = Math.min(5, Math.max(0, (((finalTime - game.keyTimes[" "])-100)*5)/2000))
-      let spin = document.getElementById('spinSlider').value/100;
-      socket.emit("gameEvent", {eventType: "playerFire", power: power, spin: spin});
-      game.resetPlayerShot();
+      let powr = document.getElementById( "powerSlider" ).valueAsNumber;
+      let spin = document.getElementById( "spinSlider" ).valueAsNumber;
+      socket.emit( "gameEvent", { eventType: "playerFire", power: powr, spin: spin } );
+      game.setPlayerShot( false );
     }
   }
 }
@@ -371,8 +419,7 @@ function sendServerUpdate() {
 var main = () => {
   if(!localStorage.username) {
     makeActive("splash");
-    data = {};
- } else if(!localStorage.lobbyCode || !localStorage.userID) {
+ } else if( !localStorage.lobbyCode || !localStorage.userID ) {
     makeActive("splash2");
  } else {
     handleResize();
@@ -384,20 +431,28 @@ var main = () => {
 };
 
 var sendMsg = () => {
-  let user = game.tanks[localStorage.userID].username;
-  let text = document.getElementById('textBox').value;
-  document.getElementById('textBox').value = "";
-  if(text.length > 0){
-    socket.emit("sendMsg", {sender: user, content: text});
+  let username = localStorage.username;
+  let textbox = document.getElementById('textBox');
+  let text = textbox.value;
+  textbox.value = "";
+  if( text.length > 0 ) {
+    socket.emit( "sendMsg", { sender: username, content: text } );
   }
 };
 
-var chatMsg = (data) => {
-  let sender = data['sender'];
-  let content = data['content'];
-  game.showMsg(sender, content);
+var chatMsg = ( data ) => {
+  let sender = data["sender"];
+  let content = data["content"];
+  if( !document.getElementById( "chatToggle" ).checked ) {
+    document.getElementById( "chatHeader" ).classList.add( "newMessage" );
+  }
+  game.showMsg( sender, content );
 };
-socket.on("chatMsg", chatMsg);
+socket.on( "chatMsg", chatMsg );
 
-window.addEventListener("load", main);
-let mainLoop = () => {game.gameTick(); };
+var resetChatHeader = () => {
+  let header = document.getElementById( "chatHeader" );
+  if( header.innerHTML == "Show Chat" ) { header.innerHTML = "Hide Chat"; }
+  else { header.innerHTML = "Show Chat"; }
+  document.getElementById( "chatHeader" ).classList.remove( "newMessage" );
+}
