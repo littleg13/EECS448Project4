@@ -52,6 +52,10 @@ class Tank extends Entity {
     return this.layer;
   }
 
+  getHitbox = () : Rect => {
+    return this.sprite.hitbox;
+  }
+
   moveForward = ( delta = 1.0 ) : void => {
     let dirRads = ( this.dir / 180.0 ) * Math.PI;
     this.xPos += Math.sin( dirRads ) * delta;

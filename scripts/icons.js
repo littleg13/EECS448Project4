@@ -160,7 +160,7 @@ var TankSprite = /** @class */ (function (_super) {
             _this.leftTread.shiftUp(delta);
             _this.rightTread.shiftDown(delta);
         };
-        _this.hitbox = new Rect(-20, -20, 40, 40, "#ccc", "#000");
+        _this.hitbox = new Rect(-17.5, -20, 35, 40, "#ccc", "#000");
         _this.leftTread = new Tread(-17.5);
         _this.rightTread = new Tread(7.5);
         _this.body = new RoundRect(-12.5, -20, 25, 40, 3, color, "#000");

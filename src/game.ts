@@ -101,8 +101,9 @@ class Game {
   checkMapCollision = ( obj, linVel, rotVel ) : boolean => {
     let toReturn = true;
     let map = this.map;
-    let halfWidth = 0.5;
-    let halfHeight = 0.5;
+    let hitbox = obj.getHitbox();
+    let halfWidth = hitbox.w / 2 / this.tileDim;
+    let halfHeight = hitbox.h / 2 / this.tileDim;
     let corners =
       [ [ -halfWidth, -halfHeight - linVel ],
         [ -halfWidth,  halfHeight - linVel ],
@@ -128,40 +129,6 @@ class Game {
 
   processInput = () : void => {
     let player = this.getPlayer();
-
-    if( this.keys["a"] ) {
-      let spin = document.getElementById( "spinSlider" );
-      let disp = document.getElementById( "spinDisplay" );
-      if( !( spin instanceof HTMLInputElement ) ) return;
-      if( !( disp instanceof HTMLInputElement ) ) return;
-      spin.stepDown();
-      disp.value = spin.value;
-    }
-    if( this.keys["d"] ) {
-      let spin = document.getElementById( "spinSlider" );
-      let disp = document.getElementById( "spinDisplay" );
-      if( !( spin instanceof HTMLInputElement ) ) return;
-      if( !( disp instanceof HTMLInputElement ) ) return;
-      spin.stepUp();
-      disp.value = spin.value;
-    }
-    if( this.keys["s"] ) {
-      let powr = document.getElementById( "powerSlider" );
-      let disp = document.getElementById( "powerDisplay" );
-      if( !( powr instanceof HTMLInputElement ) ) return;
-      if( !( disp instanceof HTMLInputElement ) ) return;
-      powr.stepDown();
-      disp.value = powr.value;
-    }
-    if( this.keys["w"] ) {
-      let powr = document.getElementById( "powerSlider" );
-      let disp = document.getElementById( "powerDisplay" );
-      if( !( powr instanceof HTMLInputElement ) ) return;
-      if( !( disp instanceof HTMLInputElement ) ) return;
-      powr.stepUp();
-      disp.value = powr.value;
-    }
-
     if( this.curTurn != localStorage.userID ) return;
     if( this.keys["ArrowLeft"] ) {
       if( this.checkMapCollision( player, 0, -1.0 ) ) {

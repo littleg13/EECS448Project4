@@ -53,8 +53,9 @@ var Game = /** @class */ (function () {
         this.checkMapCollision = function (obj, linVel, rotVel) {
             var toReturn = true;
             var map = _this.map;
-            var halfWidth = 0.5;
-            var halfHeight = 0.5;
+            var hitbox = obj.getHitbox();
+            var halfWidth = hitbox.w / 2 / _this.tileDim;
+            var halfHeight = hitbox.h / 2 / _this.tileDim;
             var corners = [[-halfWidth, -halfHeight - linVel],
                 [-halfWidth, halfHeight - linVel],
                 [halfWidth, -halfHeight - linVel],
@@ -78,46 +79,6 @@ var Game = /** @class */ (function () {
         };
         this.processInput = function () {
             var player = _this.getPlayer();
-            if (_this.keys["a"]) {
-                var spin = document.getElementById("spinSlider");
-                var disp = document.getElementById("spinDisplay");
-                if (!(spin instanceof HTMLInputElement))
-                    return;
-                if (!(disp instanceof HTMLInputElement))
-                    return;
-                spin.stepDown();
-                disp.value = spin.value;
-            }
-            if (_this.keys["d"]) {
-                var spin = document.getElementById("spinSlider");
-                var disp = document.getElementById("spinDisplay");
-                if (!(spin instanceof HTMLInputElement))
-                    return;
-                if (!(disp instanceof HTMLInputElement))
-                    return;
-                spin.stepUp();
-                disp.value = spin.value;
-            }
-            if (_this.keys["s"]) {
-                var powr = document.getElementById("powerSlider");
-                var disp = document.getElementById("powerDisplay");
-                if (!(powr instanceof HTMLInputElement))
-                    return;
-                if (!(disp instanceof HTMLInputElement))
-                    return;
-                powr.stepDown();
-                disp.value = powr.value;
-            }
-            if (_this.keys["w"]) {
-                var powr = document.getElementById("powerSlider");
-                var disp = document.getElementById("powerDisplay");
-                if (!(powr instanceof HTMLInputElement))
-                    return;
-                if (!(disp instanceof HTMLInputElement))
-                    return;
-                powr.stepUp();
-                disp.value = powr.value;
-            }
             if (_this.curTurn != localStorage.userID)
                 return;
             if (_this.keys["ArrowLeft"]) {

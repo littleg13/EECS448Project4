@@ -131,7 +131,7 @@ class TankSprite extends Renderable {
   turret      : Circle;
   constructor( color = "#c00" ) {
     super();
-    this.hitbox     = new Rect( -20, -20, 40, 40, "#ccc", "#000" );
+    this.hitbox     = new Rect( -17.5, -20, 35, 40, "#ccc", "#000" );
     this.leftTread  = new Tread( -17.5 );
     this.rightTread = new Tread(   7.5 );
     this.body       = new RoundRect( -12.5, -20, 25, 40, 3, color, "#000" );

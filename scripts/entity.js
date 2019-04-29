@@ -35,6 +35,9 @@ var Tank = /** @class */ (function (_super) {
         _this.getLayer = function () {
             return _this.layer;
         };
+        _this.getHitbox = function () {
+            return _this.sprite.hitbox;
+        };
         _this.moveForward = function (delta) {
             if (delta === void 0) { delta = 1.0; }
             var dirRads = (_this.dir / 180.0) * Math.PI;
