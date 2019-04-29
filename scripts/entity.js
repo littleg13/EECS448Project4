@@ -17,8 +17,18 @@ var Entity = /** @class */ (function () {
         this.attachToLayer = function (layer) {
             _this.layer = layer;
         };
+        this.getHitbox = function () {
+            return _this.hitbox;
+        };
     }
     return Entity;
+}());
+var Hitbox = /** @class */ (function () {
+    function Hitbox(w, h) {
+        this.w = w;
+        this.h = h;
+    }
+    return Hitbox;
 }());
 var Tank = /** @class */ (function (_super) {
     __extends(Tank, _super);
@@ -34,9 +44,6 @@ var Tank = /** @class */ (function (_super) {
         };
         _this.getLayer = function () {
             return _this.layer;
-        };
-        _this.getHitbox = function () {
-            return _this.sprite.hitbox;
         };
         _this.moveForward = function (delta) {
             if (delta === void 0) { delta = 1.0; }
@@ -96,6 +103,7 @@ var Tank = /** @class */ (function (_super) {
         _this.sprite = new TankSprite(color);
         _this.nameTag = new NameTag(playerName, health);
         _this.layer = new Layer(playerName, 60, 60);
+        _this.hitbox = new Hitbox(35, 40);
         _this.health = health;
         _this.canShoot = false;
         return _this;

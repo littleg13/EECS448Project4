@@ -340,10 +340,19 @@ class Game {
   }
 
   renderLoop = () : void => {
+    let plyr = this.getPlayer();
+    let [ xOffset, yOffset ] = [ plyr.xPos, plyr.yPos ].map( ( val : number ) => {
+      return -val * this.tileDim;
+    } );
+    this.gameview.clear();
     this.gameview.applyScale( this.scale, this.scale );
+    this.gameview.applyTranslate( xOffset, yOffset );
+    this.gameview.center();
     this.renderMap();
     this.renderEffects();
     this.renderTanks();
+    this.gameview.popTransform();
+    this.gameview.popTransform();
     this.gameview.popTransform();
   }
 

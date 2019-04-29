@@ -277,10 +277,19 @@ var Game = /** @class */ (function () {
             });
         };
         this.renderLoop = function () {
+            var plyr = _this.getPlayer();
+            var _a = [plyr.xPos, plyr.yPos].map(function (val) {
+                return -val * _this.tileDim;
+            }), xOffset = _a[0], yOffset = _a[1];
+            _this.gameview.clear();
             _this.gameview.applyScale(_this.scale, _this.scale);
+            _this.gameview.applyTranslate(xOffset, yOffset);
+            _this.gameview.center();
             _this.renderMap();
             _this.renderEffects();
             _this.renderTanks();
+            _this.gameview.popTransform();
+            _this.gameview.popTransform();
             _this.gameview.popTransform();
         };
         this.gameTick = function () {
