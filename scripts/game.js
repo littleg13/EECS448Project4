@@ -147,7 +147,6 @@ class Game {
   updateMap(map) {
     this.map = map
   }
-  u
   updatePowerupsOnMap(powerups){
     this.powerupsOnMap = powerups;
   }
