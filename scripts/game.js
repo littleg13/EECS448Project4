@@ -27,7 +27,6 @@ var Game = /** @class */ (function () {
         this.startGame = function () {
             _this.gameTickUpdateInt = setInterval(function () { _this.gameTick(); }, Math.round(1000 / 32));
             _this.sendServerUpdateInt = setInterval(function () { sendServerUpdate(); }, 40);
-            _this.populateSidebar();
         };
         this.addTank = function (userID, username, xPos, yPos, direction, distanceLeft, color, health) {
             _this.tanks.push(new Tank(xPos, yPos, direction, username, userID, color, health));

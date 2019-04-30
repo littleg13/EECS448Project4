@@ -1,4 +1,5 @@
 const socket = io( "https://448.cuzzo.net" );
+//const socket = io( "http://localhost:3000" );
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
 var game = null;
@@ -206,6 +207,7 @@ var playerListHandler = (data) => {
                     direction,          userData['distanceLeft'],
                     userData['color'],  userData['health'] );
     }
+    game.populateSidebar();
   }
   updateLists();
 };
@@ -234,12 +236,12 @@ socket.on("playerJoin", playerJoinHandler);
 var gameStartHandler = (data) => {
   window.addEventListener( "keydown", handleKeyDown, true );
   window.addEventListener( "keyup", handleKeyUp, true );
-  socket.emit("requestInfo", {request : "getTurn"});
   socket.emit("requestInfo", {request : "getMap"});
   wrapper.style.display = "none";
   document.getElementById("game").style.display = "block";
   localStorage.gameActive = true;
   game.startGame();
+  socket.emit("requestInfo", {request : "getTurn"});
 };
 socket.on("gameStart" , gameStartHandler);
 
@@ -269,7 +271,6 @@ socket.on("mapUpdate", mapUpdateHandler);
   * @param {string} data.lobbyCode string with lobbyCode
   */
 var connectHandler = (data) => {
-  main();
   console.log( "Socket connect." );
   if( localStorage.userID && localStorage.lobbyCode ) {
     console.log( "Socket connected. userID and lobbyCode detected." );
@@ -277,6 +278,7 @@ var connectHandler = (data) => {
     url = url.substring(url.lastIndexOf("/")+1);
     socket.emit("auth", {userID : localStorage.userID, lobbyCode : localStorage.lobbyCode, page : url});
   }
+  main();
 };
 socket.on("connect", connectHandler);
 
@@ -451,11 +453,10 @@ var main = () => {
  } else if( !localStorage.lobbyCode || !localStorage.userID ) {
     makeActive("splash2");
  } else {
-    handleResize();
-    wrapper.style.display = "none";
-    socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
-    socket.emit("requestInfo", {request : "getMap"});
-    game = new Game(20);
+   handleResize();
+   game = new Game(20);
+   wrapper.style.display = "none";
+   socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
  }
 };
 
