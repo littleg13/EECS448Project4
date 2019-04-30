@@ -242,6 +242,8 @@ class Lobby:
                 if (self.addedPowerup):
                     self.addedPowerup = False
                     outboundData['powerupsOnMap'] = self.powerups
+                outboundData['xPos'] = collisionData[2]
+                outboundData['yPos'] = collisionData[3]
                 outboundData['distance'] = collisionData[1]
                 outboundData['power'] = data['power']
                 outboundData['spin'] = data['spin']
@@ -306,7 +308,7 @@ class Lobby:
             if(abs(player.direction - direction) >= 3/4 * 2*math.pi):
                 collided = True
                 collidedWith = 'edge'
-        return [collidedWith, finalDistance]
+        return [collidedWith, finalDistance, position[0], position[1]]
 
     def getDistanceToPlayer(self, position, player):
         return math.sqrt(math.pow(position[0] - (player.xPos + 0.5), 2) + math.pow(position[1] - (player.yPos+0.5), 2))
