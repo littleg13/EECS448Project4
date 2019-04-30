@@ -308,7 +308,7 @@ class Lobby:
             if(abs(player.direction - direction) >= 3/4 * 2*math.pi):
                 collided = True
                 collidedWith = 'edge'
-        return [collidedWith, finalDistance, position[0], position[1]]
+        return [collidedWith, finalDistance, position[0]-math.sin(direction)*increment, position[1]+math.cos(direction)*increment]
 
     def getDistanceToPlayer(self, position, player):
         return math.sqrt(math.pow(position[0] - (player.xPos + 0.5), 2) + math.pow(position[1] - (player.yPos+0.5), 2))
