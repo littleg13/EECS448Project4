@@ -64,6 +64,7 @@ var Game = /** @class */ (function () {
                 var retVal = tiles[row][col].isBlocking;
                 if (obj instanceof Bullet) {
                     _this.map.redraw(row, col);
+                    //        this.effects.push( new ExplosionSprite() );
                     _this.background.applyTranslate(col * _this.tileDim, row * _this.tileDim);
                     _this.background.drawItem(_this.map.getTile(row, col));
                     _this.background.popTransform();
@@ -72,20 +73,6 @@ var Game = /** @class */ (function () {
             });
         };
         this.checkPowerupCollision = function (obj) {
-            /*
-            let corners = obj.projHitbox();
-            let powerupIndices = this.powerups.map( ( powerup : Powerup, index : number ) : number => {
-              let match = corners.some( ( point : Point ) : boolean => {
-                let [ col, row ] = [ point.x, point.y ].map( Math.floor );
-                let [ pCol, pRow ] = [ powerup.xPos, powerup.yPos ].map( Math.floor );
-                return ( pCol == col && pRow == row );
-              } );
-              return ( match ? index : -1 );
-            } ).filter( ( index : number ) : boolean => {
-              return index > -1;
-            } );
-            return powerupIndices;
-            */
             var _a = [obj.xPos + 0.5, obj.yPos + 0.5].map(Math.floor), col = _a[0], row = _a[1];
             var retIndex = _this.powerups.map(function (powerup) {
                 if (powerup.xPos == col && powerup.yPos == row)
@@ -94,6 +81,24 @@ var Game = /** @class */ (function () {
                     return false;
             }).indexOf(true);
             return retIndex;
+        };
+        this.checkBulletCollision = function (bullet) {
+            var _a = [bullet.xPos + 0.5, bullet.yPos + 0.5], bullX = _a[0], bullY = _a[1];
+            return _this.tanks.some(function (tank) {
+                if (tank.userID == bullet.shooterID)
+                    return false;
+                var dirRad = tank.dir * Math.PI / 180.0;
+                var _a = [tank.xPos + 0.5, tank.yPos + 0.5], xPos = _a[0], yPos = _a[1];
+                var between = function (val, a, b) {
+                    var low = Math.min(a, b);
+                    var high = Math.max(a, b);
+                    return (low < val && val < high);
+                };
+                var delX = +Math.cos(dirRad) * 0.5;
+                var delY = -Math.sin(dirRad) * 0.5;
+                return between(bullX, xPos - delX, xPos + delX) &&
+                    between(bullY, yPos - delY, yPos + delY);
+            });
         };
         this.processInput = function () {
             var player = _this.getPlayer();
@@ -135,7 +140,7 @@ var Game = /** @class */ (function () {
             if (_this.getPlayerMoved()) {
                 var powerupIndex = _this.checkPowerupCollision(player);
                 if (powerupIndex > -1) {
-                    player.addPowerup(_this.powerups.splice(powerupIndex, 1));
+                    player.addPowerup(_this.powerups.splice(powerupIndex, 1)[0]);
                 }
             }
             player.distanceLeft = Math.max(0, player.distanceLeft);
@@ -227,7 +232,7 @@ var Game = /** @class */ (function () {
         this.fire = function (shooterID, power, curve, dist) {
             var shooter = _this.getPlayer(shooterID);
             if (shooter.canShoot) {
-                var bullet = new Bullet(shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve);
+                var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve);
                 bullet.attachToLayer(_this.effects);
                 _this.bullets.push(bullet);
                 shooter.canShoot = false;
@@ -313,11 +318,13 @@ var Game = /** @class */ (function () {
         this.renderBullets = function () {
             _this.bullets = _this.bullets.filter(function (bullet) {
                 bullet.render();
-                if (!_this.checkMapCollision(bullet, bullet.speed, 0.0)) {
+                if (!_this.checkMapCollision(bullet, bullet.speed, 0.0) &&
+                    !_this.checkBulletCollision(bullet)) {
                     bullet.update();
                     return true;
                 }
                 else {
+                    console.log("Bullet collision detected");
                     return false;
                 }
             });

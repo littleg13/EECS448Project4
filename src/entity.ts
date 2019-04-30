@@ -157,6 +157,7 @@ class Tank extends Entity {
 }
 
 class Bullet extends Entity {
+  shooterID   : string;
   distToGo    : number;
   distGone    : number;
   sprite      : BulletSprite;
@@ -166,8 +167,9 @@ class Bullet extends Entity {
   boom        : boolean;
   trajectory  : Point[];
 
-  constructor( xPos : number, yPos : number, dir : number, distToGo : number, power : number, curve : number ) {
+  constructor( userID : string, xPos : number, yPos : number, dir : number, distToGo : number, power : number, curve : number ) {
     super();
+    this.shooterID = userID;
     this.xPos = xPos;
     this.yPos = yPos;
     this.dir  = dir;

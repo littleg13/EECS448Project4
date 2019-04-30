@@ -444,8 +444,8 @@ var main = () => {
  } else if( !localStorage.lobbyCode || !localStorage.userID ) {
     makeActive("splash2");
  } else {
-   handleResize();
    game = new Game(20);
+   handleResize();
    wrapper.style.display = "none";
    socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
  }

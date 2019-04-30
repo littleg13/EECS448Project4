@@ -121,6 +121,7 @@ class Game {
       let retVal = tiles[ row ][ col ].isBlocking;
       if( obj instanceof Bullet ) {
         this.map.redraw( row, col );
+//        this.effects.push( new ExplosionSprite() );
         this.background.applyTranslate( col * this.tileDim, row * this.tileDim );
         this.background.drawItem( this.map.getTile( row, col ) );
         this.background.popTransform();
@@ -130,28 +131,31 @@ class Game {
   }
 
   checkPowerupCollision = ( obj : Entity ) : number => {
-    /*
-    let corners = obj.projHitbox();
-    let powerupIndices = this.powerups.map( ( powerup : Powerup, index : number ) : number => {
-      let match = corners.some( ( point : Point ) : boolean => {
-        let [ col, row ] = [ point.x, point.y ].map( Math.floor );
-        let [ pCol, pRow ] = [ powerup.xPos, powerup.yPos ].map( Math.floor );
-        return ( pCol == col && pRow == row );
-      } );
-      return ( match ? index : -1 );
-    } ).filter( ( index : number ) : boolean => {
-      return index > -1;
-    } );
-    return powerupIndices;
-    */
     let [ col, row ] = [ obj.xPos + 0.5, obj.yPos + 0.5 ].map( Math.floor );
-    let retIndex = this.powerups.map( ( powerup : Powerup ) : number => {
+    let retIndex = this.powerups.map( ( powerup : Powerup ) : boolean => {
       if( powerup.xPos == col && powerup.yPos == row ) return true;
       else return false;
     } ).indexOf( true );
     return retIndex;
   }
 
+  checkBulletCollision = ( bullet : Bullet ) : boolean => {
+    let [ bullX, bullY ] = [ bullet.xPos + 0.5, bullet.yPos + 0.5 ];
+    return this.tanks.some( ( tank : Tank ) : boolean => {
+      if( tank.userID == bullet.shooterID ) return false;
+      let dirRad = tank.dir * Math.PI / 180.0;
+      let [ xPos, yPos ] = [ tank.xPos + 0.5, tank.yPos + 0.5 ];
+      let between = ( val, a, b ) => {
+        let low = Math.min( a, b );
+        let high = Math.max( a, b );
+        return ( low < val && val < high );
+      }
+      let delX = +Math.cos( dirRad ) * 0.5;
+      let delY = -Math.sin( dirRad ) * 0.5;
+      return between( bullX, xPos - delX, xPos + delX ) &&
+             between( bullY, yPos - delY, yPos + delY );
+    } );
+  }
 
   processInput = () : void => {
     let player = this.getPlayer();
@@ -193,7 +197,7 @@ class Game {
     if( this.getPlayerMoved() ) {
       let powerupIndex = this.checkPowerupCollision( player );
       if( powerupIndex > -1 ) {
-        player.addPowerup( this.powerups.splice( powerupIndex, 1 ) );
+        player.addPowerup( this.powerups.splice( powerupIndex, 1 )[0] );
       }
     }
     player.distanceLeft = Math.max( 0, player.distanceLeft );
@@ -289,7 +293,7 @@ class Game {
   fire = ( shooterID : string, power : number, curve : number, dist : number ) => {
     let shooter = this.getPlayer( shooterID );
     if( shooter.canShoot ) {
-      let bullet = new Bullet( shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve );
+      let bullet = new Bullet( shooter.userID, shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve );
       bullet.attachToLayer( this.effects );
       this.bullets.push( bullet );
       shooter.canShoot = false;
@@ -383,10 +387,12 @@ class Game {
   renderBullets = () : void => {
     this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
       bullet.render();
-      if( !this.checkMapCollision( bullet, bullet.speed, 0.0 ) ) {
+      if( !this.checkMapCollision( bullet, bullet.speed, 0.0 ) &&
+          !this.checkBulletCollision( bullet ) ) {
         bullet.update();
         return true;
       } else {
+        console.log( "Bullet collision detected" );
         return false;
       }
     });

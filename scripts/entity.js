@@ -150,7 +150,7 @@ var Tank = /** @class */ (function (_super) {
 }(Entity));
 var Bullet = /** @class */ (function (_super) {
     __extends(Bullet, _super);
-    function Bullet(xPos, yPos, dir, distToGo, power, curve) {
+    function Bullet(userID, xPos, yPos, dir, distToGo, power, curve) {
         var _a;
         var _this = _super.call(this) || this;
         _this.render = function () {
@@ -172,6 +172,7 @@ var Bullet = /** @class */ (function (_super) {
             _this.distGone += _this.speed;
             _this.dir += Math.max(0, _this.distGone - _this.power) * _this.curve;
         };
+        _this.shooterID = userID;
         _this.xPos = xPos;
         _this.yPos = yPos;
         _this.dir = dir;
