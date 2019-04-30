@@ -145,9 +145,16 @@ class Game {
   }
 
   checkBulletCollision = ( bullet : Bullet ) : boolean => {
-    let [ bullX, bullY ] = [ bullet.xPos + 0.5, bullet.yPos + 0.5 ];
-    bullX += bullet.speed * Math.sin( bullet.dir * Math.PI / 180.0 );
-    bullY -= bullet.speed * Math.cos( bullet.dir * Math.PI / 180.0 );
+    for( let speed = 0.1; speed < bullet.speed; speed += 0.1 ) {
+      let [ bullX, bullY ] = [ bullet.xPos + 0.5, bullet.yPos + 0.5 ];
+      bullX += speed * Math.sin( bullet.dir * Math.PI / 180.0 );
+      bullY -= speed * Math.cos( bullet.dir * Math.PI / 180.0 );
+      if( this.checkBulletTrajectory( bullX, bullY, bullet.shooterID ) ) return true;
+    }
+    return false;
+  }
+
+  checkBulletTrajectory = ( bullX : number, bullY : number, userID : string ) : boolean => {
     let [ bullCol, bullRow ] = [ bullX, bullY ].map( Math.floor );
     let tile = this.map.getTile( bullRow, bullCol );
     if( tile.isBlocking ) {
@@ -156,20 +163,22 @@ class Game {
       this.background.drawItem( this.map.getTile( bullRow, bullCol ) );
       this.background.popTransform();
       return true;
+    } else {
+      let retVal = this.tanks.some( ( tank : Tank ) : boolean => {
+        if( tank.userID == userID ) return false;
+        let dirRad = tank.dir * Math.PI / 180.0;
+        let [ xPos, yPos ] = [ tank.xPos + 0.5, tank.yPos + 0.5 ];
+        let between = ( val, a, b ) => {
+          let low = Math.min( a, b );
+          let high = Math.max( a, b );
+          return ( low < val && val < high );
+        }
+        let [ delX, delY ] = [ bullX - xPos, bullY - yPos ];
+        let dist = Math.sqrt( delX * delX + delY * delY );
+        return dist < 0.5;
+      } );
+      return retVal;
     }
-    return this.tanks.some( ( tank : Tank ) : boolean => {
-      if( tank.userID == bullet.shooterID ) return false;
-      let dirRad = tank.dir * Math.PI / 180.0;
-      let [ xPos, yPos ] = [ tank.xPos + 0.5, tank.yPos + 0.5 ];
-      let between = ( val, a, b ) => {
-        let low = Math.min( a, b );
-        let high = Math.max( a, b );
-        return ( low < val && val < high );
-      }
-      let [ delX, delY ] = [ bullX - xPos, bullY - yPos ];
-      let dist = Math.sqrt( delX * delX + delY * delY );
-      return dist < 0.5;
-    } );
   }
 
   processInput = () : void => {
