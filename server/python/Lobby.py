@@ -136,25 +136,26 @@ class Lobby:
         self.players[self.order[self.turn]].resetDistance()
 
     def updatePowerups(self):
-        self.turnsSinceLastPowerupSpawn += 1
-        if (random.random() < (self.turnsSinceLastPowerupSpawn * 0.2)): # Add powerup
-            self.addedPowerup = True
-            self.turnsSinceLastPowerupSpawn = 0
-            pos = self.powerUpSpawnList.pop(0)
-            while True:
-                pointTaken = False
-                for playerId, player in self.players.items():
-                    if (math.floor(player.xPos) == pos['x'] and math.floor(player.yPos) == pos['y']):
-                        pointTaken = True
+        if(len(self.powerUpSpawnList) > 0):
+            self.turnsSinceLastPowerupSpawn += 1
+            if (random.random() < (self.turnsSinceLastPowerupSpawn * 0.2)): # Add powerup
+                self.addedPowerup = True
+                self.turnsSinceLastPowerupSpawn = 0
+                pos = self.powerUpSpawnList.pop(0)
+                while True:
+                    pointTaken = False
+                    for playerId, player in self.players.items():
+                        if (math.floor(player.xPos) == pos['x'] and math.floor(player.yPos) == pos['y']):
+                            pointTaken = True
+                            break
+                    if (pointTaken):
+                        self.powerUpSpawnList.append(pos)
+                        pos = self.powerUpSpawnList.pop(0)
+                    else:
                         break
-                if (pointTaken):
-                    self.powerUpSpawnList.append(pos)
-                    pos = self.powerUpSpawnList.pop(0)
-                else:
-                    break
-            if (pos['x'] not in self.powerups):
-                self.powerups[pos['x']] = {}
-            self.powerups[pos['x']][pos['y']] = random.choice(self.powerupTypes)
+                if (pos['x'] not in self.powerups):
+                    self.powerups[pos['x']] = {}
+                self.powerups[pos['x']][pos['y']] = random.choice(self.powerupTypes)
 
     def getTurn(self):
         return self.order[self.turn]
