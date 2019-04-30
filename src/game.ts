@@ -60,7 +60,6 @@ class Game {
 */
 
   initLayers = () : void => {
-    console.log("Init Layers Called");
     let viewRadius = 7; // in tiles
     this.gameview = new Layer( "gameview", 2 * viewRadius * this.tileDim, 2 * viewRadius * this.tileDim );
     this.gameview.attachToParent( document.getElementById( "center" ) );
@@ -76,7 +75,6 @@ class Game {
   }
 
   startGame = () : void => {
-    console.log("Start Game Called");
     this.gameTickUpdateInt = setInterval( () => { this.gameTick(); } , Math.round( 1000 / 32 ) );
     this.sendServerUpdateInt = setInterval( () => { sendServerUpdate(); }, 40 );
     this.populateSidebar();
@@ -125,6 +123,21 @@ class Game {
     } );
   }
 
+  checkPowerupCollision = ( obj : Entity ) : number[] => {
+    let corners = obj.projHitbox();
+    let powerupIndices = this.powerups.map( ( powerup : Powerup, index : number ) : number => {
+      let match = corners.some( ( point : Point ) : boolean => {
+        let [ col, row ] = [ point.x, point.y ].map( Math.floor );
+        let [ pCol, pRow ] = [ powerup.xPos, powerup.yPos ].map( Math.floor );
+        return ( pCol == col && pRow == row );
+      } );
+      return ( match ? index : -1 );
+    } ).filter( ( index : number ) : boolean => {
+      return index > -1;
+    } );
+    return powerupIndices;
+  }
+
 
   processInput = () : void => {
     let player = this.getPlayer();
@@ -162,6 +175,11 @@ class Game {
         player.moveBackward( 0.125 );
         this.setPlayerMoved();
       }
+    }
+    if( this.getPlayerMoved() ) {
+      this.checkPowerupCollision( player ).forEach( ( powerupIndex ) => {
+        player.addPowerup( this.powerups.splice( powerupIndex, 1 ) );
+      } );
     }
     player.distanceLeft = Math.max( 0, player.distanceLeft );
   }
@@ -218,6 +236,9 @@ class Game {
     } else if( deltaLocalY < 0 ) {
       tank.moveBackward( -deltaLocalY );
     }
+    this.checkPowerupCollision( tank ).forEach( ( powerupIndex : number ) : void => {
+      tank.addPowerup( this.powerups.splice( powerupIndex, 1 ) );
+    } );
   }
 
   updateTurn = ( userID : string ) => {
@@ -311,8 +332,8 @@ class Game {
 
   renderTank = ( tank ) : void => {
     tank.updateImage();
-    this.gameview.applyTranslate( this.tileDim * tank.xPos - 10, this.tileDim * tank.yPos - 10 );
-    this.gameview.addLayer( tank.getLayer() );
+    this.gameview.applyTranslate( this.tileDim * tank.xPos, this.tileDim * tank.yPos );
+    this.gameview.addLayer( tank.getLayer(), -10, -10 );
     this.gameview.applyTranslate( this.tileDim / 2, this.tileDim );
     this.gameview.drawItem( tank.nameTag );
     this.gameview.popTransform();

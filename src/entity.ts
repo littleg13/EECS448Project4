@@ -11,7 +11,7 @@ abstract class Entity {
     this.layer = layer;
   }
 
-  projHitbox = ( linVel : number, rotVel : number ) : Point[] => {
+  projHitbox = ( linVel : number = 0, rotVel : number = 0 ) : Point[] => {
     let dirRad = ( this.dir + rotVel ) * Math.PI / 180.0;
     let dX =  linVel * Math.sin( dirRad ) + this.xPos + 0.5;
     let dY = -linVel * Math.cos( dirRad ) + this.yPos + 0.5;
@@ -202,7 +202,6 @@ abstract class Powerup extends Entity {
     super();
     this.xPos = x;
     this.yPos = y;
-    console.log( this.xPos );
   }
 
   render = () : void => {

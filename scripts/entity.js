@@ -18,6 +18,8 @@ var Entity = /** @class */ (function () {
             _this.layer = layer;
         };
         this.projHitbox = function (linVel, rotVel) {
+            if (linVel === void 0) { linVel = 0; }
+            if (rotVel === void 0) { rotVel = 0; }
             var dirRad = (_this.dir + rotVel) * Math.PI / 180.0;
             var dX = linVel * Math.sin(dirRad) + _this.xPos + 0.5;
             var dY = -linVel * Math.cos(dirRad) + _this.yPos + 0.5;
@@ -187,7 +189,6 @@ var Powerup = /** @class */ (function (_super) {
         };
         _this.xPos = x;
         _this.yPos = y;
-        console.log(_this.xPos);
         return _this;
     }
     return Powerup;

@@ -14,7 +14,6 @@ var Game = /** @class */ (function () {
         *
         */
         this.initLayers = function () {
-            console.log("Init Layers Called");
             var viewRadius = 7; // in tiles
             _this.gameview = new Layer("gameview", 2 * viewRadius * _this.tileDim, 2 * viewRadius * _this.tileDim);
             _this.gameview.attachToParent(document.getElementById("center"));
@@ -26,7 +25,6 @@ var Game = /** @class */ (function () {
             _this.minimap.attachToParent(document.getElementById("mini"));
         };
         this.startGame = function () {
-            console.log("Start Game Called");
             _this.gameTickUpdateInt = setInterval(function () { _this.gameTick(); }, Math.round(1000 / 32));
             _this.sendServerUpdateInt = setInterval(function () { sendServerUpdate(); }, 40);
             _this.populateSidebar();
@@ -70,6 +68,20 @@ var Game = /** @class */ (function () {
                 return retVal;
             });
         };
+        this.checkPowerupCollision = function (obj) {
+            var corners = obj.projHitbox();
+            var powerupIndices = _this.powerups.map(function (powerup, index) {
+                var match = corners.some(function (point) {
+                    var _a = [point.x, point.y].map(Math.floor), col = _a[0], row = _a[1];
+                    var _b = [powerup.xPos, powerup.yPos].map(Math.floor), pCol = _b[0], pRow = _b[1];
+                    return (pCol == col && pRow == row);
+                });
+                return (match ? index : -1);
+            }).filter(function (index) {
+                return index > -1;
+            });
+            return powerupIndices;
+        };
         this.processInput = function () {
             var player = _this.getPlayer();
             if (_this.curTurn != localStorage.userID)
@@ -106,6 +118,11 @@ var Game = /** @class */ (function () {
                     player.moveBackward(0.125);
                     _this.setPlayerMoved();
                 }
+            }
+            if (_this.getPlayerMoved()) {
+                _this.checkPowerupCollision(player).forEach(function (powerupIndex) {
+                    player.addPowerup(_this.powerups.splice(powerupIndex, 1));
+                });
             }
             player.distanceLeft = Math.max(0, player.distanceLeft);
         };
@@ -159,6 +176,9 @@ var Game = /** @class */ (function () {
             else if (deltaLocalY < 0) {
                 tank.moveBackward(-deltaLocalY);
             }
+            _this.checkPowerupCollision(tank).forEach(function (powerupIndex) {
+                tank.addPowerup(_this.powerups.splice(powerupIndex, 1));
+            });
         };
         this.updateTurn = function (userID) {
             var prevPlayer = _this.getPlayer(_this.curTurn);
@@ -246,8 +266,8 @@ var Game = /** @class */ (function () {
         };
         this.renderTank = function (tank) {
             tank.updateImage();
-            _this.gameview.applyTranslate(_this.tileDim * tank.xPos - 10, _this.tileDim * tank.yPos - 10);
-            _this.gameview.addLayer(tank.getLayer());
+            _this.gameview.applyTranslate(_this.tileDim * tank.xPos, _this.tileDim * tank.yPos);
+            _this.gameview.addLayer(tank.getLayer(), -10, -10);
             _this.gameview.applyTranslate(_this.tileDim / 2, _this.tileDim);
             _this.gameview.drawItem(tank.nameTag);
             _this.gameview.popTransform();
