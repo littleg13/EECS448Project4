@@ -340,9 +340,9 @@ var gameUpdateHandler = (data) => {
   }
   if( data.powerupsOnMap ) {
     let parsedUpdate = [];
-    for( let row in data.powerupsOnMap ) {
-      for( let col in data.powerupsOnMap[row] ) {
-        let type = data.powerupsOnMap[row][col];
+    for( let col in data.powerupsOnMap ) {
+      for( let row in data.powerupsOnMap[col] ) {
+        let type = data.powerupsOnMap[col][row];
         parsedUpdate.push( { row : parseInt( row ), col : parseInt( col ), type : type } );
       }
     }
@@ -391,11 +391,6 @@ var handleKeyDown = (evt) => {
   }
 
   if( game.curTurn == localStorage.userID ) {
-    if( evt.key == " " ) {
-      game.recordKeyPress( evt.key );
-
-      return;
-    }
     game.keys[ evt.key ] = true;
   }
 }
@@ -408,10 +403,6 @@ var handleKeyDown = (evt) => {
   var handleKeyUp = (evt) => {
     if( document.activeElement.getAttribute( "id" ) == "textBox" ) {
       if( evt.key == "Enter" ) sendMsg();
-    }
-    else if(evt.key == " ") {
-      game.keys[ evt.key ] = true;
-      game.keys['spaceDown'] = false;
     }
     else {
       game.keys[ evt.key ] = false;
