@@ -13,33 +13,88 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var Map = /** @class */ (function (_super) {
     __extends(Map, _super);
-    function Map() {
+    function Map(mapDim) {
         var _this = _super.call(this) || this;
+        _this.redrawRange = function (startRow, numRows, startCol, numCols) {
+            for (var row = startRow; row < startRow + numRows; row++) {
+                for (var col = startCol; col < startCol + numCols; col++) {
+                    _this.redraw(row, col);
+                }
+            }
+        };
+        _this.redraw = function (row, col) {
+            if (_this.toRedraw[row][col] == null)
+                return;
+            var val = _this.toRedraw[row][col];
+            if (val < 0)
+                _this.tiles[row][col] = new OuterWallTile();
+            if (val == 0)
+                _this.tiles[row][col] = new FloorTile();
+            if (val > 0)
+                _this.tiles[row][col] = new WallTile(val);
+            _this.toRedraw[row][col] = null;
+        };
         _this.render = function (ctx) {
             ctx.save();
-            for (var i = 0; i < _this.tiles.length; i++) {
-                var row = _this.tiles[i];
+            _this.tiles.forEach(function (row, yIndex) {
                 ctx.save();
-                for (var j = 0; j < row.length; j++) {
-                    var tile = row[j];
+                row.forEach(function (tile, xIndex) {
                     tile.render(ctx);
                     ctx.translate(40, 0);
-                }
+                });
                 ctx.restore();
                 ctx.translate(0, 40);
-            }
+            });
             ctx.restore();
         };
         _this.update = function (tiles) {
-            _this.tiles = tiles.map(function (row) {
-                return row.map(function (val) {
-                    if (val === 0)
-                        return new FloorTile();
-                    else
-                        return new WallTile();
+            tiles.forEach(function (row, i) {
+                row.forEach(function (val, j) {
+                    var compare = (val < -1 && _this.tiles[i][j] instanceof OuterWallTile) ||
+                        (val == 0 && _this.tiles[i][j] instanceof FloorTile) ||
+                        (val > 0 && _this.tiles[i][j] instanceof WallTile);
+                    if (compare)
+                        return;
+                    _this.toRedraw[i][j] = val;
                 });
             });
         };
+        _this.setTiles = function (tiles) {
+            tiles.forEach(function (row, i) {
+                row.forEach(function (val, j) {
+                    if (val < 0) {
+                        _this.tiles[i][j] = new OuterWallTile();
+                    }
+                    ;
+                    if (val == 0) {
+                        _this.tiles[i][j] = new FloorTile();
+                    }
+                    ;
+                    if (val > 0) {
+                        _this.tiles[i][j] = new WallTile(val);
+                    }
+                    ;
+                });
+            });
+            _this.redrawRange(0, _this.rowCount, 0, _this.colCount);
+            _this.set = true;
+        };
+        _this.getTile = function (row, col) {
+            return _this.tiles[row][col];
+        };
+        _this.tiles = [];
+        _this.toRedraw = [];
+        _this.rowCount = mapDim;
+        _this.colCount = mapDim;
+        _this.set = false;
+        for (var i = 0; i < mapDim; i++) {
+            _this.tiles[i] = [];
+            _this.toRedraw[i] = [];
+            for (var j = 0; j < mapDim; j++) {
+                _this.tiles[i][j] = null;
+                _this.toRedraw[i][j] = null;
+            }
+        }
         return _this;
     }
     return Map;
@@ -93,6 +148,32 @@ var WallTile = /** @class */ (function (_super) {
         return _this;
     }
     return WallTile;
+}(MapTile));
+var OuterWallTile = /** @class */ (function (_super) {
+    __extends(OuterWallTile, _super);
+    function OuterWallTile() {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            _this.items.render(ctx);
+        };
+        _this.isBlocking = true;
+        var items = [
+            new RoundRect(0, 0, 40, 40, 3, "#000000", "rgba(0,0,0,0)"),
+            new RoundRect(1, 2, 18, 7, 3, "#c0c0c0", "rgba(0,0,0,0)"),
+            new RoundRect(21, 2, 18, 7, 3, "#c0c0c0", "rgba(0,0,0,0)"),
+            new RoundRect(1, 11, 8, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
+            new RoundRect(11, 11, 18, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
+            new RoundRect(31, 11, 8, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
+            new RoundRect(1, 20, 18, 7, 3, "#909090", "rgba(0,0,0,0)"),
+            new RoundRect(21, 20, 18, 7, 3, "#909090", "rgba(0,0,0,0)"),
+            new RoundRect(1, 29, 8, 7, 3, "#606060", "rgba(0,0,0,0)"),
+            new RoundRect(11, 29, 18, 7, 3, "#606060", "rgba(0,0,0,0)"),
+            new RoundRect(31, 29, 8, 7, 3, "#606060", "rgba(0,0,0,0)")
+        ];
+        _this.items = new Collection(items);
+        return _this;
+    }
+    return OuterWallTile;
 }(MapTile));
 var FloorTile = /** @class */ (function (_super) {
     __extends(FloorTile, _super);

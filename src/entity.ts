@@ -194,7 +194,6 @@ class Bullet extends Entity {
     this.yPos -= Math.cos( dirRad ) * this.speed;
     this.distGone += this.speed;
     this.dir += Math.max( 0, this.distGone - this.power ) * this.curve;
-    if( this.distToGo <= this.distGone ) { this.detonate(); }
   }
 }
 

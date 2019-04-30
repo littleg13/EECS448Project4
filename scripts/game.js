@@ -14,6 +14,7 @@ var Game = /** @class */ (function () {
         *
         */
         this.initLayers = function () {
+            console.log("Init Layers Called");
             var viewRadius = 7; // in tiles
             _this.gameview = new Layer("gameview", 2 * viewRadius * _this.tileDim, 2 * viewRadius * _this.tileDim);
             _this.gameview.attachToParent(document.getElementById("center"));
@@ -25,6 +26,7 @@ var Game = /** @class */ (function () {
             _this.minimap.attachToParent(document.getElementById("mini"));
         };
         this.startGame = function () {
+            console.log("Start Game Called");
             _this.gameTickUpdateInt = setInterval(function () { _this.gameTick(); }, Math.round(1000 / 32));
             _this.sendServerUpdateInt = setInterval(function () { sendServerUpdate(); }, 40);
             _this.populateSidebar();
@@ -58,7 +60,14 @@ var Game = /** @class */ (function () {
             return obj.projHitbox(linVel, rotVel).some(function (corner) {
                 var col = Math.floor(corner.x);
                 var row = Math.floor(corner.y);
-                return tiles[row][col].isBlocking;
+                var retVal = tiles[row][col].isBlocking;
+                if (obj instanceof Bullet) {
+                    _this.map.redraw(row, col);
+                    _this.background.applyTranslate(col * _this.tileDim, row * _this.tileDim);
+                    _this.background.drawItem(_this.map.getTile(row, col));
+                    _this.background.popTransform();
+                }
+                return retVal;
             });
         };
         this.processInput = function () {
@@ -112,8 +121,13 @@ var Game = /** @class */ (function () {
         *
         */
         this.updateMap = function (map) {
-            _this.map.update(map);
-            _this.background.drawItem(_this.map);
+            if (_this.map.set) {
+                _this.map.update(map);
+            }
+            else {
+                _this.map.setTiles(map);
+                _this.background.drawItem(_this.map);
+            }
         };
         this.updateTankHealth = function (userID, health) {
             _this.getPlayer(userID).setHealth(health);
@@ -254,9 +268,9 @@ var Game = /** @class */ (function () {
         this.renderEffects = function () {
             _this.effects.clear();
             if (_this.curTurn == localStorage.userID) {
-                var tank_1 = _this.getPlayer();
-                _this.effects.applyTranslate((tank_1.xPos + 0.5) * _this.tileDim, (tank_1.yPos + 0.5) * _this.tileDim);
-                _this.effects.drawItem(new Circle(0, 0, tank_1.distanceLeft * _this.tileDim, "rgba( 238, 255, 0, 0.5 )", "#000000"));
+                var tank = _this.getPlayer();
+                _this.effects.applyTranslate((tank.xPos + 0.5) * _this.tileDim, (tank.yPos + 0.5) * _this.tileDim);
+                _this.effects.drawItem(new Circle(0, 0, tank.distanceLeft * _this.tileDim, "rgba( 238, 255, 0, 0.5 )", "#000000"));
                 _this.effects.popTransform();
             }
             _this.renderBullets();
@@ -264,10 +278,15 @@ var Game = /** @class */ (function () {
             _this.gameview.addLayer(_this.effects);
         };
         this.renderBullets = function () {
-            _this.bullets.forEach(function (bullet) {
+            _this.bullets = _this.bullets.filter(function (bullet) {
                 bullet.render();
-                if (!_this.checkMapCollision(bullet, bullet.speed, 0.0))
+                if (!_this.checkMapCollision(bullet, bullet.speed, 0.0)) {
                     bullet.update();
+                    return true;
+                }
+                else {
+                    return false;
+                }
             });
         };
         this.renderLoop = function () {
@@ -323,7 +342,7 @@ var Game = /** @class */ (function () {
         this.getPlayerDir = function () {
             return _this.getPlayer().dir;
         };
-        this.map = new Map();
+        this.map = new Map(mapDim);
         this.mapDim = mapDim;
         this.scale = 1;
         this.tanks = [];

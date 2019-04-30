@@ -44,6 +44,10 @@ class Layer {
     this.ctx.scale( x, y );
   }
 
+  popTransforms = ( num : number ) : void => {
+    for( let i = 0; i < num; i++ ) this.popTransform();
+  }
+
   popTransform = () : void => {
     this.ctx.restore();
   }

@@ -32,6 +32,10 @@ var Layer = /** @class */ (function () {
             _this.ctx.save();
             _this.ctx.scale(x, y);
         };
+        this.popTransforms = function (num) {
+            for (var i = 0; i < num; i++)
+                _this.popTransform();
+        };
         this.popTransform = function () {
             _this.ctx.restore();
         };

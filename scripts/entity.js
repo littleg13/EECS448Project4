@@ -159,9 +159,6 @@ var Bullet = /** @class */ (function (_super) {
             _this.yPos -= Math.cos(dirRad) * _this.speed;
             _this.distGone += _this.speed;
             _this.dir += Math.max(0, _this.distGone - _this.power) * _this.curve;
-            if (_this.distToGo <= _this.distGone) {
-                _this.detonate();
-            }
         };
         _this.xPos = xPos;
         _this.yPos = yPos;

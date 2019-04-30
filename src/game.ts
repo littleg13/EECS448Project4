@@ -33,7 +33,7 @@ class Game {
   sendServerUpdateInt    : number;
 
   constructor( mapDim : number ) {
-    this.map = new Map();
+    this.map = new Map( mapDim );
     this.mapDim = mapDim;
     this.scale = 1;
     this.tanks = [];
@@ -60,6 +60,7 @@ class Game {
 */
 
   initLayers = () : void => {
+    console.log("Init Layers Called");
     let viewRadius = 7; // in tiles
     this.gameview = new Layer( "gameview", 2 * viewRadius * this.tileDim, 2 * viewRadius * this.tileDim );
     this.gameview.attachToParent( document.getElementById( "center" ) );
@@ -75,6 +76,7 @@ class Game {
   }
 
   startGame = () : void => {
+    console.log("Start Game Called");
     this.gameTickUpdateInt = setInterval( () => { this.gameTick(); } , Math.round( 1000 / 32 ) );
     this.sendServerUpdateInt = setInterval( () => { sendServerUpdate(); }, 40 );
     this.populateSidebar();
@@ -112,7 +114,14 @@ class Game {
     return obj.projHitbox( linVel, rotVel ).some( ( corner : Point ) : boolean => {
       let col = Math.floor( corner.x );
       let row = Math.floor( corner.y );
-      return tiles[ row ][ col ].isBlocking;
+      let retVal = tiles[ row ][ col ].isBlocking;
+      if( obj instanceof Bullet ) {
+        this.map.redraw( row, col );
+        this.background.applyTranslate( col * this.tileDim, row * this.tileDim );
+        this.background.drawItem( this.map.getTile( row, col ) );
+        this.background.popTransform();
+      }
+      return retVal;
     } );
   }
 
@@ -170,8 +179,12 @@ class Game {
 *
 */
   updateMap = ( map : number[][] ) : void => {
-    this.map.update( map );
-    this.background.drawItem( this.map );
+    if( this.map.set ) {
+      this.map.update( map );
+    } else {
+      this.map.setTiles( map );
+      this.background.drawItem( this.map );
+    }
   }
 
   updateTankHealth = ( userID : string, health : number ) : void => {
@@ -333,10 +346,14 @@ class Game {
   }
 
   renderBullets = () : void => {
-    this.bullets.forEach( ( bullet : Bullet ) => {
+    this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
       bullet.render();
-      if( !this.checkMapCollision( bullet, bullet.speed, 0.0 ) )
+      if( !this.checkMapCollision( bullet, bullet.speed, 0.0 ) ) {
         bullet.update();
+        return true;
+      } else {
+        return false;
+      }
     });
   }
 

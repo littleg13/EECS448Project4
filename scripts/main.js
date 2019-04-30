@@ -1,5 +1,4 @@
- const socket = io( "https://448.cuzzo.net" );
-//const socket = io( "http://192.168.1.100:3000" );
+const socket = io( "https://448.cuzzo.net" );
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
 var game = null;
@@ -252,7 +251,12 @@ socket.on("gameStart" , gameStartHandler);
   */
 var mapUpdateHandler = (data) => {
   console.log( "Map Update Received" );
-  game.updateMap( data.map );
+  let mapData = data.map.map( ( row ) => {
+    return row.map( ( val ) => {
+      return parseInt( val );
+    } );
+  } );
+  game.updateMap( mapData );
 };
 socket.on("mapUpdate", mapUpdateHandler);
 
