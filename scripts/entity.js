@@ -160,13 +160,12 @@ var Bullet = /** @class */ (function (_super) {
             _this.boom = true;
         };
         _this.update = function () {
-            if (_this.boom)
-                return;
             var dirRad = _this.dir * Math.PI / 180.0;
             _this.xPos += Math.sin(dirRad) * _this.speed;
             _this.yPos -= Math.cos(dirRad) * _this.speed;
             _this.distGone += _this.speed;
             _this.dir += Math.max(0, _this.distGone - _this.power) * _this.curve;
+            return _this.boom;
         };
         _this.shooterID = userID;
         _this.xPos = xPos;
@@ -204,7 +203,6 @@ var MultiShotToken = /** @class */ (function (_super) {
     __extends(MultiShotToken, _super);
     function MultiShotToken(x, y) {
         var _this = _super.call(this, x, y) || this;
-        console.log({ x: x, y: y, powerup: _this });
         _this.sprite = new MultiShotSprite();
         return _this;
     }
