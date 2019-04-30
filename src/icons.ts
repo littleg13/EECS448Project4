@@ -133,6 +133,7 @@ class TankSprite extends Sprite {
   barrel      : Rect;
   cap         : Rect;
   turret      : Circle;
+  multishot   : boolean;
 
   constructor( color = "#c00" ) {
     super();
@@ -145,6 +146,7 @@ class TankSprite extends Sprite {
     this.barrel     = new Rect( -5,   -20, 10, 25, color, "#000" );
     this.cap        = new RoundRect( -7.5, -25, 15, 7.5, 2.5, color, "#000" );
     this.turret     = new Circle( 0, 0, 10, color, "#000" );
+    this.multishot  = false;
   }
 
   render = ( ctx: CanvasRenderingContext2D ) : void => {
