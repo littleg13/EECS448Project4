@@ -314,7 +314,7 @@ class Game {
       }
     } );
     this.powerups.forEach( ( powerup : Powerup ) : void => {
-      powerup.attachToLayer( this.effects );
+      powerup.attachToLayer( this.entities );
     } );
   }
 
@@ -351,7 +351,9 @@ class Game {
     msg.appendChild( content );
     msg.appendChild( sender );
 
+    let updateScroll = ( messageWindow.scrollHeight - messageWindow.offsetHeight ) == messageWindow.scrollTop;
     messageWindow.insertAdjacentElement( "beforeend", msg );
+    if( updateScroll ) msg.scrollIntoView( false );
   }
 
 /**

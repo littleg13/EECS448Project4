@@ -249,7 +249,7 @@ var Game = /** @class */ (function () {
                 }
             });
             _this.powerups.forEach(function (powerup) {
-                powerup.attachToLayer(_this.effects);
+                powerup.attachToLayer(_this.entities);
             });
         };
         this.fire = function (shooterID, power, curve, dist) {
@@ -282,7 +282,10 @@ var Game = /** @class */ (function () {
             content.innerHTML = text;
             msg.appendChild(content);
             msg.appendChild(sender);
+            var updateScroll = (messageWindow.scrollHeight - messageWindow.offsetHeight) == messageWindow.scrollTop;
             messageWindow.insertAdjacentElement("beforeend", msg);
+            if (updateScroll)
+                msg.scrollIntoView(false);
         };
         /**
         *   RENDERING METHODS:
