@@ -311,7 +311,7 @@ class ExplosionSprite extends Sprite {
 
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo( 0, 0 );
+    ctx.moveTo( 0, -this.radii1[0].x );
     this.radii1.forEach( ( p : Point ) => {
       let innerR = p.x;
       let outerR = p.y;
@@ -324,6 +324,7 @@ class ExplosionSprite extends Sprite {
     ctx.closePath();
     ctx.fillStyle = "rgba( 255, 0, 0, " + a + " )";
     ctx.fill();
+    ctx.stroke();
     ctx.restore();
 
     ctx.save();

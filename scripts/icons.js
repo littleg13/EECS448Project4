@@ -260,7 +260,7 @@ var ExplosionSprite = /** @class */ (function (_super) {
             var a = _this.counter.get() / _this.counter.max;
             ctx.save();
             ctx.beginPath();
-            ctx.moveTo(0, 0);
+            ctx.moveTo(0, -_this.radii1[0].x);
             _this.radii1.forEach(function (p) {
                 var innerR = p.x;
                 var outerR = p.y;
@@ -273,6 +273,7 @@ var ExplosionSprite = /** @class */ (function (_super) {
             ctx.closePath();
             ctx.fillStyle = "rgba( 255, 0, 0, " + a + " )";
             ctx.fill();
+            ctx.stroke();
             ctx.restore();
             ctx.save();
             ctx.beginPath();
