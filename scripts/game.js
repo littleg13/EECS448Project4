@@ -84,6 +84,15 @@ var Game = /** @class */ (function () {
         };
         this.checkBulletCollision = function (bullet) {
             var _a = [bullet.xPos + 0.5, bullet.yPos + 0.5], bullX = _a[0], bullY = _a[1];
+            var _b = [bullX, bullY].map(Math.floor), bullCol = _b[0], bullRow = _b[1];
+            var tile = _this.map.getTile(bullRow, bullCol);
+            if (tile.isBlocking) {
+                _this.map.redraw(bullRow, bullCol);
+                _this.background.applyTranslate(bullCol * _this.tileDim, bullRow * _this.tileDim);
+                _this.background.drawItem(_this.map.getTile(bullRow, bullCol));
+                _this.background.popTransform();
+                return true;
+            }
             return _this.tanks.some(function (tank) {
                 if (tank.userID == bullet.shooterID)
                     return false;
@@ -94,10 +103,9 @@ var Game = /** @class */ (function () {
                     var high = Math.max(a, b);
                     return (low < val && val < high);
                 };
-                var delX = +Math.cos(dirRad) * 0.5;
-                var delY = -Math.sin(dirRad) * 0.5;
-                return between(bullX, xPos - delX, xPos + delX) &&
-                    between(bullY, yPos - delY, yPos + delY);
+                var _b = [bullX - xPos, bullY - yPos], delX = _b[0], delY = _b[1];
+                var dist = Math.sqrt(delX * delX + delY * delY);
+                return dist < 0.5;
             });
         };
         this.processInput = function () {

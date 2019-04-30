@@ -141,6 +141,15 @@ class Game {
 
   checkBulletCollision = ( bullet : Bullet ) : boolean => {
     let [ bullX, bullY ] = [ bullet.xPos + 0.5, bullet.yPos + 0.5 ];
+    let [ bullCol, bullRow ] = [ bullX, bullY ].map( Math.floor );
+    let tile = this.map.getTile( bullRow, bullCol );
+    if( tile.isBlocking ) {
+      this.map.redraw( bullRow, bullCol );
+      this.background.applyTranslate( bullCol * this.tileDim, bullRow * this.tileDim );
+      this.background.drawItem( this.map.getTile( bullRow, bullCol ) );
+      this.background.popTransform();
+      return true;
+    }
     return this.tanks.some( ( tank : Tank ) : boolean => {
       if( tank.userID == bullet.shooterID ) return false;
       let dirRad = tank.dir * Math.PI / 180.0;
@@ -150,10 +159,9 @@ class Game {
         let high = Math.max( a, b );
         return ( low < val && val < high );
       }
-      let delX = +Math.cos( dirRad ) * 0.5;
-      let delY = -Math.sin( dirRad ) * 0.5;
-      return between( bullX, xPos - delX, xPos + delX ) &&
-             between( bullY, yPos - delY, yPos + delY );
+      let [ delX, delY ] = [ bullX - xPos, bullY - yPos ];
+      let dist = Math.sqrt( delX * delX + delY * delY );
+      return dist < 0.5;
     } );
   }
 
