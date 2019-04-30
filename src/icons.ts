@@ -1,3 +1,9 @@
+class Sprite extends Animated {
+  width   : number;
+  height  : number;
+  hitbox  : Hitbox;
+}
+
 class Tread extends Animated {
   x         : number;
   mainRect  : Rect;
@@ -114,24 +120,25 @@ class Tread extends Animated {
   }
 }
 
-class TankSprite extends Renderable {
+class TankSprite extends Sprite {
   color   : string;
   canFire : boolean;
 
   /*
    *  Initialize the shape variables
    */
-  hitbox      : Rect;
-  showHitbox  : boolean;
   leftTread   : Tread;
   rightTread  : Tread;
   body        : RoundRect;
   barrel      : Rect;
   cap         : Rect;
   turret      : Circle;
+
   constructor( color = "#c00" ) {
     super();
-    this.hitbox     = new Rect( -17.5, -20, 35, 40, "#ccc", "#000" );
+    this.width      = 40;
+    this.height     = 40;
+    this.hitbox     = new Hitbox( -17.5, -20, 35, 40 );
     this.leftTread  = new Tread( -17.5 );
     this.rightTread = new Tread(   7.5 );
     this.body       = new RoundRect( -12.5, -20, 25, 40, 3, color, "#000" );
@@ -141,7 +148,6 @@ class TankSprite extends Renderable {
   }
 
   render = ( ctx: CanvasRenderingContext2D ) : void => {
-    if( this.showHitbox ) { this.hitbox.render( ctx ); }
     this.getItems().map( ( item : Renderable ) => { item.render( ctx ); } );
   }
 
@@ -149,6 +155,10 @@ class TankSprite extends Renderable {
     return [ this.leftTread, this.rightTread,
              this.body, this.barrel,
              this.cap, this.turret ];
+  }
+
+  getDim = () : number[] => {
+    return [ this.width, this.height ]
   }
 
   changeColor = ( color : string ) : void => {
@@ -206,11 +216,16 @@ class NameTag extends Renderable {
   }
 }
 
-class BulletSprite extends Animated {
-  hitbox : Rect;
+class BulletSprite extends Sprite {
+  hitbox : Hitbox;
   body   : Path;
+  width  : number;
+  height : number;
   constructor() {
     super();
+    this.width = 40;
+    this.height = 40;
+    this.hitbox = new Hitbox( -5, -15, 10, 25 );
     this.body = new Path( -5,  5, "#606060" );
     let segments = [
       new LineSegment( 5,   5 ),
@@ -218,6 +233,10 @@ class BulletSprite extends Animated {
       new ArcSegment( 0, -10, 5, 0.0, Math.PI, true )
     ];
     this.body.addSegments( segments );
+  }
+
+  getDim = () : number[] => {
+    return [ this.width, this.height ]
   }
 
   render = ( ctx : CanvasRenderingContext2D ) : void => {
@@ -229,7 +248,7 @@ class BulletSprite extends Animated {
   }
 }
 
-class ExplosionSprite extends Animated {
+class ExplosionSprite extends Sprite {
   constructor() {
     super();
   }
@@ -238,7 +257,7 @@ class ExplosionSprite extends Animated {
   }
 }
 
-class MultiShotSprite extends Renderable {
+class MultiShotSprite extends Sprite {
   box : RoundRect;
   hub : Circle;
   turret1 : Collection;
@@ -247,6 +266,8 @@ class MultiShotSprite extends Renderable {
 
   constructor() {
     super();
+    this.width = 40;
+    this.height = 40;
     this.box = new RoundRect( -18, -18, 36, 36, 10, "#336", "#669" ).setBorderWidth( 2 );
     let genTurret = () => {
       return new Collection( [
@@ -262,7 +283,6 @@ class MultiShotSprite extends Renderable {
 
   render = ( ctx : CanvasRenderingContext2D ) : void => {
     this.box.render( ctx );
-    console.log("Rendering MultiShot");
     ctx.save();
     ctx.translate( 0, 10 ); // set up for rotations
     ctx.save();
@@ -282,12 +302,16 @@ class MultiShotSprite extends Renderable {
   }
 }
 
-class BuildWallSprite extends Renderable {
+class BuildWallSprite extends Sprite {
+  width  : number;
+  height : number;
   box : RoundRect;
   bricks : Collection;
 
   constructor() {
     super();
+    this.width = 40;
+    this.height = 40;
     this.box = new RoundRect( -18, -18, 36, 36, 10, "#999", "#333" ).setBorderWidth( 2 );
     this.bricks = new Collection( [
       new RoundRect( -15, -15, 18, 10, 3, "#666", "#333" ),
@@ -305,12 +329,16 @@ class BuildWallSprite extends Renderable {
   }
 }
 
-class IncreaseMoveDistSprite extends Renderable {
+class IncreaseMoveDistSprite extends Sprite {
+  width  : number;
+  height : number;
   box : RoundRect;
   arrows : Collection;
 
   constructor() {
     super();
+    this.width = 40;
+    this.height = 40;
     this.box = new RoundRect( -18, -18, 36, 36, 10, "darkgreen", "limegreen" ).setBorderWidth( 2 );
     this.box.setBorderWidth( 2 );
     this.arrows = new Collection();
@@ -334,11 +362,15 @@ class IncreaseMoveDistSprite extends Renderable {
   }
 }
 
-class HealthPackSprite extends Renderable {
+class HealthPackSprite extends Sprite {
+  width  : number;
+  height : number;
   box : RoundRect;
   cross : Path;
   constructor() {
     super();
+    this.width = 40;
+    this.height = 40;
     this.box = new RoundRect( -18, -18, 36, 36, 10, "#f00", "#933" ).setBorderWidth( 2 );
     this.cross = new Path( 0, 15, "#fcc", "#933" );
     this.cross.addSegments( [

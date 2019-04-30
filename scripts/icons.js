@@ -11,6 +11,13 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var Sprite = /** @class */ (function (_super) {
+    __extends(Sprite, _super);
+    function Sprite() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return Sprite;
+}(Animated));
 var Tread = /** @class */ (function (_super) {
     __extends(Tread, _super);
     function Tread(x) {
@@ -123,15 +130,15 @@ var TankSprite = /** @class */ (function (_super) {
         if (color === void 0) { color = "#c00"; }
         var _this = _super.call(this) || this;
         _this.render = function (ctx) {
-            if (_this.showHitbox) {
-                _this.hitbox.render(ctx);
-            }
             _this.getItems().map(function (item) { item.render(ctx); });
         };
         _this.getItems = function () {
             return [_this.leftTread, _this.rightTread,
                 _this.body, _this.barrel,
                 _this.cap, _this.turret];
+        };
+        _this.getDim = function () {
+            return [_this.width, _this.height];
         };
         _this.changeColor = function (color) {
             _this.getItems().map(function (item) {
@@ -160,7 +167,9 @@ var TankSprite = /** @class */ (function (_super) {
             _this.leftTread.shiftUp(delta);
             _this.rightTread.shiftDown(delta);
         };
-        _this.hitbox = new Rect(-17.5, -20, 35, 40, "#ccc", "#000");
+        _this.width = 40;
+        _this.height = 40;
+        _this.hitbox = new Hitbox(-17.5, -20, 35, 40);
         _this.leftTread = new Tread(-17.5);
         _this.rightTread = new Tread(7.5);
         _this.body = new RoundRect(-12.5, -20, 25, 40, 3, color, "#000");
@@ -170,7 +179,7 @@ var TankSprite = /** @class */ (function (_super) {
         return _this;
     }
     return TankSprite;
-}(Renderable));
+}(Sprite));
 var NameTag = /** @class */ (function (_super) {
     __extends(NameTag, _super);
     function NameTag(playerName, health) {
@@ -200,6 +209,9 @@ var BulletSprite = /** @class */ (function (_super) {
     __extends(BulletSprite, _super);
     function BulletSprite() {
         var _this = _super.call(this) || this;
+        _this.getDim = function () {
+            return [_this.width, _this.height];
+        };
         _this.render = function (ctx) {
             ctx.save();
             _this.body.render(ctx);
@@ -207,6 +219,9 @@ var BulletSprite = /** @class */ (function (_super) {
             ctx.fillRect(-4, 2, 8, 2);
             ctx.restore();
         };
+        _this.width = 40;
+        _this.height = 40;
+        _this.hitbox = new Hitbox(-5, -15, 10, 25);
         _this.body = new Path(-5, 5, "#606060");
         var segments = [
             new LineSegment(5, 5),
@@ -217,7 +232,7 @@ var BulletSprite = /** @class */ (function (_super) {
         return _this;
     }
     return BulletSprite;
-}(Animated));
+}(Sprite));
 var ExplosionSprite = /** @class */ (function (_super) {
     __extends(ExplosionSprite, _super);
     function ExplosionSprite() {
@@ -227,14 +242,13 @@ var ExplosionSprite = /** @class */ (function (_super) {
         return _this;
     }
     return ExplosionSprite;
-}(Animated));
+}(Sprite));
 var MultiShotSprite = /** @class */ (function (_super) {
     __extends(MultiShotSprite, _super);
     function MultiShotSprite() {
         var _this = _super.call(this) || this;
         _this.render = function (ctx) {
             _this.box.render(ctx);
-            console.log("Rendering MultiShot");
             ctx.save();
             ctx.translate(0, 10); // set up for rotations
             ctx.save();
@@ -252,6 +266,8 @@ var MultiShotSprite = /** @class */ (function (_super) {
             _this.hub.render(ctx);
             ctx.restore();
         };
+        _this.width = 40;
+        _this.height = 40;
         _this.box = new RoundRect(-18, -18, 36, 36, 10, "#336", "#669").setBorderWidth(2);
         var genTurret = function () {
             return new Collection([
@@ -266,7 +282,7 @@ var MultiShotSprite = /** @class */ (function (_super) {
         return _this;
     }
     return MultiShotSprite;
-}(Renderable));
+}(Sprite));
 var BuildWallSprite = /** @class */ (function (_super) {
     __extends(BuildWallSprite, _super);
     function BuildWallSprite() {
@@ -275,6 +291,8 @@ var BuildWallSprite = /** @class */ (function (_super) {
             _this.box.render(ctx);
             _this.bricks.render(ctx);
         };
+        _this.width = 40;
+        _this.height = 40;
         _this.box = new RoundRect(-18, -18, 36, 36, 10, "#999", "#333").setBorderWidth(2);
         _this.bricks = new Collection([
             new RoundRect(-15, -15, 18, 10, 3, "#666", "#333"),
@@ -287,7 +305,7 @@ var BuildWallSprite = /** @class */ (function (_super) {
         return _this;
     }
     return BuildWallSprite;
-}(Renderable));
+}(Sprite));
 var IncreaseMoveDistSprite = /** @class */ (function (_super) {
     __extends(IncreaseMoveDistSprite, _super);
     function IncreaseMoveDistSprite() {
@@ -296,6 +314,8 @@ var IncreaseMoveDistSprite = /** @class */ (function (_super) {
             _this.box.render(ctx);
             _this.arrows.render(ctx);
         };
+        _this.width = 40;
+        _this.height = 40;
         _this.box = new RoundRect(-18, -18, 36, 36, 10, "darkgreen", "limegreen").setBorderWidth(2);
         _this.box.setBorderWidth(2);
         _this.arrows = new Collection();
@@ -314,7 +334,7 @@ var IncreaseMoveDistSprite = /** @class */ (function (_super) {
         return _this;
     }
     return IncreaseMoveDistSprite;
-}(Renderable));
+}(Sprite));
 var HealthPackSprite = /** @class */ (function (_super) {
     __extends(HealthPackSprite, _super);
     function HealthPackSprite() {
@@ -323,6 +343,8 @@ var HealthPackSprite = /** @class */ (function (_super) {
             _this.box.render(ctx);
             _this.cross.render(ctx);
         };
+        _this.width = 40;
+        _this.height = 40;
         _this.box = new RoundRect(-18, -18, 36, 36, 10, "#f00", "#933").setBorderWidth(2);
         _this.cross = new Path(0, 15, "#fcc", "#933");
         _this.cross.addSegments([
@@ -348,4 +370,4 @@ var HealthPackSprite = /** @class */ (function (_super) {
         return _this;
     }
     return HealthPackSprite;
-}(Renderable));
+}(Sprite));

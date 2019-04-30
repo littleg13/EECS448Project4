@@ -17,14 +17,34 @@ var Entity = /** @class */ (function () {
         this.attachToLayer = function (layer) {
             _this.layer = layer;
         };
-        this.getHitbox = function () {
-            return _this.hitbox;
+        this.projHitbox = function (linVel, rotVel) {
+            var dirRad = (_this.dir + rotVel) * Math.PI / 180.0;
+            var dX = linVel * Math.sin(dirRad) + _this.xPos + 0.5;
+            var dY = -linVel * Math.cos(dirRad) + _this.yPos + 0.5;
+            var localHitbox = _this.sprite.hitbox;
+            var delX = localHitbox.w / _this.width;
+            var offX = localHitbox.xOffset / _this.width;
+            var delY = localHitbox.h / _this.height;
+            var offY = localHitbox.yOffset / _this.height;
+            var corners = [
+                new Point(offX, offY),
+                new Point(offX + delX, offY),
+                new Point(offX + delX, offY + delY),
+                new Point(offX, offY + delY)
+            ];
+            return corners.map(function (point) {
+                var x = point.x * Math.cos(dirRad) - point.y * Math.sin(dirRad);
+                var y = point.x * Math.sin(dirRad) + point.y * Math.cos(dirRad);
+                return new Point(x + dX, y + dY);
+            });
         };
     }
     return Entity;
 }());
 var Hitbox = /** @class */ (function () {
-    function Hitbox(w, h) {
+    function Hitbox(xOffset, yOffset, w, h) {
+        this.xOffset = xOffset;
+        this.yOffset = yOffset;
         this.w = w;
         this.h = h;
     }
@@ -33,6 +53,7 @@ var Hitbox = /** @class */ (function () {
 var Tank = /** @class */ (function (_super) {
     __extends(Tank, _super);
     function Tank(xPos, yPos, dir, playerName, userID, color, health) {
+        var _a;
         var _this = _super.call(this) || this;
         _this.updateImage = function () {
             _this.layer.clear();
@@ -106,9 +127,9 @@ var Tank = /** @class */ (function (_super) {
         _this.playerName = playerName;
         _this.userID = userID;
         _this.sprite = new TankSprite(color);
+        _a = _this.sprite.getDim(), _this.width = _a[0], _this.height = _a[1];
         _this.nameTag = new NameTag(playerName, health);
         _this.layer = new Layer(playerName, 60, 60);
-        _this.hitbox = new Hitbox(35, 40);
         _this.health = health;
         _this.canShoot = false;
         return _this;
@@ -118,12 +139,12 @@ var Tank = /** @class */ (function (_super) {
 var Bullet = /** @class */ (function (_super) {
     __extends(Bullet, _super);
     function Bullet(xPos, yPos, dir, distToGo, power, curve) {
+        var _a;
         var _this = _super.call(this) || this;
         _this.render = function () {
-            _this.layer.applyTranslate(_this.xPos * 40, _this.yPos * 40);
+            _this.layer.applyTranslate((_this.xPos + 0.5) * _this.width, (_this.yPos + 0.5) * _this.height);
             _this.layer.applyRotation(_this.dir);
             _this.layer.drawItem(_this.sprite);
-            //    this.layer.drawItem( this.hitbox );
             _this.layer.popTransform();
             _this.layer.popTransform();
         };
@@ -131,10 +152,12 @@ var Bullet = /** @class */ (function (_super) {
             _this.boom = true;
         };
         _this.update = function () {
+            if (_this.boom)
+                return;
             var dirRad = _this.dir * Math.PI / 180.0;
-            _this.xPos += Math.sin(dirRad) * 0.5;
-            _this.yPos -= Math.cos(dirRad) * 0.5;
-            _this.distGone += 0.5;
+            _this.xPos += Math.sin(dirRad) * _this.speed;
+            _this.yPos -= Math.cos(dirRad) * _this.speed;
+            _this.distGone += _this.speed;
             _this.dir += Math.max(0, _this.distGone - _this.power) * _this.curve;
             if (_this.distToGo <= _this.distGone) {
                 _this.detonate();
@@ -143,12 +166,13 @@ var Bullet = /** @class */ (function (_super) {
         _this.xPos = xPos;
         _this.yPos = yPos;
         _this.dir = dir;
-        _this.hitbox = new Rect(-5, -15, 10, 25, "green");
         _this.sprite = new BulletSprite();
+        _a = _this.sprite.getDim(), _this.width = _a[0], _this.height = _a[1];
         _this.distToGo = distToGo;
         _this.distGone = 0.0;
         _this.power = power;
         _this.curve = curve;
+        _this.speed = 0.5;
         return _this;
     }
     return Bullet;
@@ -167,7 +191,6 @@ var Powerup = /** @class */ (function (_super) {
         _this.xPos = x;
         _this.yPos = y;
         console.log(_this.xPos);
-        _this.sprite = new Rect(0, 0, 40, 40);
         return _this;
     }
     return Powerup;

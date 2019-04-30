@@ -54,44 +54,25 @@ var Game = /** @class */ (function () {
         *
         */
         this.checkMapCollision = function (obj, linVel, rotVel) {
-            var toReturn = true;
-            var map = _this.map;
-            var hitbox = obj.getHitbox();
-            var halfWidth = hitbox.w / 2 / _this.tileDim;
-            var halfHeight = hitbox.h / 2 / _this.tileDim;
-            var corners = [[-halfWidth, -halfHeight - linVel],
-                [-halfWidth, halfHeight - linVel],
-                [halfWidth, -halfHeight - linVel],
-                [halfWidth, halfHeight - linVel]];
-            corners.forEach(function (corner) {
-                var theta = (obj.dir + rotVel) * Math.PI / 180.0;
-                var x = corner[0] * Math.cos(theta)
-                    - corner[1] * Math.sin(theta)
-                    + obj.xPos + 0.5;
-                var y = corner[0] * Math.sin(theta)
-                    + corner[1] * Math.cos(theta)
-                    + obj.yPos + 0.5;
-                var col = Math.floor(x);
-                var row = Math.floor(y);
-                if (map.tiles[row][col].isBlocking) {
-                    toReturn = false;
-                    return false;
-                }
+            var tiles = _this.map.tiles;
+            return obj.projHitbox(linVel, rotVel).some(function (corner) {
+                var col = Math.floor(corner.x);
+                var row = Math.floor(corner.y);
+                return tiles[row][col].isBlocking;
             });
-            return toReturn;
         };
         this.processInput = function () {
             var player = _this.getPlayer();
             if (_this.curTurn != localStorage.userID)
                 return;
             if (_this.keys["ArrowLeft"]) {
-                if (_this.checkMapCollision(player, 0, -1.0)) {
+                if (!_this.checkMapCollision(player, 0, -2.0)) {
                     player.rotateCCW(2.0);
                     _this.setPlayerMoved();
                 }
             }
             if (_this.keys["ArrowRight"]) {
-                if (_this.checkMapCollision(player, 0, 1.0)) {
+                if (!_this.checkMapCollision(player, 0, 2.0)) {
                     player.rotateCW(2.0);
                     _this.setPlayerMoved();
                 }
@@ -106,13 +87,13 @@ var Game = /** @class */ (function () {
                 return;
             var deltaPos = Math.min(player.distanceLeft, 0.125);
             if (_this.keys["ArrowUp"]) {
-                if (_this.checkMapCollision(player, 0.125, 0)) {
+                if (!_this.checkMapCollision(player, 0.125, 0)) {
                     player.moveForward(0.125);
                     _this.setPlayerMoved();
                 }
             }
             if (_this.keys["ArrowDown"]) {
-                if (_this.checkMapCollision(player, -0.125, 0)) {
+                if (!_this.checkMapCollision(player, -0.125, 0)) {
                     player.moveBackward(0.125);
                     _this.setPlayerMoved();
                 }
@@ -199,7 +180,7 @@ var Game = /** @class */ (function () {
         this.fire = function (shooterID, power, curve, dist) {
             var shooter = _this.getPlayer(shooterID);
             if (shooter.canShoot) {
-                var bullet = new Bullet(shooter.xPos + 0.5, shooter.yPos + 0.5, shooter.dir, dist, power, curve);
+                var bullet = new Bullet(shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve);
                 bullet.attachToLayer(_this.effects);
                 _this.bullets.push(bullet);
                 shooter.canShoot = false;
@@ -283,11 +264,10 @@ var Game = /** @class */ (function () {
             _this.gameview.addLayer(_this.effects);
         };
         this.renderBullets = function () {
-            _this.bullets = _this.bullets.filter(function (bullet) {
+            _this.bullets.forEach(function (bullet) {
                 bullet.render();
-                // update bullet position
-                bullet.update();
-                return (!bullet.boom);
+                if (!_this.checkMapCollision(bullet, bullet.speed, 0.0))
+                    bullet.update();
             });
         };
         this.renderLoop = function () {

@@ -107,46 +107,27 @@ class Game {
 *     Here are the methods that handle input processing
 *
 */
-  checkMapCollision = ( obj, linVel, rotVel ) : boolean => {
-    let toReturn = true;
-    let map = this.map;
-    let hitbox = obj.getHitbox();
-    let halfWidth = hitbox.w / 2 / this.tileDim;
-    let halfHeight = hitbox.h / 2 / this.tileDim;
-    let corners =
-      [ [ -halfWidth, -halfHeight - linVel ],
-        [ -halfWidth,  halfHeight - linVel ],
-        [  halfWidth, -halfHeight - linVel ],
-        [  halfWidth,  halfHeight - linVel ] ];
-    corners.forEach( ( corner ) => {
-      let theta = ( obj.dir + rotVel ) * Math.PI / 180.0;
-      let x = corner[0] * Math.cos( theta )
-            - corner[1] * Math.sin( theta )
-            + obj.xPos + 0.5;
-      let y = corner[0] * Math.sin( theta )
-            + corner[1] * Math.cos( theta )
-            + obj.yPos + 0.5;
-      let col = Math.floor( x );
-      let row = Math.floor( y );
-      if( map.tiles[ row ][ col ].isBlocking ) {
-        toReturn = false;
-        return false;
-      }
-    });
-    return toReturn;
+  checkMapCollision = ( obj : Entity, linVel, rotVel ) : boolean => {
+    let tiles = this.map.tiles;
+    return obj.projHitbox( linVel, rotVel ).some( ( corner : Point ) : boolean => {
+      let col = Math.floor( corner.x );
+      let row = Math.floor( corner.y );
+      return tiles[ row ][ col ].isBlocking;
+    } );
   }
+
 
   processInput = () : void => {
     let player = this.getPlayer();
     if( this.curTurn != localStorage.userID ) return;
     if( this.keys["ArrowLeft"] ) {
-      if( this.checkMapCollision( player, 0, -1.0 ) ) {
+      if( !this.checkMapCollision( player, 0, -2.0 ) ) {
         player.rotateCCW( 2.0 );
         this.setPlayerMoved();
       }
     }
     if( this.keys["ArrowRight"] ) {
-      if( this.checkMapCollision( player, 0, 1.0 ) ) {
+      if( !this.checkMapCollision( player, 0, 2.0 ) ) {
         player.rotateCW( 2.0 );
         this.setPlayerMoved();
       }
@@ -162,13 +143,13 @@ class Game {
     let deltaPos = Math.min( player.distanceLeft, 0.125 );
 
     if( this.keys["ArrowUp"] ) {
-      if( this.checkMapCollision( player, 0.125, 0 ) ) {
+      if( !this.checkMapCollision( player, 0.125, 0 ) ) {
         player.moveForward( 0.125 );
         this.setPlayerMoved();
       }
     }
     if( this.keys["ArrowDown"] ) {
-      if( this.checkMapCollision( player, -0.125, 0) ) {
+      if( !this.checkMapCollision( player, -0.125, 0) ) {
         player.moveBackward( 0.125 );
         this.setPlayerMoved();
       }
@@ -260,7 +241,7 @@ class Game {
   fire = ( shooterID : string, power : number, curve : number, dist : number ) => {
     let shooter = this.getPlayer( shooterID );
     if( shooter.canShoot ) {
-      let bullet = new Bullet( shooter.xPos + 0.5, shooter.yPos + 0.5, shooter.dir, dist, power, curve );
+      let bullet = new Bullet( shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve );
       bullet.attachToLayer( this.effects );
       this.bullets.push( bullet );
       shooter.canShoot = false;
@@ -352,11 +333,10 @@ class Game {
   }
 
   renderBullets = () : void => {
-    this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
+    this.bullets.forEach( ( bullet : Bullet ) => {
       bullet.render();
-      // update bullet position
-      bullet.update();
-      return ( !bullet.boom );
+      if( !this.checkMapCollision( bullet, bullet.speed, 0.0 ) )
+        bullet.update();
     });
   }
 

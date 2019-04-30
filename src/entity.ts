@@ -1,25 +1,48 @@
 abstract class Entity {
-  xPos : number;
-  yPos : number;
-  dir  : number;
-  sprite  : Renderable;
+  xPos    : number;
+  yPos    : number;
+  width   : number;
+  height  : number;
+  dir     : number;
+  sprite  : Sprite;
   layer   : Layer;
-  hitbox  : Hitbox;
 
   attachToLayer = ( layer : Layer ) : void => {
     this.layer = layer;
   }
 
-  getHitbox = ( ) : Hitbox => {
-    return this.hitbox;
+  projHitbox = ( linVel : number, rotVel : number ) : Point[] => {
+    let dirRad = ( this.dir + rotVel ) * Math.PI / 180.0;
+    let dX =  linVel * Math.sin( dirRad ) + this.xPos + 0.5;
+    let dY = -linVel * Math.cos( dirRad ) + this.yPos + 0.5;
+    let localHitbox = this.sprite.hitbox;
+    let delX = localHitbox.w / this.width;
+    let offX = localHitbox.xOffset / this.width;
+    let delY = localHitbox.h / this.height;
+    let offY = localHitbox.yOffset / this.height;
+    let corners = [
+      new Point( offX       , offY        ),
+      new Point( offX + delX, offY        ),
+      new Point( offX + delX, offY + delY ),
+      new Point( offX       , offY + delY )
+    ];
+    return corners.map( ( point ) => {
+      let x = point.x * Math.cos( dirRad ) - point.y * Math.sin( dirRad );
+      let y = point.x * Math.sin( dirRad ) + point.y * Math.cos( dirRad );
+      return new Point( x + dX, y + dY );
+    } );
   }
 }
 
 class Hitbox {
+  xOffset : number;
+  yOffset : number;
   w : number;
   h : number;
 
-  constructor( w : number, h : number ) {
+  constructor( xOffset : number, yOffset : number, w : number, h : number) {
+    this.xOffset = xOffset;
+    this.yOffset = yOffset;
     this.w = w;
     this.h = h;
   }
@@ -48,9 +71,9 @@ class Tank extends Entity {
     this.playerName = playerName;
     this.userID     = userID;
     this.sprite     = new TankSprite( color );
+    [ this.width, this.height ] = this.sprite.getDim();
     this.nameTag    = new NameTag( playerName, health );
     this.layer      = new Layer( playerName, 60, 60 );
-    this.hitbox     = new Hitbox( 35, 40 );
 
     this.health   = health;
     this.canShoot = false;
@@ -129,30 +152,33 @@ class Tank extends Entity {
 }
 
 class Bullet extends Entity {
-  distToGo  : number;
-  distGone  : number;
-  power     : number;
-  curve     : number;
-  boom      : boolean;
+  distToGo    : number;
+  distGone    : number;
+  sprite      : BulletSprite;
+  power       : number;
+  curve       : number;
+  speed       : number;
+  boom        : boolean;
+  trajectory  : Point[];
 
   constructor( xPos : number, yPos : number, dir : number, distToGo : number, power : number, curve : number ) {
     super();
     this.xPos = xPos;
     this.yPos = yPos;
     this.dir  = dir;
-    this.hitbox = new Rect( -5, -15, 10, 25, "green" );
     this.sprite = new BulletSprite();
+    [ this.width, this.height ] = this.sprite.getDim();
     this.distToGo = distToGo;
     this.distGone = 0.0;
     this.power = power;
     this.curve = curve;
+    this.speed = 0.5;
   }
 
   render = () : void => {
-    this.layer.applyTranslate( this.xPos * 40, this.yPos * 40 );
+    this.layer.applyTranslate( ( this.xPos + 0.5 ) * this.width, ( this.yPos + 0.5 ) * this.height );
     this.layer.applyRotation( this.dir );
     this.layer.drawItem( this.sprite );
-//    this.layer.drawItem( this.hitbox );
     this.layer.popTransform();
     this.layer.popTransform();
   }
@@ -162,10 +188,11 @@ class Bullet extends Entity {
   }
 
   update = () : void => {
+    if( this.boom ) return;
     let dirRad = this.dir * Math.PI / 180.0;
-    this.xPos += Math.sin( dirRad ) * 0.5;
-    this.yPos -= Math.cos( dirRad ) * 0.5;
-    this.distGone += 0.5;
+    this.xPos += Math.sin( dirRad ) * this.speed;
+    this.yPos -= Math.cos( dirRad ) * this.speed;
+    this.distGone += this.speed;
     this.dir += Math.max( 0, this.distGone - this.power ) * this.curve;
     if( this.distToGo <= this.distGone ) { this.detonate(); }
   }
@@ -177,7 +204,6 @@ abstract class Powerup extends Entity {
     this.xPos = x;
     this.yPos = y;
     console.log( this.xPos );
-    this.sprite = new Rect( 0, 0, 40, 40 );
   }
 
   render = () : void => {
