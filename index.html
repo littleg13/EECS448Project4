@@ -19,31 +19,18 @@
       crossorigin="anonymous"
     /> -->
     <script>
-    const delay = 10;
+    const delay = 100;
     var resizeTaskId = null;
 
     var handleResize = ( evt ) => {
       if( game === null ) return;
-      // 128 is subtracted to account for 4em margins, where 1em = 16px
-      // height has additional adjustment for Exit button ( 1em margins, 1em padding, 1em text)
-      let rect = { width : window.innerWidth - 128, height : window.innerHeight - 128 - 64 };
-      if( rect.width < 600 || rect.height < 600 ) {
-        game.curBoxDim = parseInt( Math.min( rect.width / game.mapDim, rect.height / game.mapDim ) );
-        let canvasSize = game.curBoxDim * game.mapDim;
-        game.gameview.resize( canvasSize, canvasSize );
-        game.effects.resize( canvasSize, canvasSize );
-        game.scale = game.curBoxDim / game.tileDim;
-      } else {
-        canvasSize = 600;
-        game.gameview.resize( canvasSize, canvasSize );
-        game.effects.resize( canvasSize, canvasSize );
-        game.gridBoxDim = parseInt( canvasSize / game.mapDim );
-        game.scale = game.curBoxDim / game.tileDim;
-      }
+      let size = Math.min( window.innerWidth, window.innerHeight );
+      let gameBody = document.getElementById( "gameBody" );
+      gameBody.style.width = size + "px";
+      gameBody.style.height = size + "px";
     }
 
     window.addEventListener("resize", (evt) => {
-      return;
       if( resizeTaskId !== null ) {
         clearTimeout( resizeTaskId );
       }
@@ -98,53 +85,51 @@
     </main>
     <div id="game">
       <div id="gameBody">
-        <div id="mini">
-        </div>
-        <div id="center">
-        </div>
-        <div id="rightSide" class="sidebar">
-          <div id="additionalInfo">
-            <div id="userInfo">
-              <div id="userCard">
-              </div>
-              <div id="spin">
-                <label for="spinSlider">Spin</label><br>
-                <input type="range" list="spinTicks" min="-1" max="1" value="0" step="0.1" class="slider" id="spinSlider" disabled>
-                <datalist id="spinTicks">
-                  <option value="-1.0">
-                  <option value="-0.8">
-                  <option value="-0.6">
-                  <option value="-0.4">
-                  <option value="-0.2">
-                  <option value="0">
-                  <option value="0.2">
-                  <option value="0.4">
-                  <option value="0.6">
-                  <option value="0.8">
-                  <option value="1.0">
-                </datalist>
-                <input type="number" id="spinDisplay" value="0" disabled style="text-align: center; border: none; border-radius: 0.5em;"><br>
-
-                <label for="powerSlider">Power</label><br>
-                <input type="range" list="powerTicks" min="0.0" max="5.0" value="0" step="0.25" class="slider" id="powerSlider" disabled>
-                <datalist id="powerTicks">
-                  <option value="0.0">
-                  <option value="0.5">
-                  <option value="1.0">
-                  <option value="1.5">
-                  <option value="2.0">
-                  <option value="2.5">
-                  <option value="3.0">
-                  <option value="3.5">
-                  <option value="4.0">
-                  <option value="4.5">
-                  <option value="5.0">
-                </datalist>
-                <input type="number" id="powerDisplay" value="0" disabled style="text-align: center; border: none; border-radius: 0.5em;"><br>
-              </div>
+      </div>
+      <div id="mini">
+      </div>
+      <div id="playerBar" class="sidebar">
+        <div id="additionalInfo">
+          <div id="userInfo">
+            <div id="userCard">
             </div>
-            <div id="lobbyInfo"></div>
+            <div id="spin">
+              <label for="spinSlider">Spin</label><br>
+              <input type="range" list="spinTicks" min="-1" max="1" value="0" step="0.1" class="slider" id="spinSlider" disabled>
+              <datalist id="spinTicks">
+                <option value="-1.0">
+                <option value="-0.8">
+                <option value="-0.6">
+                <option value="-0.4">
+                <option value="-0.2">
+                <option value="0">
+                <option value="0.2">
+                <option value="0.4">
+                <option value="0.6">
+                <option value="0.8">
+                <option value="1.0">
+              </datalist>
+              <input type="number" id="spinDisplay" value="0" disabled style="text-align: center; border: none; border-radius: 0.5em;"><br>
+
+              <label for="powerSlider">Power</label><br>
+              <input type="range" list="powerTicks" min="0.0" max="5.0" value="0" step="0.25" class="slider" id="powerSlider" disabled>
+              <datalist id="powerTicks">
+                <option value="0.0">
+                <option value="0.5">
+                <option value="1.0">
+                <option value="1.5">
+                <option value="2.0">
+                <option value="2.5">
+                <option value="3.0">
+                <option value="3.5">
+                <option value="4.0">
+                <option value="4.5">
+                <option value="5.0">
+              </datalist>
+              <input type="number" id="powerDisplay" value="0" disabled style="text-align: center; border: none; border-radius: 0.5em;"><br>
+            </div>
           </div>
+          <div id="lobbyInfo"></div>
         </div>
       </div>
       <input type="checkbox" id="chatToggle" class="toggle" onchange="resetChatHeader()">

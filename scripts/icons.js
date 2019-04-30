@@ -221,7 +221,8 @@ var BulletSprite = /** @class */ (function (_super) {
         };
         _this.width = 40;
         _this.height = 40;
-        _this.hitbox = new Hitbox(-5, -15, 10, 25);
+        //    this.hitbox = new Hitbox( -5, -15, 10, 25 );
+        _this.hitbox = new Hitbox(0, -15, 0, 25);
         _this.body = new Path(-5, 5, "#606060");
         var segments = [
             new LineSegment(5, 5),

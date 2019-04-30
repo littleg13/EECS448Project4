@@ -225,7 +225,8 @@ class BulletSprite extends Sprite {
     super();
     this.width = 40;
     this.height = 40;
-    this.hitbox = new Hitbox( -5, -15, 10, 25 );
+//    this.hitbox = new Hitbox( -5, -15, 10, 25 );
+    this.hitbox = new Hitbox( 0, -15, 0, 25 );
     this.body = new Path( -5,  5, "#606060" );
     let segments = [
       new LineSegment( 5,   5 ),

@@ -10,6 +10,7 @@ class PowerupUpdate {
 class Game {
   background  : Layer;
   gameview    : Layer;
+  entities    : Layer;
   effects     : Layer;
   minimap     : Layer;
   map         : Map;
@@ -60,14 +61,19 @@ class Game {
 */
 
   initLayers = () : void => {
-    let viewRadius = 7; // in tiles
+    let viewRadius = 10; // in tiles
     this.gameview = new Layer( "gameview", 2 * viewRadius * this.tileDim, 2 * viewRadius * this.tileDim );
-    this.gameview.attachToParent( document.getElementById( "center" ) );
+    this.gameview.attachToParent( document.getElementById( "gameBody" ) );
 
-    this.effects = new Layer( "effects", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
+    let canvasDim = this.mapDim * this.tileDim;
+
+    this.entities = new Layer( "entities", canvasDim, canvasDim );
+    this.entities.attachToParent( document.getElementById( "hidden" ) );
+
+    this.effects = new Layer( "effects", canvasDim, canvasDim );
     this.effects.attachToParent( document.getElementById( "hidden" ) );
 
-    this.background = new Layer( "background", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
+    this.background = new Layer( "background", canvasDim, canvasDim );
     this.background.attachToParent( document.getElementById( "hidden" ) );
 
     this.minimap = new Layer( "minimap", this.miniDim * this.mapDim, this.miniDim * this.mapDim );
@@ -123,7 +129,8 @@ class Game {
     } );
   }
 
-  checkPowerupCollision = ( obj : Entity ) : number[] => {
+  checkPowerupCollision = ( obj : Entity ) : number => {
+    /*
     let corners = obj.projHitbox();
     let powerupIndices = this.powerups.map( ( powerup : Powerup, index : number ) : number => {
       let match = corners.some( ( point : Point ) : boolean => {
@@ -136,6 +143,13 @@ class Game {
       return index > -1;
     } );
     return powerupIndices;
+    */
+    let [ col, row ] = [ obj.xPos + 0.5, obj.yPos + 0.5 ].map( Math.floor );
+    let retIndex = this.powerups.map( ( powerup : Powerup ) : number => {
+      if( powerup.xPos == col && powerup.yPos == row ) return true;
+      else return false;
+    } ).indexOf( true );
+    return retIndex;
   }
 
 
@@ -177,9 +191,10 @@ class Game {
       }
     }
     if( this.getPlayerMoved() ) {
-      this.checkPowerupCollision( player ).forEach( ( powerupIndex ) => {
+      let powerupIndex = this.checkPowerupCollision( player );
+      if( powerupIndex > -1 ) {
         player.addPowerup( this.powerups.splice( powerupIndex, 1 ) );
-      } );
+      }
     }
     player.distanceLeft = Math.max( 0, player.distanceLeft );
   }
@@ -210,11 +225,8 @@ class Game {
   }
 
   updateTankPowerups = ( userID : string, powerups : string[] ) : void => {
-    /*
-    let objs = powerups.map( ( str : string ) : Buff => {
-      return new Buff();
-    } );
-    this.getPlayer( userID ).addPowerups( objs );*/
+    console.log( powerups );
+//    this.getPlayer( userID ).addPowerups( objs );
   }
 
   updateTankPosition = ( userID : string, newXPos : number, newYPos: number, newDirection : number ) : void => {
@@ -236,9 +248,11 @@ class Game {
     } else if( deltaLocalY < 0 ) {
       tank.moveBackward( -deltaLocalY );
     }
+    /*
     this.checkPowerupCollision( tank ).forEach( ( powerupIndex : number ) : void => {
-      tank.addPowerup( this.powerups.splice( powerupIndex, 1 ) );
+      tank.addPowerups( this.powerups.splice( powerupIndex, 1 ) );
     } );
+    */
   }
 
   updateTurn = ( userID : string ) => {
@@ -427,5 +441,9 @@ class Game {
 
   getPlayerDir = () : number => {
     return this.getPlayer().dir;
+  }
+
+  getPlayerPowerups = () : Buff[] => {
+    return this.getPlayer().buffs;
   }
 }

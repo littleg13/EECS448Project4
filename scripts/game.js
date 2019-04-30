@@ -14,12 +14,15 @@ var Game = /** @class */ (function () {
         *
         */
         this.initLayers = function () {
-            var viewRadius = 7; // in tiles
+            var viewRadius = 10; // in tiles
             _this.gameview = new Layer("gameview", 2 * viewRadius * _this.tileDim, 2 * viewRadius * _this.tileDim);
-            _this.gameview.attachToParent(document.getElementById("center"));
-            _this.effects = new Layer("effects", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
+            _this.gameview.attachToParent(document.getElementById("gameBody"));
+            var canvasDim = _this.mapDim * _this.tileDim;
+            _this.entities = new Layer("entities", canvasDim, canvasDim);
+            _this.entities.attachToParent(document.getElementById("hidden"));
+            _this.effects = new Layer("effects", canvasDim, canvasDim);
             _this.effects.attachToParent(document.getElementById("hidden"));
-            _this.background = new Layer("background", _this.mapDim * _this.tileDim, _this.mapDim * _this.tileDim);
+            _this.background = new Layer("background", canvasDim, canvasDim);
             _this.background.attachToParent(document.getElementById("hidden"));
             _this.minimap = new Layer("minimap", _this.miniDim * _this.mapDim, _this.miniDim * _this.mapDim);
             _this.minimap.attachToParent(document.getElementById("mini"));
@@ -27,6 +30,7 @@ var Game = /** @class */ (function () {
         this.startGame = function () {
             _this.gameTickUpdateInt = setInterval(function () { _this.gameTick(); }, Math.round(1000 / 32));
             _this.sendServerUpdateInt = setInterval(function () { sendServerUpdate(); }, 40);
+            _this.populateSidebar();
         };
         this.addTank = function (userID, username, xPos, yPos, direction, distanceLeft, color, health) {
             _this.tanks.push(new Tank(xPos, yPos, direction, username, userID, color, health));
@@ -68,18 +72,28 @@ var Game = /** @class */ (function () {
             });
         };
         this.checkPowerupCollision = function (obj) {
-            var corners = obj.projHitbox();
-            var powerupIndices = _this.powerups.map(function (powerup, index) {
-                var match = corners.some(function (point) {
-                    var _a = [point.x, point.y].map(Math.floor), col = _a[0], row = _a[1];
-                    var _b = [powerup.xPos, powerup.yPos].map(Math.floor), pCol = _b[0], pRow = _b[1];
-                    return (pCol == col && pRow == row);
-                });
-                return (match ? index : -1);
-            }).filter(function (index) {
-                return index > -1;
-            });
+            /*
+            let corners = obj.projHitbox();
+            let powerupIndices = this.powerups.map( ( powerup : Powerup, index : number ) : number => {
+              let match = corners.some( ( point : Point ) : boolean => {
+                let [ col, row ] = [ point.x, point.y ].map( Math.floor );
+                let [ pCol, pRow ] = [ powerup.xPos, powerup.yPos ].map( Math.floor );
+                return ( pCol == col && pRow == row );
+              } );
+              return ( match ? index : -1 );
+            } ).filter( ( index : number ) : boolean => {
+              return index > -1;
+            } );
             return powerupIndices;
+            */
+            var _a = [obj.xPos + 0.5, obj.yPos + 0.5].map(Math.floor), col = _a[0], row = _a[1];
+            var retIndex = _this.powerups.map(function (powerup) {
+                if (powerup.xPos == col && powerup.yPos == row)
+                    return true;
+                else
+                    return false;
+            }).indexOf(true);
+            return retIndex;
         };
         this.processInput = function () {
             var player = _this.getPlayer();
@@ -119,9 +133,10 @@ var Game = /** @class */ (function () {
                 }
             }
             if (_this.getPlayerMoved()) {
-                _this.checkPowerupCollision(player).forEach(function (powerupIndex) {
+                var powerupIndex = _this.checkPowerupCollision(player);
+                if (powerupIndex > -1) {
                     player.addPowerup(_this.powerups.splice(powerupIndex, 1));
-                });
+                }
             }
             player.distanceLeft = Math.max(0, player.distanceLeft);
         };
@@ -149,11 +164,8 @@ var Game = /** @class */ (function () {
             _this.getPlayer(userID).setHealth(health);
         };
         this.updateTankPowerups = function (userID, powerups) {
-            /*
-            let objs = powerups.map( ( str : string ) : Buff => {
-              return new Buff();
-            } );
-            this.getPlayer( userID ).addPowerups( objs );*/
+            console.log(powerups);
+            //    this.getPlayer( userID ).addPowerups( objs );
         };
         this.updateTankPosition = function (userID, newXPos, newYPos, newDirection) {
             var tank = _this.getPlayer(userID);
@@ -175,9 +187,11 @@ var Game = /** @class */ (function () {
             else if (deltaLocalY < 0) {
                 tank.moveBackward(-deltaLocalY);
             }
-            _this.checkPowerupCollision(tank).forEach(function (powerupIndex) {
-                tank.addPowerup(_this.powerups.splice(powerupIndex, 1));
-            });
+            /*
+            this.checkPowerupCollision( tank ).forEach( ( powerupIndex : number ) : void => {
+              tank.addPowerups( this.powerups.splice( powerupIndex, 1 ) );
+            } );
+            */
         };
         this.updateTurn = function (userID) {
             var prevPlayer = _this.getPlayer(_this.curTurn);
@@ -360,6 +374,9 @@ var Game = /** @class */ (function () {
         };
         this.getPlayerDir = function () {
             return _this.getPlayer().dir;
+        };
+        this.getPlayerPowerups = function () {
+            return _this.getPlayer().buffs;
         };
         this.map = new Map(mapDim);
         this.mapDim = mapDim;
