@@ -150,8 +150,7 @@ var Game = /** @class */ (function () {
                     player.moveForward(0.125);
                     _this.setPlayerMoved();
                 }
-            }
-            if (_this.keys["ArrowDown"]) {
+            } else if (_this.keys["ArrowDown"]) {
                 if (!_this.checkMapCollision(player, -0.125, 0)) {
                     player.moveBackward(0.125);
                     _this.setPlayerMoved();
