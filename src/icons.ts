@@ -4,7 +4,7 @@ class Sprite extends Animated {
   hitbox  : Hitbox;
 }
 
-class Tread extends Animated {
+class Tread extends Sprite {
   x         : number;
   mainRect  : Rect;
   rects     : Rect[];
@@ -225,7 +225,6 @@ class BulletSprite extends Sprite {
     super();
     this.width = 40;
     this.height = 40;
-//    this.hitbox = new Hitbox( -5, -15, 10, 25 );
     this.hitbox = new Hitbox( 0, -15, 0, 25 );
     this.body = new Path( -5,  5, "#606060" );
     let segments = [
@@ -250,11 +249,99 @@ class BulletSprite extends Sprite {
 }
 
 class ExplosionSprite extends Sprite {
+  radii1 : Point[];
+  radii2 : Point[];
+  numPoints: number;
+  innerVar : number;
+  outerVar : number;
+  growth   : number;
+  counter : Counter;
+
   constructor() {
     super();
-  }
-  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    this.width = 40;
+    this.height = 40;
+    this.radii1 = [];
+    this.radii2 = [];
+    this.innerVar = 10;
+    this.outerVar = 10;
+    this.growth = 1;
+    this.numPoints = 32;
+    this.counter = new Counter( 0, 1, 32 );
+    this.counter.dec();
+    let innerR = 10;
+    let outerR = 20;
 
+    for( let i = 0; i < this.numPoints / 2; i++ ) {
+      let p1 = new Point( innerR, outerR );
+      let p2 = new Point( innerR / 2, outerR / 2 );
+      p1.x += ( Math.random() - 0.5 ) * this.innerVar;
+      p1.y += ( Math.random() - 0.5 ) * this.outerVar;
+      p2.x += ( Math.random() - 0.5 ) * this.innerVar / 2;
+      p2.y += ( Math.random() - 0.5 ) * this.outerVar / 2;
+      this.radii1.push( p1 );
+      this.radii2.push( p2 );
+    }
+  }
+
+  update = () : boolean => {
+    let count = this.counter.get();
+    let growth = this.growth * count / this.counter.max;
+    if( count == 0 ) {
+      return true;
+    }
+    this.radii1 = this.radii1.map( ( p : Point ) : Point => {
+      let innerR = p.x;
+      let outerR = p.y;
+      return new Point( innerR + growth,
+                        outerR + growth );
+    } );
+    this.radii2 = this.radii2.map( ( p : Point ) : Point => {
+      let innerR = p.x;
+      let outerR = p.y;
+      return new Point( innerR + growth / 2,
+                        outerR + growth / 2 );
+    } );
+    this.counter.dec();
+    return false;
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    let a = this.counter.get() / this.counter.max;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo( 0, 0 );
+    this.radii1.forEach( ( p : Point ) => {
+      let innerR = p.x;
+      let outerR = p.y;
+      ctx.lineTo( 0, -innerR );
+      ctx.rotate( 2 * Math.PI / this.numPoints );
+      ctx.lineTo( 0, -outerR );
+      ctx.rotate( 2 * Math.PI / this.numPoints );
+    } );
+    ctx.lineTo( 0, -this.radii1[0].x );
+    ctx.closePath();
+    ctx.fillStyle = "rgba( 255, 0, 0, " + a + " )";
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo( 0, 0 );
+    this.radii2.forEach( ( p : Point ) => {
+      let innerR = p.x;
+      let outerR = p.y;
+      ctx.lineTo( 0, -innerR );
+      ctx.rotate( 2 * Math.PI / this.numPoints );
+      ctx.lineTo( 0, -outerR );
+      ctx.rotate( 2 * Math.PI / this.numPoints );
+    } );
+    ctx.lineTo( 0, -this.radii2[0].x );
+    ctx.closePath();
+    ctx.fillStyle = "rgba( 255, 255, 0, " + a + " )";
+    ctx.fill();
+    ctx.restore();
   }
 }
 

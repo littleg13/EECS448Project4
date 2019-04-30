@@ -79,7 +79,7 @@ var Counter = /** @class */ (function () {
     function Counter(initial, delta, max) {
         var _this = this;
         if (delta === void 0) { delta = 1; }
-        if (max === void 0) { max = Infinity; }
+        if (max === void 0) { max = null; }
         this.onInc = function () { };
         this.onDec = function () { };
         this.inc = function (delta) {
@@ -87,7 +87,10 @@ var Counter = /** @class */ (function () {
             delta = Math.max(delta, _this.delta);
             // extra max term added bc % returns - for - numbers
             for (var i = 0; i < delta; i++) {
-                _this.value = (_this.value + _this.max + 1) % _this.max;
+                _this.value++;
+                if (_this.max != null) {
+                    _this.value = (_this.value + _this.max) % _this.max;
+                }
                 _this.onInc();
             }
         };
@@ -96,7 +99,10 @@ var Counter = /** @class */ (function () {
             delta = Math.max(delta, _this.delta);
             // extra max term added bc % returns - for - numbers
             for (var i = 0; i < delta; i++) {
-                _this.value = (_this.value + _this.max - 1) % _this.max;
+                _this.value--;
+                if (_this.max != null) {
+                    _this.value = (_this.value + _this.max) % _this.max;
+                }
                 _this.onDec();
             }
         };
@@ -123,7 +129,9 @@ var Renderable = /** @class */ (function () {
 var Animated = /** @class */ (function (_super) {
     __extends(Animated, _super);
     function Animated() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.update = function () { return false; };
+        return _this;
     }
     return Animated;
 }(Renderable));

@@ -17,13 +17,14 @@ class Game {
   mapDim      : number;
   scale       : number;
   tanks       : Tank[];
+  bullets     : Bullet[];
+  powerups    : Powerup[];
+  explosions : Effect[];
   distLeftThisTurn : number;
   curTurn     : string;
   curBoxDim   : number;
   tileDim     : number;
   miniDim     : number;
-  bullets     : Bullet[];
-  powerups    : Powerup[];
   keys        : string[];
   keyTimes;
   movedSinceLastTransmit : boolean;
@@ -37,14 +38,18 @@ class Game {
     this.map = new Map( mapDim );
     this.mapDim = mapDim;
     this.scale = 1;
-    this.tanks = [];
+
+    // Entity lists
+    this.tanks       = [];
+    this.bullets     = [];
+    this.powerups    = [];
+    this.explosions = [];
+
     this.curTurn = "";
     this.distLeftThisTurn = 5.0;
     this.curBoxDim = 40;
     this.tileDim   = 40;
     this.miniDim   = 10;
-    this.bullets   = [];
-    this.powerups  = [];
     this.keys      = [];
     this.keyTimes  = {};
     this.movedSinceLastTransmit = false;
@@ -141,6 +146,8 @@ class Game {
 
   checkBulletCollision = ( bullet : Bullet ) : boolean => {
     let [ bullX, bullY ] = [ bullet.xPos + 0.5, bullet.yPos + 0.5 ];
+    bullX += bullet.speed * Math.sin( bullet.dir * Math.PI / 180.0 );
+    bullY -= bullet.speed * Math.cos( bullet.dir * Math.PI / 180.0 );
     let [ bullCol, bullRow ] = [ bullX, bullY ].map( Math.floor );
     let tile = this.map.getTile( bullRow, bullCol );
     if( tile.isBlocking ) {
@@ -238,7 +245,6 @@ class Game {
 
   updateTankPowerups = ( userID : string, powerups : string[] ) : void => {
     console.log( powerups );
-//    this.getPlayer( userID ).addPowerups( objs );
   }
 
   updateTankPosition = ( userID : string, newXPos : number, newYPos: number, newDirection : number ) : void => {
@@ -302,7 +308,7 @@ class Game {
     let shooter = this.getPlayer( shooterID );
     if( shooter.canShoot ) {
       let bullet = new Bullet( shooter.userID, shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve );
-      bullet.attachToLayer( this.effects );
+      bullet.attachToLayer( this.entities );
       this.bullets.push( bullet );
       shooter.canShoot = false;
     }
@@ -349,6 +355,14 @@ class Game {
     this.minimap.popTransform();
   }
 
+  renderEntities = () : void => {
+    this.entities.clear();
+    this.renderBullets();
+    this.renderPowerups();
+    this.renderTanks();
+    this.gameview.addLayer( this.entities );
+  }
+
   renderTanks = () : void => {
     this.tanks.forEach( ( tank ) => {
       if( tank.health <= 0 ) { return; }
@@ -358,12 +372,12 @@ class Game {
 
   renderTank = ( tank ) : void => {
     tank.updateImage();
-    this.gameview.applyTranslate( this.tileDim * tank.xPos, this.tileDim * tank.yPos );
-    this.gameview.addLayer( tank.getLayer(), -10, -10 );
-    this.gameview.applyTranslate( this.tileDim / 2, this.tileDim );
-    this.gameview.drawItem( tank.nameTag );
-    this.gameview.popTransform();
-    this.gameview.popTransform();
+    this.entities.applyTranslate( this.tileDim * tank.xPos, this.tileDim * tank.yPos );
+    this.entities.addLayer( tank.getLayer(), -10, -10 );
+    this.entities.applyTranslate( this.tileDim / 2, this.tileDim );
+    this.entities.drawItem( tank.nameTag );
+    this.entities.popTransform();
+    this.entities.popTransform();
     // To-do: add nametag w/ health bar
     let [ xOffset, yOffset ] = [ tank.xPos, tank.yPos ].map( ( val ) => {
       return this.miniDim * ( val + 0.5 );
@@ -379,6 +393,18 @@ class Game {
     } );
   }
 
+  renderBullets = () : void => {
+    this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
+      bullet.render();
+      if( !this.checkBulletCollision( bullet ) ) {
+        bullet.update();
+        return true;
+      } else {
+        this.explosions.push( new ExplosionEffect( bullet.xPos, bullet.yPos, bullet.dir ) );
+      }
+    });
+  }
+
   renderEffects = () : void => {
     this.effects.clear();
     if( this.curTurn == localStorage.userID ) {
@@ -387,23 +413,16 @@ class Game {
       this.effects.drawItem( new Circle( 0, 0, tank.distanceLeft * this.tileDim, "rgba( 238, 255, 0, 0.5 )", "#000000") );
       this.effects.popTransform();
     }
-    this.renderBullets();
-    this.renderPowerups();
+    this.explosions = this.explosions.filter( ( explosion : ExplosionEffect ) : boolean => {
+      let [ xPos, yPos ] = [ explosion.xPos + 0.5, explosion.yPos + 0.5 ];
+      this.effects.applyTranslate( xPos * this.tileDim,
+                                   yPos * this.tileDim );
+      this.effects.drawItem( explosion );
+      this.effects.popTransform();
+      explosion.update();
+      return !explosion.done;
+    } );
     this.gameview.addLayer( this.effects );
-  }
-
-  renderBullets = () : void => {
-    this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
-      bullet.render();
-      if( !this.checkMapCollision( bullet, bullet.speed, 0.0 ) &&
-          !this.checkBulletCollision( bullet ) ) {
-        bullet.update();
-        return true;
-      } else {
-        console.log( "Bullet collision detected" );
-        return false;
-      }
-    });
   }
 
   renderLoop = () : void => {
@@ -415,9 +434,9 @@ class Game {
     this.gameview.applyTranslate( xOffset, yOffset );
     this.gameview.center();
     this.renderMap();
-    this.renderEffects();
     this.renderMinimap();
-    this.renderTanks();
+    this.renderEffects();
+    this.renderEntities();
     this.gameview.popTransform();
     this.gameview.popTransform();
     this.gameview.popTransform();

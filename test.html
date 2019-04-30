@@ -241,9 +241,10 @@ var main = () => {
   counter = 32;
   counterMax = 32;
   interval = setInterval( loop, Math.round( 1000 / 64 ) );
-  items = new BuildWallSprite();
+  items = new ExplosionSprite();
 }
 
+/*
 var loop = () => {
   ctx.clearRect( 0, 0, width, height );
   if( counter > 0 ) {
@@ -257,14 +258,16 @@ var loop = () => {
     setTimeout( () => { counter = counterMax; }, 1000 );
   }
 }
-/*
+*/
 var loop = () => {
   ctx.clearRect( 0, 0, width, height );
   ctx.save();
   ctx.translate( width / 2, height / 2 );
   items.render( ctx );
+  items.update();
   ctx.restore();
-}*/
+  if( items.done ) { delete items; }
+}
 
     </script>
     <style>

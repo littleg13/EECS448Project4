@@ -84,6 +84,8 @@ var Game = /** @class */ (function () {
         };
         this.checkBulletCollision = function (bullet) {
             var _a = [bullet.xPos + 0.5, bullet.yPos + 0.5], bullX = _a[0], bullY = _a[1];
+            bullX += bullet.speed * Math.sin(bullet.dir * Math.PI / 180.0);
+            bullY -= bullet.speed * Math.cos(bullet.dir * Math.PI / 180.0);
             var _b = [bullX, bullY].map(Math.floor), bullCol = _b[0], bullRow = _b[1];
             var tile = _this.map.getTile(bullRow, bullCol);
             if (tile.isBlocking) {
@@ -178,7 +180,6 @@ var Game = /** @class */ (function () {
         };
         this.updateTankPowerups = function (userID, powerups) {
             console.log(powerups);
-            //    this.getPlayer( userID ).addPowerups( objs );
         };
         this.updateTankPosition = function (userID, newXPos, newYPos, newDirection) {
             var tank = _this.getPlayer(userID);
@@ -241,7 +242,7 @@ var Game = /** @class */ (function () {
             var shooter = _this.getPlayer(shooterID);
             if (shooter.canShoot) {
                 var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve);
-                bullet.attachToLayer(_this.effects);
+                bullet.attachToLayer(_this.entities);
                 _this.bullets.push(bullet);
                 shooter.canShoot = false;
             }
@@ -282,6 +283,13 @@ var Game = /** @class */ (function () {
             _this.minimap.addLayer(_this.background);
             _this.minimap.popTransform();
         };
+        this.renderEntities = function () {
+            _this.entities.clear();
+            _this.renderBullets();
+            _this.renderPowerups();
+            _this.renderTanks();
+            _this.gameview.addLayer(_this.entities);
+        };
         this.renderTanks = function () {
             _this.tanks.forEach(function (tank) {
                 if (tank.health <= 0) {
@@ -292,12 +300,12 @@ var Game = /** @class */ (function () {
         };
         this.renderTank = function (tank) {
             tank.updateImage();
-            _this.gameview.applyTranslate(_this.tileDim * tank.xPos, _this.tileDim * tank.yPos);
-            _this.gameview.addLayer(tank.getLayer(), -10, -10);
-            _this.gameview.applyTranslate(_this.tileDim / 2, _this.tileDim);
-            _this.gameview.drawItem(tank.nameTag);
-            _this.gameview.popTransform();
-            _this.gameview.popTransform();
+            _this.entities.applyTranslate(_this.tileDim * tank.xPos, _this.tileDim * tank.yPos);
+            _this.entities.addLayer(tank.getLayer(), -10, -10);
+            _this.entities.applyTranslate(_this.tileDim / 2, _this.tileDim);
+            _this.entities.drawItem(tank.nameTag);
+            _this.entities.popTransform();
+            _this.entities.popTransform();
             // To-do: add nametag w/ health bar
             var _a = [tank.xPos, tank.yPos].map(function (val) {
                 return _this.miniDim * (val + 0.5);
@@ -311,6 +319,18 @@ var Game = /** @class */ (function () {
                 powerup.render();
             });
         };
+        this.renderBullets = function () {
+            _this.bullets = _this.bullets.filter(function (bullet) {
+                bullet.render();
+                if (!_this.checkBulletCollision(bullet)) {
+                    bullet.update();
+                    return true;
+                }
+                else {
+                    _this.explosions.push(new ExplosionEffect(bullet.xPos, bullet.yPos, bullet.dir));
+                }
+            });
+        };
         this.renderEffects = function () {
             _this.effects.clear();
             if (_this.curTurn == localStorage.userID) {
@@ -319,23 +339,15 @@ var Game = /** @class */ (function () {
                 _this.effects.drawItem(new Circle(0, 0, tank.distanceLeft * _this.tileDim, "rgba( 238, 255, 0, 0.5 )", "#000000"));
                 _this.effects.popTransform();
             }
-            _this.renderBullets();
-            _this.renderPowerups();
-            _this.gameview.addLayer(_this.effects);
-        };
-        this.renderBullets = function () {
-            _this.bullets = _this.bullets.filter(function (bullet) {
-                bullet.render();
-                if (!_this.checkMapCollision(bullet, bullet.speed, 0.0) &&
-                    !_this.checkBulletCollision(bullet)) {
-                    bullet.update();
-                    return true;
-                }
-                else {
-                    console.log("Bullet collision detected");
-                    return false;
-                }
+            _this.explosions = _this.explosions.filter(function (explosion) {
+                var _a = [explosion.xPos + 0.5, explosion.yPos + 0.5], xPos = _a[0], yPos = _a[1];
+                _this.effects.applyTranslate(xPos * _this.tileDim, yPos * _this.tileDim);
+                _this.effects.drawItem(explosion);
+                _this.effects.popTransform();
+                explosion.update();
+                return !explosion.done;
             });
+            _this.gameview.addLayer(_this.effects);
         };
         this.renderLoop = function () {
             var _a = _this.getPlayerPos().map(function (val) {
@@ -346,9 +358,9 @@ var Game = /** @class */ (function () {
             _this.gameview.applyTranslate(xOffset, yOffset);
             _this.gameview.center();
             _this.renderMap();
-            _this.renderEffects();
             _this.renderMinimap();
-            _this.renderTanks();
+            _this.renderEffects();
+            _this.renderEntities();
             _this.gameview.popTransform();
             _this.gameview.popTransform();
             _this.gameview.popTransform();
@@ -396,14 +408,16 @@ var Game = /** @class */ (function () {
         this.map = new Map(mapDim);
         this.mapDim = mapDim;
         this.scale = 1;
+        // Entity lists
         this.tanks = [];
+        this.bullets = [];
+        this.powerups = [];
+        this.explosions = [];
         this.curTurn = "";
         this.distLeftThisTurn = 5.0;
         this.curBoxDim = 40;
         this.tileDim = 40;
         this.miniDim = 10;
-        this.bullets = [];
-        this.powerups = [];
         this.keys = [];
         this.keyTimes = {};
         this.movedSinceLastTransmit = false;

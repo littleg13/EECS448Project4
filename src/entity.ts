@@ -194,13 +194,13 @@ class Bullet extends Entity {
     this.boom = true;
   }
 
-  update = () : void => {
-    if( this.boom ) return;
+  update = () : boolean => {
     let dirRad = this.dir * Math.PI / 180.0;
     this.xPos += Math.sin( dirRad ) * this.speed;
     this.yPos -= Math.cos( dirRad ) * this.speed;
     this.distGone += this.speed;
     this.dir += Math.max( 0, this.distGone - this.power ) * this.curve;
+    return this.boom;
   }
 }
 
@@ -222,7 +222,6 @@ abstract class Powerup extends Entity {
 class MultiShotToken extends Powerup {
   constructor( x : number, y : number ) {
     super( x, y );
-    console.log( { x: x, y: y, powerup: this } );
     this.sprite = new MultiShotSprite();
   }
 }
