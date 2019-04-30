@@ -453,7 +453,7 @@ var main = () => {
    game = new Game(20);
    handleResize();
    wrapper.style.display = "none";
-   socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
+   socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
  }
 };
 
@@ -483,3 +483,27 @@ var resetChatHeader = () => {
   else { header.innerHTML = "Show Chat"; }
   document.getElementById( "chatHeader" ).classList.remove( "newMessage" );
 }
+
+const delay = 100;
+var resizeTaskId = null;
+
+var handleResize = ( evt ) => {
+  if( game === null ) return;
+  let size = Math.min( window.innerWidth, window.innerHeight );
+  let gameBody = document.getElementById( "gameBody" );
+  gameBody.style.width = size + "px";
+  gameBody.style.height = size + "px";
+}
+
+window.addEventListener("resize", (evt) => {
+  if( resizeTaskId !== null ) {
+    clearTimeout( resizeTaskId );
+  }
+
+  resizeTaskId = setTimeout( () => {
+    resizeTaskId = null;
+    handleResize( evt );
+  }, delay);
+});
+
+window.addEventListener( "load", handleResize );

@@ -19,30 +19,6 @@
       integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
       crossorigin="anonymous"
     /> -->
-    <script>
-    const delay = 100;
-    var resizeTaskId = null;
-
-    var handleResize = ( evt ) => {
-      if( game === null ) return;
-      let size = Math.min( window.innerWidth, window.innerHeight );
-      let gameBody = document.getElementById( "gameBody" );
-      gameBody.style.width = size + "px";
-      gameBody.style.height = size + "px";
-    }
-
-    window.addEventListener("resize", (evt) => {
-      if( resizeTaskId !== null ) {
-        clearTimeout( resizeTaskId );
-      }
-
-      resizeTaskId = setTimeout( () => {
-        resizeTaskId = null;
-        handleResize( evt );
-      }, delay);
-    });
-
-    </script>
   </head>
   <body>
     <main id="wrapper">
