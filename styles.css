@@ -217,7 +217,7 @@ input[type="checkbox"].toggle {
 
 #chatToggle:checked + #chatWindow {
   transition: all 1s;
-  top: 15%;
+  top: 10%;
 }
 
 /* #chatHeader is the marker on top of the chat box */
