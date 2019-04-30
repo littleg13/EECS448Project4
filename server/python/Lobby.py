@@ -193,7 +193,7 @@ class Lobby:
                                involved in that event.
 
         Returns:
-            outBoundData (dictionary): contains the updated information of the game
+            outboundData (dictionary): contains the updated information of the game
         """
         self.refreshLastUsedTime()
         player = self.players[userID]
@@ -211,6 +211,14 @@ class Lobby:
                     outboundData['newPos'] = data['newPos']
                     outboundData['newDir'] = data['newDir']
                     if (self.checkForPowerupCollision(userID, player)):
+                        if('healthPack' in player.powerups):
+                            player.health = min(100, player.health + 20)
+                            player.powerups.remove('healthPack')
+                            outboundData['updateHealth'] = player.health
+                        elif('increaseMoveDist' in player.powerups):
+                            player.distanceLeft += 5
+                            player.powerups.remove('increaseMoveDist')
+                            outboundData['updateMoveDistance'] = player.distanceLeft
                         outboundData['playerPowerups'] = player.powerups
                         outboundData['powerupsOnMap'] = self.powerups
             elif data['eventType'] == 'playerFire':
@@ -242,8 +250,8 @@ class Lobby:
         return outboundData
 
     def checkForPowerupCollision(self, userID, player):
-        playerxPos = round(player.xPos)
-        playeryPos = round(player.yPos)
+        playerxPos = math.floor(player.xPos + 0.5)
+        playeryPos = math.floor(player.yPos + 0.5)
         if (playerxPos in self.powerups):
             if (playeryPos in self.powerups[playerxPos]):
                 player.powerups.append(self.powerups[playerxPos][playeryPos])

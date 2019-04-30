@@ -318,6 +318,12 @@ var gameUpdateHandler = (data) => {
       }
       if( data.playerPowerups ) {
         game.updateTankPowerups( data.userID, data.playerPowerups );
+        if( data.updateHealth ) {
+          game.updateTankHealth( data.userID, data.updateHealth );
+        }
+        else if( data.updateMoveDistance ) {
+          game.updateTankDistanceLeft( data.userID, data.updateMoveDistance );
+        }
       }
       break;
     case "playerFire":

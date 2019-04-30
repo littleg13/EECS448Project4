@@ -121,11 +121,7 @@ var Tank = /** @class */ (function (_super) {
             var buff = null;
             if (powerup instanceof MultiShotToken)
                 buff = new Buff();
-            if (powerup instanceof IncreaseMoveDistToken)
-                buff = new Buff();
-            if (powerup instanceof BuildWallToken)
-                buff = new Buff();
-            if (powerup instanceof HealthPackToken)
+            else if (powerup instanceof BuildWallToken)
                 buff = new Buff();
             if (buff != null)
                 _this.buffs.push(buff);
