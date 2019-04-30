@@ -176,6 +176,7 @@ var TankSprite = /** @class */ (function (_super) {
         _this.barrel = new Rect(-5, -20, 10, 25, color, "#000");
         _this.cap = new RoundRect(-7.5, -25, 15, 7.5, 2.5, color, "#000");
         _this.turret = new Circle(0, 0, 10, color, "#000");
+        _this.multishot = false;
         return _this;
     }
     return TankSprite;

@@ -506,4 +506,9 @@ window.addEventListener("resize", (evt) => {
   }, delay);
 });
 
+var redrawMap = () => {
+  game.map.redrawRange( 0, 20, 0, 20 );
+  game.background.drawItem( game.map );
+}
+
 window.addEventListener( "load", handleResize );
