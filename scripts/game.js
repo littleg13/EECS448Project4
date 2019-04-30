@@ -148,7 +148,7 @@ var Game = /** @class */ (function () {
             if (_this.getPlayerMoved()) {
                 var powerupIndex = _this.checkPowerupCollision(player);
                 if (powerupIndex > -1) {
-                    let powerup = _this.powerups.splice(powerupIndex, 1)[0];
+                    var powerup = _this.powerups.splice(powerupIndex, 1)[0];
                     player.addPowerup(powerup);
                 }
             }
@@ -179,11 +179,10 @@ var Game = /** @class */ (function () {
         };
         this.updateTankPowerups = function (userID, powerups) {
             console.log(powerups);
-            //    this.getPlayer( userID ).addPowerups( objs );
         };
-        this.updateTankDistanceLeft = function (userID, moveDistance) {
-            _this.getPlayer(userID).distanceLeft = moveDistance;
-        }
+        this.updateTankDistanceLeft = function (userID, distanceLeft) {
+            _this.getPlayer(userID).distanceLeft = distanceLeft;
+        };
         this.updateTankPosition = function (userID, newXPos, newYPos, newDirection) {
             var tank = _this.getPlayer(userID);
             var deltaDir = ((newDirection * 180.0 / Math.PI) - tank.dir) % 360.0;

@@ -205,7 +205,8 @@ class Game {
     if( this.getPlayerMoved() ) {
       let powerupIndex = this.checkPowerupCollision( player );
       if( powerupIndex > -1 ) {
-        player.addPowerup( this.powerups.splice( powerupIndex, 1 )[0] );
+        let powerup = this.powerups.splice( powerupIndex, 1 )[0];
+        player.addPowerup( powerup );
       }
     }
     player.distanceLeft = Math.max( 0, player.distanceLeft );
@@ -238,7 +239,10 @@ class Game {
 
   updateTankPowerups = ( userID : string, powerups : string[] ) : void => {
     console.log( powerups );
-//    this.getPlayer( userID ).addPowerups( objs );
+  }
+
+  updateTankDistanceLeft = ( userID : string, distanceLeft : number ) : void => {
+    this.getPlayer( userID ).distanceLeft = distanceLeft;
   }
 
   updateTankPosition = ( userID : string, newXPos : number, newYPos: number, newDirection : number ) : void => {

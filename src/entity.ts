@@ -149,9 +149,7 @@ class Tank extends Entity {
   addPowerup = ( powerup : Powerup ) : void => {
     let buff = null;
     if( powerup instanceof MultiShotToken ) buff = new Buff();
-    if( powerup instanceof IncreaseMoveDistToken ) buff = new Buff();
-    if( powerup instanceof BuildWallToken ) buff = new Buff();
-    if( powerup instanceof HealthPackToken ) buff = new Buff();
+    else if( powerup instanceof BuildWallToken ) buff = new Buff();
     if( buff != null ) this.buffs.push( buff );
   }
 }
