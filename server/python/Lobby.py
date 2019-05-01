@@ -237,19 +237,21 @@ class Lobby:
                     if(count > 1):
                         directionOffset = ((i-math.floor(count/2))/math.floor(count/2)) * math.pi/6
                     collisionData[i] = self.checkBulletCollision( userID, player, data['power'], data['spin'], directionOffset )
+
                     if(collisionData[i][0]['type'] == 'map'):
                         outboundData[i]['bulletHit'] = collisionData[i][0]
                     elif(collisionData[i][0]["type"] != 'edge'):
-                        userID = collisionData[i][0]["userID"]
-                        newHealth = self.players[userID].health - 20
+                        targetUserID = collisionData[i][0]["userID"]
+                        newHealth = self.players[targetUserID].health - 20
                         if(newHealth <= 0):
                             newHealth = 0
                             self.order.remove( userID )
                             if (len(self.order) == 1):
                                 outboundData['gameOver'] = userID
                             turnsToAdvance = 0
-                            self.players[ UserID].alive = False
-                        self.players[ UserID].health = newHealth
+                            self.players[targetUserID].alive = False
+                        self.players[targetUserID].health = newHealth
+                        outboundData[i]['bulletHit'] = collisionData[i][0]
                         outboundData[i]['bulletHit']['newHealth'] = newHealth
                     else:
                         outboundData[i]['bulletHit'] ={ 'type' : 'edge' }
@@ -320,7 +322,7 @@ class Lobby:
                  distance from the player who shot to whatever it collided with
 
         """
-        position  = [ player.xPos, player.yPos ]
+        position  = [ player.xPos + 0.5, player.yPos + 0.5 ]
         direction = player.direction + directionOffset
         spin      = spin / 5
         increment = 0.5
