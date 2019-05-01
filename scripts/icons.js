@@ -129,16 +129,37 @@ var TankSprite = /** @class */ (function (_super) {
     function TankSprite(color) {
         if (color === void 0) { color = "#c00"; }
         var _this = _super.call(this) || this;
-        _this.render = function (ctx) {
+        _this.render = function (ctx, multiShot, buildWall) {
+            if (multiShot === void 0) { multiShot = 0; }
+            if (buildWall === void 0) { buildWall = 0; }
             _this.getItems().map(function (item) { item.render(ctx); });
+            if (_this.multiShot != 0) {
+                ctx.save();
+                ctx.rotate(Math.PI / 6);
+                _this.getAuxBarrel().map(function (item) { item.render(ctx); });
+                ctx.restore();
+                ctx.save();
+                ctx.rotate(-Math.PI / 6);
+                _this.getAuxBarrel().map(function (item) { item.render(ctx); });
+                ctx.restore();
+            }
         };
         _this.getItems = function () {
             return [_this.leftTread, _this.rightTread,
                 _this.body, _this.barrel,
                 _this.cap, _this.turret];
         };
+        _this.getAuxBarrel = function () {
+            return [
+                new Rect(-3, -25, 6, 15, "green")
+            ];
+        };
         _this.getDim = function () {
             return [_this.width, _this.height];
+        };
+        _this.setBuffs = function (multiShot, buildWall) {
+            _this.multiShot = multiShot;
+            _this.buildWall = buildWall;
         };
         _this.changeColor = function (color) {
             _this.getItems().map(function (item) {
@@ -176,7 +197,8 @@ var TankSprite = /** @class */ (function (_super) {
         _this.barrel = new Rect(-5, -20, 10, 25, color, "#000");
         _this.cap = new RoundRect(-7.5, -25, 15, 7.5, 2.5, color, "#000");
         _this.turret = new Circle(0, 0, 10, color, "#000");
-        _this.multishot = false;
+        _this.multiShot = 0;
+        _this.buildWall = 0;
         return _this;
     }
     return TankSprite;
@@ -233,6 +255,31 @@ var BulletSprite = /** @class */ (function (_super) {
         return _this;
     }
     return BulletSprite;
+}(Sprite));
+var ShadowBlock = /** @class */ (function (_super) {
+    __extends(ShadowBlock, _super);
+    function ShadowBlock() {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            _this.items.render(ctx);
+        };
+        var items = [
+            new RoundRect(0, 0, 40, 40, 3, "rgba( 0, 0, 0, 0.5 )", "transparent"),
+            new RoundRect(1, 2, 18, 7, 3, "rgba( 112, 112, 112, 0.5 )", "transparent"),
+            new RoundRect(21, 2, 18, 7, 3, "rgba( 112, 112, 112, 0.5 )", "transparent"),
+            new RoundRect(1, 11, 8, 7, 3, "rgba( 80, 80, 80, 0.5 )", "transparent"),
+            new RoundRect(11, 11, 18, 7, 3, "rgba( 80, 80, 80, 0.5 )", "transparent"),
+            new RoundRect(31, 11, 8, 7, 3, "rgba( 80, 80, 80, 0.5 )", "transparent"),
+            new RoundRect(1, 20, 18, 7, 3, "rgba( 48, 48, 48, 0.5 )", "transparent"),
+            new RoundRect(21, 20, 18, 7, 3, "rgba( 48, 48, 48, 0.5 )", "transparent"),
+            new RoundRect(1, 29, 8, 7, 3, "rgba( 16, 16, 16, 0.5 )", "transparent"),
+            new RoundRect(11, 29, 18, 7, 3, "rgba( 16, 16, 16, 0.5 )", "transparent"),
+            new RoundRect(31, 29, 8, 7, 3, "rgba( 16, 16, 16, 0.5 )", "transparent")
+        ];
+        _this.items = new Collection(items);
+        return _this;
+    }
+    return ShadowBlock;
 }(Sprite));
 var ExplosionSprite = /** @class */ (function (_super) {
     __extends(ExplosionSprite, _super);

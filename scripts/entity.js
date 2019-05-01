@@ -118,13 +118,11 @@ var Tank = /** @class */ (function (_super) {
             _this.infoCard.setTurn(isTurn);
         };
         _this.addPowerup = function (powerup) {
-            var buff = null;
             if (powerup instanceof MultiShotToken)
-                buff = new Buff();
+                _this.multiShot++;
             else if (powerup instanceof BuildWallToken)
-                buff = new Buff();
-            if (buff != null)
-                _this.buffs.push(buff);
+                _this.buildWall++;
+            _this.sprite.setBuffs(_this.multiShot, _this.buildWall);
         };
         _this.xPos = xPos;
         _this.yPos = yPos;
@@ -138,8 +136,9 @@ var Tank = /** @class */ (function (_super) {
         _this.nameTag = new NameTag(playerName, health);
         _this.layer = new Layer(playerName, 60, 60);
         _this.health = health;
-        _this.buffs = [];
         _this.canShoot = false;
+        _this.multiShot = 0;
+        _this.buildWall = 0;
         return _this;
     }
     return Tank;
@@ -235,8 +234,3 @@ var HealthPackToken = /** @class */ (function (_super) {
     }
     return HealthPackToken;
 }(Powerup));
-var Buff = /** @class */ (function () {
-    function Buff() {
-    }
-    return Buff;
-}());

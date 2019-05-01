@@ -125,14 +125,14 @@ var Game = /** @class */ (function () {
             if (_this.curTurn != localStorage.userID)
                 return;
             if (_this.keys["ArrowLeft"]) {
-                if (!_this.checkMapCollision(player, 0, -2.0)) {
-                    player.rotateCCW(2.0);
+                if (!_this.checkMapCollision(player, 0, -4.0)) {
+                    player.rotateCCW(4.0);
                     _this.setPlayerMoved();
                 }
             }
             if (_this.keys["ArrowRight"]) {
-                if (!_this.checkMapCollision(player, 0, 2.0)) {
-                    player.rotateCW(2.0);
+                if (!_this.checkMapCollision(player, 0, 4.0)) {
+                    player.rotateCW(4.0);
                     _this.setPlayerMoved();
                 }
             }
@@ -150,12 +150,18 @@ var Game = /** @class */ (function () {
                     player.moveForward(0.125);
                     _this.setPlayerMoved();
                 }
-            }
-            if (_this.keys["ArrowDown"]) {
+            } else if (_this.keys["ArrowDown"]) {
                 if (!_this.checkMapCollision(player, -0.125, 0)) {
                     player.moveBackward(0.125);
                     _this.setPlayerMoved();
                 }
+            }
+            if (_this.keys["e"] && player.buildWall != 0) {
+                var _a = [player.xPos, player.yPos], xPos = _a[0], yPos = _a[1];
+                xPos += 1.5 * Math.sin(player.dir * Math.PI / 180.0);
+                yPos -= 1.5 * Math.cos(player.dir * Math.PI / 180.0);
+                var _b = [xPos + 0.5, yPos + 0.5].map(Math.floor), col = _b[0], row = _b[1];
+                _this.setBuildWall(row, col);
             }
             if (_this.getPlayerMoved()) {
                 var powerupIndex = _this.checkPowerupCollision(player);
@@ -316,6 +322,16 @@ var Game = /** @class */ (function () {
         };
         this.renderTank = function (tank) {
             tank.updateImage();
+            if (tank.buildWall != 0) {
+                var dirRad = tank.dir * Math.PI / 180.0;
+                var _a = [tank.xPos, tank.yPos], xPos = _a[0], yPos = _a[1];
+                xPos += 1.5 * Math.sin(dirRad);
+                yPos -= 1.5 * Math.cos(dirRad);
+                var _b = [xPos + 0.5, yPos + 0.5].map(Math.floor), col = _b[0], row = _b[1];
+                _this.entities.applyTranslate(_this.tileDim * col, _this.tileDim * row);
+                _this.entities.drawItem(new ShadowBlock());
+                _this.entities.popTransform();
+            }
             _this.entities.applyTranslate(_this.tileDim * tank.xPos, _this.tileDim * tank.yPos);
             _this.entities.addLayer(tank.getLayer(), -10, -10);
             _this.entities.applyTranslate(_this.tileDim / 2, _this.tileDim);
@@ -323,9 +339,9 @@ var Game = /** @class */ (function () {
             _this.entities.popTransform();
             _this.entities.popTransform();
             // To-do: add nametag w/ health bar
-            var _a = [tank.xPos, tank.yPos].map(function (val) {
+            var _c = [tank.xPos, tank.yPos].map(function (val) {
                 return _this.miniDim * (val + 0.5);
-            }), xOffset = _a[0], yOffset = _a[1];
+            }), xOffset = _c[0], yOffset = _c[1];
             _this.minimap.applyTranslate(xOffset, yOffset);
             _this.minimap.drawItem(new Circle(0, 0, _this.miniDim / 2, tank.color));
             _this.minimap.popTransform();
@@ -418,8 +434,15 @@ var Game = /** @class */ (function () {
         this.getPlayerDir = function () {
             return _this.getPlayer().dir;
         };
-        this.getPlayerPowerups = function () {
-            return _this.getPlayer().buffs;
+        this.getPlayerPowerups = function () { };
+        this.getBuildWall = function () {
+            return _this.buildWall;
+        };
+        this.setBuildWall = function (row, col) {
+            if (row === undefined && col === undefined) {
+                _this.buildWall = null;
+            }
+            _this.buildWall = { row: row, col: col };
         };
         this.map = new Map(mapDim);
         this.mapDim = mapDim;

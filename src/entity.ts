@@ -59,7 +59,8 @@ class Tank extends Entity {
   nameTag     : NameTag;
   distanceLeft: number;
   alive       : boolean;
-  buffs       : Buff[];
+  multiShot   : number;
+  buildWall   : number;
 
   constructor( xPos : number, yPos : number, dir : number, playerName : string, userID : string, color : string, health : number ) {
     super();
@@ -77,8 +78,9 @@ class Tank extends Entity {
     this.layer      = new Layer( playerName, 60, 60 );
 
     this.health   = health;
-    this.buffs    = [];
     this.canShoot = false;
+    this.multiShot = 0;
+    this.buildWall = 0;
   }
 
   updateImage = () : void => {
@@ -147,10 +149,9 @@ class Tank extends Entity {
   }
 
   addPowerup = ( powerup : Powerup ) : void => {
-    let buff = null;
-    if( powerup instanceof MultiShotToken ) buff = new Buff();
-    else if( powerup instanceof BuildWallToken ) buff = new Buff();
-    if( buff != null ) this.buffs.push( buff );
+    if( powerup instanceof MultiShotToken ) this.multiShot++;
+    else if( powerup instanceof BuildWallToken ) this.buildWall++;
+    this.sprite.setBuffs( this.multiShot, this.buildWall );
   }
 }
 
@@ -244,5 +245,3 @@ class HealthPackToken extends Powerup {
     this.sprite = new HealthPackSprite();
   }
 }
-
-class Buff {}
