@@ -280,8 +280,8 @@ var Game = /** @class */ (function () {
             }
         };
         this.endGame = function (winnerUserID) {
-            window.clearInterval(gameTickUpdateInt);
-            window.clearInterval(sendServerUpdateInt);
+            window.clearInterval(_this.gameTickUpdateInt);
+            window.clearInterval(_this.sendServerUpdateInt);
             _this.won = true;
             alert("Game over. Winner is: " + _this.getPlayer(winnerUserID).playerName);
             delete localStorage.userID;

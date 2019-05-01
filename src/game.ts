@@ -351,8 +351,8 @@ class Game {
   }
 
   endGame = ( winnerUserID : string ) : void => {
-    window.clearInterval( gameTickUpdateInt );
-    window.clearInterval( sendServerUpdateInt );
+    window.clearInterval( this.gameTickUpdateInt );
+    window.clearInterval( this.sendServerUpdateInt );
     this.won = true;
     alert( "Game over. Winner is: " + this.getPlayer( winnerUserID ).playerName );
     delete localStorage.userID;
