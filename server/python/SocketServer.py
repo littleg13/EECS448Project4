@@ -54,6 +54,9 @@ def sendMap(sid, data):
 def sendHost(sid, data):
     io.emit('lobbyHost', {'host': lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getHost()}, room=sid)
 
+def sendPowerups(sid, data):
+    io.emit('powerupsOnMap', {'powerups': lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).powerups}, room=sid)
+
 @io.on('joinLobby')
 def joinLobby(sid, data):
     """Adds a user to a lobby upon request
@@ -131,7 +134,8 @@ def requestInfo(sid, data):
         'getPlayerList' : sendPlayerList,
         'getTurn' : sendTurn,
         'getMap' : sendMap,
-        'getHost' : sendHost
+        'getHost' : sendHost,
+        'getPowerups' : sendPowerups
         }
         options[data['request']](sid, data)
     else:
