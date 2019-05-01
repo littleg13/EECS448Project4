@@ -266,7 +266,6 @@ var Game = /** @class */ (function () {
                 var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve);
                 bullet.attachToLayer(_this.entities);
                 _this.bullets.push(bullet);
-                shooter.canShoot = false;
             }
         };
         this.endGame = function (winnerUserID) {

@@ -265,8 +265,8 @@ class Lobby:
                 if 'buildWall' not in player.powerups:
                     return outboundData
                 direction = player.direction
-                xPos = player.xPos + 1.5 * math.sin( direction )
-                yPos = player.yPos - 1.5 * math.cos( direction )
+                xPos = player.xPos + 0.5 + 1.5 * math.sin( direction )
+                yPos = player.yPos + 0.5 - 1.5 * math.cos( direction )
                 col = math.floor( xPos )
                 row = math.floor( yPos )
                 if self.getDistanceToPlayer([col, row], player) > 3:
