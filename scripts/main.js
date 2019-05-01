@@ -195,12 +195,10 @@ socket.on("moveToLobby", moveToLobbyHandler);
   * userIDs.
   */
 var playerListHandler = (data) => {
-  console.log( "Player list received" );
-  console.log( data );
   if( game ) {
-    for(let user in data) {
+    game.tanks = [];
+    for( let user in data ) {
       let userData = data[user];
-      if( game.getPlayer( user ) ) { continue; }
       let direction = userData[ "direction" ] * 180.0 / Math.PI;
       game.addTank( user,               userData['username'],
                     userData['xPos'],   userData['yPos'],
@@ -234,17 +232,30 @@ socket.on("playerJoin", playerJoinHandler);
   * @param {Object} data an empty data object. the server sends no information on gameStart
   */
 var gameStartHandler = (data) => {
+  if( !game ) { game = new Game( 20 ); }
   window.addEventListener( "keydown", handleKeyDown, true );
   window.addEventListener( "keyup", handleKeyUp, true );
-  socket.emit("requestInfo", {request : "getMap"});
+  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+  socket.emit( "requestInfo", { request : "getMap" } );
+  socket.emit( "requestInfo", { request : "getTurn" } );
   wrapper.style.display = "none";
   document.getElementById("game").style.display = "block";
   localStorage.gameActive = true;
-  game.startGame();
-  socket.emit("requestInfo", {request : "getTurn"});
 };
 socket.on("gameStart" , gameStartHandler);
 
+var gameInProgressHandler = ( data ) => {
+  game = new Game( 20 );
+  window.addEventListener( "keydown", handleKeyDown, true );
+  window.addEventListener( "keyup", handleKeyUp, true );
+  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+  socket.emit( "requestInfo", { request : "getMap" } );
+  socket.emit( "requestInfo", { request : "getTurn" } );
+  wrapper.style.display = "none";
+  document.getElementById("game").style.display = "block";
+  localStorage.gameActive = true;
+}
+socket.on( "gameInProgress", gameInProgressHandler );
 /**
   * The event handler for the mapUpdate signal from the server. The received
   * map data is sent to the Game object to be stored.
@@ -467,9 +478,8 @@ var main = () => {
   } else if( !localStorage.lobbyCode || !localStorage.userID ) {
     makeActive("splash2");
   } else {
-    game = new Game(20);
     wrapper.style.display = "none";
-    socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+    document.getElementById("game").style.display = "block"
   }
 };
 
