@@ -443,7 +443,7 @@ function sendServerUpdate() {
       let spin = document.getElementById( "spinSlider" ).valueAsNumber;
       socket.emit( "gameEvent", { eventType: "playerFire", power: powr, spin: spin } );
       game.setPlayerShot( false );
-    } else if( game.getBuildWall() ) {} // returns pair : { row : , col : } 
+    } else if( game.getBuildWall() ) {} // returns pair : { row : , col : }
   }
 }
 
@@ -452,16 +452,16 @@ function sendServerUpdate() {
   * view depending on currently stored valid user information.
   */
 var main = () => {
+  handleResize();
   if(!localStorage.username) {
     makeActive("splash");
- } else if( !localStorage.lobbyCode || !localStorage.userID ) {
+  } else if( !localStorage.lobbyCode || !localStorage.userID ) {
     makeActive("splash2");
- } else {
-   game = new Game(20);
-   handleResize();
-   wrapper.style.display = "none";
-   socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
- }
+  } else {
+    game = new Game(20);
+    wrapper.style.display = "none";
+    socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+  }
 };
 
 var sendMsg = () => {
@@ -518,4 +518,4 @@ var redrawMap = () => {
   game.background.drawItem( game.map );
 }
 
-window.addEventListener( "load", handleResize );
+handleResize();

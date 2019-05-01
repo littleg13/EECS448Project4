@@ -55,6 +55,7 @@ class Game {
     this.keyTimes  = {};
     this.movedSinceLastTransmit = false;
     this.playerShot = false;
+    this.buildWall = null;
     this.begun = false;
     this.won = false;
     this.initLayers();
@@ -225,6 +226,8 @@ class Game {
       yPos -= 1.5 * Math.cos( player.dir * Math.PI / 180.0 );
       let [ col, row ] = [ xPos + 0.5, yPos + 0.5 ].map( Math.floor );
       this.setBuildWall( row, col );
+      player.buildWall--;
+      this.keys["e"] = false;
     }
 
     if( this.getPlayerMoved() ) {
@@ -235,13 +238,6 @@ class Game {
       }
     }
     player.distanceLeft = Math.max( 0, player.distanceLeft );
-  }
-
-  recordKeyPress = ( key : string ) : void => {
-    if( !this.keys[ " " ] ) {
-      this.keyTimes[ key ] = new Date();
-      this.keys[ " " ] = true;
-    }
   }
 
 /**
@@ -513,14 +509,15 @@ class Game {
 
   getPlayerPowerups = () : void => {}
 
-  getBuildWall = () : Point => {
+  getBuildWall = () : object => {
     return this.buildWall;
   }
 
   setBuildWall = ( row : number, col : number ) : void => {
     if( row === undefined && col === undefined ) {
       this.buildWall = null;
+    } else {
+      this.buildWall = { row : row, col : col };
     }
-    this.buildWall = { row : row, col : col };
   }
 }

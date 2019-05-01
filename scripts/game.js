@@ -125,14 +125,14 @@ var Game = /** @class */ (function () {
             if (_this.curTurn != localStorage.userID)
                 return;
             if (_this.keys["ArrowLeft"]) {
-                if (!_this.checkMapCollision(player, 0, -4.0)) {
-                    player.rotateCCW(4.0);
+                if (!_this.checkMapCollision(player, 0, -2.0)) {
+                    player.rotateCCW(2.0);
                     _this.setPlayerMoved();
                 }
             }
             if (_this.keys["ArrowRight"]) {
-                if (!_this.checkMapCollision(player, 0, 4.0)) {
-                    player.rotateCW(4.0);
+                if (!_this.checkMapCollision(player, 0, 2.0)) {
+                    player.rotateCW(2.0);
                     _this.setPlayerMoved();
                 }
             }
@@ -150,7 +150,8 @@ var Game = /** @class */ (function () {
                     player.moveForward(0.125);
                     _this.setPlayerMoved();
                 }
-            } else if (_this.keys["ArrowDown"]) {
+            }
+            if (_this.keys["ArrowDown"]) {
                 if (!_this.checkMapCollision(player, -0.125, 0)) {
                     player.moveBackward(0.125);
                     _this.setPlayerMoved();
@@ -162,6 +163,8 @@ var Game = /** @class */ (function () {
                 yPos -= 1.5 * Math.cos(player.dir * Math.PI / 180.0);
                 var _b = [xPos + 0.5, yPos + 0.5].map(Math.floor), col = _b[0], row = _b[1];
                 _this.setBuildWall(row, col);
+                player.buildWall--;
+                _this.keys["e"] = false;
             }
             if (_this.getPlayerMoved()) {
                 var powerupIndex = _this.checkPowerupCollision(player);
@@ -171,12 +174,6 @@ var Game = /** @class */ (function () {
                 }
             }
             player.distanceLeft = Math.max(0, player.distanceLeft);
-        };
-        this.recordKeyPress = function (key) {
-            if (!_this.keys[" "]) {
-                _this.keyTimes[key] = new Date();
-                _this.keys[" "] = true;
-            }
         };
         /**
         *   UPDATE METHODS:
@@ -442,7 +439,9 @@ var Game = /** @class */ (function () {
             if (row === undefined && col === undefined) {
                 _this.buildWall = null;
             }
-            _this.buildWall = { row: row, col: col };
+            else {
+                _this.buildWall = { row: row, col: col };
+            }
         };
         this.map = new Map(mapDim);
         this.mapDim = mapDim;
@@ -461,6 +460,7 @@ var Game = /** @class */ (function () {
         this.keyTimes = {};
         this.movedSinceLastTransmit = false;
         this.playerShot = false;
+        this.buildWall = null;
         this.begun = false;
         this.won = false;
         this.initLayers();
