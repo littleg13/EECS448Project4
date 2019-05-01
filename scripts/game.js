@@ -273,6 +273,7 @@ var Game = /** @class */ (function () {
             var shooter = _this.getPlayer(shooterID);
             if (shooter.canShoot) {
                 var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve);
+                console.log(bulletHit);
                 bullet.setTarget(bulletHit);
                 bullet.attachToLayer(_this.entities);
                 _this.bullets.push(bullet);
@@ -368,8 +369,6 @@ var Game = /** @class */ (function () {
             _this.bullets = _this.bullets.filter(function (bullet) {
                 bullet.render();
                 if (!bullet.update()) {
-                    if (bullet.target.type == "edge")
-                        return false;
                     if (bullet.target.type == "player") {
                         _this.updateTankHealth(bullet.target.userID, bullet.target.newHealth);
                     }
@@ -378,7 +377,7 @@ var Game = /** @class */ (function () {
                         _this.map.setTile(0, row, col);
                         _this.background.drawItem(_this.map);
                     }
-                    _this.explosions.push(new ExplosionEffect(bullet.xPos - 0.5, bullet.yPos - 0.5, bullet.dir));
+                    _this.explosions.push(new ExplosionEffect(bullet.xPos, bullet.yPos, bullet.dir));
                     return false;
                 }
                 return true;

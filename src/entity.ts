@@ -189,7 +189,6 @@ class Bullet extends Entity {
   }
 
   render = () : void => {
-    console.log( this );
     this.layer.applyTranslate( ( this.xPos + 0.5 ) * this.width, ( this.yPos + 0.5 ) * this.height );
     this.layer.applyRotation( this.dir );
     this.layer.drawItem( this.sprite );
@@ -198,7 +197,6 @@ class Bullet extends Entity {
   }
 
   setTarget = ( targetData ) : void => {
-    console.log( targetData );
     this.target = targetData;
   }
 

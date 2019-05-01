@@ -153,7 +153,6 @@ var Bullet = /** @class */ (function (_super) {
         var _a;
         var _this = _super.call(this) || this;
         _this.render = function () {
-            console.log(_this);
             _this.layer.applyTranslate((_this.xPos + 0.5) * _this.width, (_this.yPos + 0.5) * _this.height);
             _this.layer.applyRotation(_this.dir);
             _this.layer.drawItem(_this.sprite);
@@ -161,7 +160,6 @@ var Bullet = /** @class */ (function (_super) {
             _this.layer.popTransform();
         };
         _this.setTarget = function (targetData) {
-            console.log(targetData);
             _this.target = targetData;
         };
         _this.detonate = function () {

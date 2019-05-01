@@ -343,6 +343,7 @@ class Game {
     let shooter = this.getPlayer( shooterID );
     if( shooter.canShoot ) {
       let bullet = new Bullet( shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve );
+      console.log( bulletHit )
       bullet.setTarget( bulletHit );
       bullet.attachToLayer( this.entities );
       this.bullets.push( bullet );
@@ -446,7 +447,6 @@ class Game {
     this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
       bullet.render();
       if( !bullet.update() ) {
-        if( bullet.target.type == "edge" ) return false;
         if( bullet.target.type == "player" ) {
           this.updateTankHealth( bullet.target.userID, bullet.target.newHealth );
         } else if( bullet.target.type == "map" ) {
@@ -454,7 +454,7 @@ class Game {
           this.map.setTile( 0, row, col );
           this.background.drawItem( this.map );
         }
-        this.explosions.push( new ExplosionEffect( bullet.xPos - 0.5, bullet.yPos - 0.5, bullet.dir ) );
+        this.explosions.push( new ExplosionEffect( bullet.xPos, bullet.yPos, bullet.dir ) );
         return false;
       }
       return true;

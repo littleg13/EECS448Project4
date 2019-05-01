@@ -251,6 +251,8 @@ class Lobby:
                             self.players[ UserID].alive = False
                         self.players[ UserID].health = newHealth
                         outboundData[i]['bulletHit']['newHealth'] = newHealth
+                    else:
+                        outboundData[i]['bulletHit'] ={ 'type' : 'edge' }
                     self.advanceTurn(turnsToAdvance)
                     if (self.addedPowerup):
                         self.addedPowerup = False
@@ -318,7 +320,7 @@ class Lobby:
                  distance from the player who shot to whatever it collided with
 
         """
-        position  = [ player.xPos + 0.5, player.yPos + 0.5 ]
+        position  = [ player.xPos, player.yPos ]
         direction = player.direction + directionOffset
         spin      = spin / 5
         increment = 0.5
