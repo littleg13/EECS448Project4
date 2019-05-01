@@ -149,13 +149,14 @@ class Game {
   }
 
   checkBulletCollision = ( bullet : Bullet ) : boolean => {
-    for( let speed = 0.1; speed < bullet.speed; speed += 0.1 ) {
-      let [ bullX, bullY ] = [ bullet.xPos + 0.5, bullet.yPos + 0.5 ];
-      bullX += speed * Math.sin( bullet.dir * Math.PI / 180.0 );
-      bullY -= speed * Math.cos( bullet.dir * Math.PI / 180.0 );
-      if( this.checkBulletTrajectory( bullX, bullY, bullet.shooterID ) ) return true;
-    }
-    return false;
+    let speed = bullet.speed;
+    let [ bullX, bullY ] = [ bullet.xPos + 0.5, bullet.yPos + 0.5 ];
+    bullX += speed * Math.sin( bullet.dir * Math.PI / 180.0 );
+    bullY -= speed * Math.cos( bullet.dir * Math.PI / 180.0 );
+    console.log( bullet.xPos, bullet.yPos, bullet.dir * Math.PI / 180.0 );
+    if( this.checkBulletTrajectory( bullX, bullY, bullet.shooterID ) )
+      return true;
+    else return false;
   }
 
   checkBulletTrajectory = ( bullX : number, bullY : number, userID : string ) : boolean => {

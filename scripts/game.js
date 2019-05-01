@@ -85,14 +85,15 @@ var Game = /** @class */ (function () {
             return retIndex;
         };
         this.checkBulletCollision = function (bullet) {
-            for (var speed = 0.1; speed < bullet.speed; speed += 0.1) {
-                var _a = [bullet.xPos + 0.5, bullet.yPos + 0.5], bullX = _a[0], bullY = _a[1];
-                bullX += speed * Math.sin(bullet.dir * Math.PI / 180.0);
-                bullY -= speed * Math.cos(bullet.dir * Math.PI / 180.0);
-                if (_this.checkBulletTrajectory(bullX, bullY, bullet.shooterID))
-                    return true;
-            }
-            return false;
+            var speed = bullet.speed;
+            var _a = [bullet.xPos + 0.5, bullet.yPos + 0.5], bullX = _a[0], bullY = _a[1];
+            bullX += speed * Math.sin(bullet.dir * Math.PI / 180.0);
+            bullY -= speed * Math.cos(bullet.dir * Math.PI / 180.0);
+            console.log(bullet.xPos, bullet.yPos, bullet.dir * Math.PI / 180.0);
+            if (_this.checkBulletTrajectory(bullX, bullY, bullet.shooterID))
+                return true;
+            else
+                return false;
         };
         this.checkBulletTrajectory = function (bullX, bullY, userID) {
             var _a = [bullX, bullY].map(Math.floor), bullCol = _a[0], bullRow = _a[1];
