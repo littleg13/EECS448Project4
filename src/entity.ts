@@ -185,7 +185,7 @@ class Bullet extends Entity {
     this.curve = curve;
     this.speed = 0.5;
     this.target = null;
-    console.log( this );
+    console.log( this.curve );
   }
 
   render = () : void => {
@@ -206,9 +206,9 @@ class Bullet extends Entity {
 
   update = () : boolean => {
     let dirRad = this.dir * Math.PI / 180.0;
-    this.xPos += Math.sin( dirRad ) * this.speed;
-    this.yPos -= Math.cos( dirRad ) * this.speed;
-    this.distGone += this.speed;
+    this.xPos += Math.sin( dirRad ) * 0.5;
+    this.yPos -= Math.cos( dirRad ) * 0.5;
+    this.distGone += 0.5;
     this.dir += Math.max( 0, this.distGone - this.power ) * this.curve;
     if( this.distToGo <= this.distGone ) { return false }
     return true;

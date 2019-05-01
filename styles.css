@@ -63,8 +63,8 @@ canvas#gameview {
   margin-top: 10%;
   overflow: hidden;
   background: black;
-  box-shadow: 0 0 4em black;
-  border: 0.5em solid black;
+  border: 0.25em solid black;
+  border-radius: 2em;
 }
 
 div#mini {

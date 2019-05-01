@@ -324,7 +324,7 @@ class Lobby:
         """
         position  = [ player.xPos + 0.5, player.yPos + 0.5 ]
         direction = player.direction + directionOffset
-        spin      = spin / 5
+        spin      = spin
         increment = 0.5
         collided  = False
         collidedWith = {}

@@ -167,9 +167,9 @@ var Bullet = /** @class */ (function (_super) {
         };
         _this.update = function () {
             var dirRad = _this.dir * Math.PI / 180.0;
-            _this.xPos += Math.sin(dirRad) * _this.speed;
-            _this.yPos -= Math.cos(dirRad) * _this.speed;
-            _this.distGone += _this.speed;
+            _this.xPos += Math.sin(dirRad) * 0.5;
+            _this.yPos -= Math.cos(dirRad) * 0.5;
+            _this.distGone += 0.5;
             _this.dir += Math.max(0, _this.distGone - _this.power) * _this.curve;
             if (_this.distToGo <= _this.distGone) {
                 return false;
@@ -188,7 +188,7 @@ var Bullet = /** @class */ (function (_super) {
         _this.curve = curve;
         _this.speed = 0.5;
         _this.target = null;
-        console.log(_this);
+        console.log(_this.curve);
         return _this;
     }
     return Bullet;
