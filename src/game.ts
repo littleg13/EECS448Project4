@@ -323,6 +323,12 @@ class Game {
     } );
   }
 
+  placeWall = ( row : number, col : number ) : void => {
+    this.map.setTile( 1, row, col );
+    this.map.redraw( row, col );
+    this.background.drawItem( this.map );
+  }
+
   fire = ( shooterID : string, power : number, curve : number, dist : number ) => {
     let shooter = this.getPlayer( shooterID );
     if( shooter.canShoot ) {
@@ -372,7 +378,7 @@ class Game {
 
   redrawTile = ( row : number, col : number ) : void => {
     this.map.redraw( row, col );
-    this.background.drawItem( map );
+    this.background.drawItem( this.map );
   }
 
   renderMinimap = () : void => {

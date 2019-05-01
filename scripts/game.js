@@ -255,6 +255,11 @@ var Game = /** @class */ (function () {
                 powerup.attachToLayer(_this.entities);
             });
         };
+        this.placeWall = function (row, col) {
+            _this.map.setTile(1, row, col);
+            _this.map.redraw(row, col);
+            _this.background.drawItem(_this.map);
+        };
         this.fire = function (shooterID, power, curve, dist) {
             var shooter = _this.getPlayer(shooterID);
             if (shooter.canShoot) {
@@ -300,7 +305,7 @@ var Game = /** @class */ (function () {
         };
         this.redrawTile = function (row, col) {
             _this.map.redraw(row, col);
-            _this.background.drawItem(map);
+            _this.background.drawItem(_this.map);
         };
         this.renderMinimap = function () {
             _this.minimap.applyScale(_this.miniDim / _this.tileDim, _this.miniDim / _this.tileDim);
