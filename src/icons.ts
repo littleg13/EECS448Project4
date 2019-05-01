@@ -133,8 +133,7 @@ class TankSprite extends Sprite {
   barrel      : Rect;
   cap         : Rect;
   turret      : Circle;
-  multiShot   : number;
-  buildWall   : number;
+  multiShot   : boolean;
 
   constructor( color = "#c00" ) {
     super();
@@ -147,14 +146,13 @@ class TankSprite extends Sprite {
     this.barrel     = new Rect( -5, -20, 10, 25, color, "#000" );
     this.cap        = new RoundRect( -7.5, -25, 15, 7.5, 2.5, color, "#000" );
     this.turret     = new Circle( 0, 0, 10, color, "#000" );
-    this.multiShot  = 0;
-    this.buildWall  = 0;
     this.color      = color;
+    this.multiShot  = false;
   }
 
-  render = ( ctx: CanvasRenderingContext2D, multiShot = 0, buildWall = 0 ) : void => {
+  render = ( ctx: CanvasRenderingContext2D ) : void => {
     this.getItems().map( ( item : Renderable ) => { item.render( ctx ); } );
-    if( this.multiShot != 0 ) {
+    if( this.multiShot ) {
       ctx.save();
       ctx.rotate( Math.PI / 6 );
       this.getAuxBarrel().render( ctx );
@@ -172,6 +170,10 @@ class TankSprite extends Sprite {
              this.cap, this.turret ];
   }
 
+  setMulti = ( num : number ) => {
+    this.multiShot = ( num > 0 );
+  }
+
   getAuxBarrel = () : Collection => {
     return new Collection ( [
       new Rect( -3, -25, 6, 15, this.color )
@@ -180,11 +182,6 @@ class TankSprite extends Sprite {
 
   getDim = () : number[] => {
     return [ this.width, this.height ]
-  }
-
-  setBuffs = ( multiShot : number, buildWall : number ) : void => {
-    this.multiShot = multiShot;
-    this.buildWall = buildWall;
   }
 
   changeColor = ( color : string ) : void => {

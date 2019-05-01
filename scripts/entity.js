@@ -61,6 +61,7 @@ var Tank = /** @class */ (function (_super) {
             _this.layer.clear();
             _this.layer.center();
             _this.layer.applyRotation(_this.dir);
+            _this.sprite.setMulti(_this.multiShot);
             _this.layer.drawItem(_this.sprite);
             _this.layer.popTransform();
             _this.layer.popTransform();

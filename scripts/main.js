@@ -371,8 +371,8 @@ var gameUpdateHandler = (data) => {
         }
         game.fire( data.userID, data.power, data.spin, shot.distance, bulletHit, directionOffset );
       }
-      game.getPlayer(data.userID).clearPowerups()
-      game.getPlayer(data.userID).canShoot = false;
+      game.getPlayer( data.userID ).clearPowerups()
+      game.getPlayer( data.userID ).canShoot = false;
       break;
      case "advanceTurn":
       game.updateTurn( data["userID"] );

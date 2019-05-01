@@ -87,6 +87,7 @@ class Tank extends Entity {
     this.layer.clear();
     this.layer.center();
     this.layer.applyRotation( this.dir );
+    this.sprite.setMulti( this.multiShot );
     this.layer.drawItem( this.sprite );
     this.layer.popTransform();
     this.layer.popTransform();

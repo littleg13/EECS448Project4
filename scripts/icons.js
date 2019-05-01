@@ -129,11 +129,9 @@ var TankSprite = /** @class */ (function (_super) {
     function TankSprite(color) {
         if (color === void 0) { color = "#c00"; }
         var _this = _super.call(this) || this;
-        _this.render = function (ctx, multiShot, buildWall) {
-            if (multiShot === void 0) { multiShot = 0; }
-            if (buildWall === void 0) { buildWall = 0; }
+        _this.render = function (ctx) {
             _this.getItems().map(function (item) { item.render(ctx); });
-            if (_this.multiShot != 0) {
+            if (_this.multiShot) {
                 ctx.save();
                 ctx.rotate(Math.PI / 6);
                 _this.getAuxBarrel().render(ctx);
@@ -149,6 +147,9 @@ var TankSprite = /** @class */ (function (_super) {
                 _this.body, _this.barrel,
                 _this.cap, _this.turret];
         };
+        _this.setMulti = function (num) {
+            _this.multiShot = (num > 0);
+        };
         _this.getAuxBarrel = function () {
             return new Collection([
                 new Rect(-3, -25, 6, 15, _this.color)
@@ -156,10 +157,6 @@ var TankSprite = /** @class */ (function (_super) {
         };
         _this.getDim = function () {
             return [_this.width, _this.height];
-        };
-        _this.setBuffs = function (multiShot, buildWall) {
-            _this.multiShot = multiShot;
-            _this.buildWall = buildWall;
         };
         _this.changeColor = function (color) {
             _this.getItems().map(function (item) {
@@ -197,9 +194,8 @@ var TankSprite = /** @class */ (function (_super) {
         _this.barrel = new Rect(-5, -20, 10, 25, color, "#000");
         _this.cap = new RoundRect(-7.5, -25, 15, 7.5, 2.5, color, "#000");
         _this.turret = new Circle(0, 0, 10, color, "#000");
-        _this.multiShot = 0;
-        _this.buildWall = 0;
         _this.color = color;
+        _this.multiShot = false;
         return _this;
     }
     return TankSprite;
