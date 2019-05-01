@@ -145,7 +145,7 @@ class Lobby:
                 while True:
                     pointTaken = False
                     for playerId, player in self.players.items():
-                        if (math.floor(player.xPos) == pos['x'] and math.floor(player.yPos) == pos['y']):
+                        if (math.floor(player.xPos + 0.5) == pos['x'] and math.floor(player.yPos + 0.5) == pos['y']):
                             pointTaken = True
                             break
                     if (pointTaken):
@@ -280,7 +280,7 @@ class Lobby:
                     print("Tried to place at (", col, ", ", row, ").")
                     print("That distance is: ", self.getDistanceToPlayer([col, row], player))
                 print("Attempting to place block at (", col, ", ", row, ").")
-                print("Maps value there is: ", self.map[col][row])
+                print("Maps value there is: ", self.map[row][col])
                 if (self.map[row][col] == 0):
                     self.map[row][col] = 1
                 outboundData['eventType'] = 'blockPlaced'
