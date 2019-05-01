@@ -133,7 +133,8 @@ class TankSprite extends Sprite {
   barrel      : Rect;
   cap         : Rect;
   turret      : Circle;
-  multishot   : boolean;
+  multiShot   : number;
+  buildWall   : number;
 
   constructor( color = "#c00" ) {
     super();
@@ -143,14 +144,25 @@ class TankSprite extends Sprite {
     this.leftTread  = new Tread( -17.5 );
     this.rightTread = new Tread(   7.5 );
     this.body       = new RoundRect( -12.5, -20, 25, 40, 3, color, "#000" );
-    this.barrel     = new Rect( -5,   -20, 10, 25, color, "#000" );
+    this.barrel     = new Rect( -5, -20, 10, 25, color, "#000" );
     this.cap        = new RoundRect( -7.5, -25, 15, 7.5, 2.5, color, "#000" );
     this.turret     = new Circle( 0, 0, 10, color, "#000" );
-    this.multishot  = false;
+    this.multiShot  = 0;
+    this.buildWall  = 0;
   }
 
-  render = ( ctx: CanvasRenderingContext2D ) : void => {
+  render = ( ctx: CanvasRenderingContext2D, multiShot = 0, buildWall = 0 ) : void => {
     this.getItems().map( ( item : Renderable ) => { item.render( ctx ); } );
+    if( this.multiShot != 0 ) {
+      ctx.save();
+      ctx.rotate( Math.PI / 6 );
+      this.getAuxBarrel().map( ( item : Renderable ) => { item.render( ctx ); } );
+      ctx.restore();
+      ctx.save();
+      ctx.rotate( -Math.PI / 6 );
+      this.getAuxBarrel().map( ( item : Renderable ) => { item.render( ctx ); } );
+      ctx.restore();
+    }
   }
 
   getItems = () : Renderable[] => {
@@ -159,8 +171,19 @@ class TankSprite extends Sprite {
              this.cap, this.turret ];
   }
 
+  getAuxBarrel = () : Renderable[] => {
+    return [
+      new Rect( -3, -25, 6, 15, "green" )
+    ];
+  }
+
   getDim = () : number[] => {
     return [ this.width, this.height ]
+  }
+
+  setBuffs = ( multiShot : number, buildWall : number ) : void => {
+    this.multiShot = multiShot;
+    this.buildWall = buildWall;
   }
 
   changeColor = ( color : string ) : void => {
@@ -247,6 +270,31 @@ class BulletSprite extends Sprite {
     ctx.fillStyle = "#333";
     ctx.fillRect( -4, 2, 8, 2 );
     ctx.restore();
+  }
+}
+
+class ShadowBlock extends Sprite {
+  items : Collection;
+  constructor( ) {
+    super();
+    let items = [
+      new RoundRect(  0,  0, 40, 40, 3, "rgba( 0, 0, 0, 0.5 )", "transparent" ),
+      new RoundRect(  1,  2, 18,  7, 3, "rgba( 112, 112, 112, 0.5 )", "transparent" ),
+      new RoundRect( 21,  2, 18,  7, 3, "rgba( 112, 112, 112, 0.5 )", "transparent" ),
+      new RoundRect(  1, 11,  8,  7, 3, "rgba( 80, 80, 80, 0.5 )", "transparent" ),
+      new RoundRect( 11, 11, 18,  7, 3, "rgba( 80, 80, 80, 0.5 )", "transparent" ),
+      new RoundRect( 31, 11,  8,  7, 3, "rgba( 80, 80, 80, 0.5 )", "transparent" ),
+      new RoundRect(  1, 20, 18,  7, 3, "rgba( 48, 48, 48, 0.5 )", "transparent" ),
+      new RoundRect( 21, 20, 18,  7, 3, "rgba( 48, 48, 48, 0.5 )", "transparent" ),
+      new RoundRect(  1, 29,  8,  7, 3, "rgba( 16, 16, 16, 0.5 )", "transparent" ),
+      new RoundRect( 11, 29, 18,  7, 3, "rgba( 16, 16, 16, 0.5 )", "transparent" ),
+      new RoundRect( 31, 29,  8,  7, 3, "rgba( 16, 16, 16, 0.5 )", "transparent" )
+    ];
+    this.items = new Collection( items );
+  }
+
+  render = ( ctx : CanvasRenderingContext2D ) : void => {
+    this.items.render( ctx );
   }
 }
 

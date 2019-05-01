@@ -12,6 +12,7 @@ var error;
   * @arg {string} the id of the element to be displayed
   */
 var makeActive = ( id ) => {
+  if( wrapper.calcula)
   console.log( "Make " + id + " Active" );
   Array.from(wrapper.getElementsByTagName("div")).forEach((elem) => {
     if( elem.id == id ) elem.classList.add("active");
@@ -429,14 +430,13 @@ function sendServerUpdate() {
       socket.emit("gameEvent", { eventType: "playerMove",
                                  newPos: myPos,
                                  newDir: myDir } );
-    }
-    else if ( game.getPlayerShot() ) {
+    } else if( game.getPlayerShot() ) {
       let finalTime = new Date();
       let powr = document.getElementById( "powerSlider" ).valueAsNumber;
       let spin = document.getElementById( "spinSlider" ).valueAsNumber;
       socket.emit( "gameEvent", { eventType: "playerFire", power: powr, spin: spin } );
       game.setPlayerShot( false );
-    }
+    } else if( game.getBuildWall() ) // returns pair : { row : , col : } 
   }
 }
 

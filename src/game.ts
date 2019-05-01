@@ -31,6 +31,7 @@ class Game {
   playerShot             : boolean;
   begun                  : boolean;
   won                    : boolean;
+  buildWall              : object;
   gameTickUpdateInt      : number;
   sendServerUpdateInt    : number;
 
@@ -218,6 +219,14 @@ class Game {
         this.setPlayerMoved();
       }
     }
+    if( this.keys["e"] && player.buildWall != 0 ) {
+      let [ xPos, yPos ] = [ player.xPos, player.yPos ];
+      xPos += 1.5 * Math.sin( player.dir * Math.PI / 180.0 );
+      yPos -= 1.5 * Math.cos( player.dir * Math.PI / 180.0 );
+      let [ col, row ] = [ xPos + 0.5, yPos + 0.5 ].map( Math.floor );
+      this.setBuildWall( row, col );
+    }
+
     if( this.getPlayerMoved() ) {
       let powerupIndex = this.checkPowerupCollision( player );
       if( powerupIndex > -1 ) {
@@ -388,6 +397,16 @@ class Game {
 
   renderTank = ( tank ) : void => {
     tank.updateImage();
+    if( tank.buildWall != 0 ) {
+      let dirRad = tank.dir * Math.PI / 180.0;
+      let [ xPos, yPos ] = [ tank.xPos, tank.yPos ];
+      xPos += 1.5 * Math.sin( dirRad );
+      yPos -= 1.5 * Math.cos( dirRad );
+      let [ col, row ] = [ xPos + 0.5, yPos + 0.5 ].map( Math.floor );
+      this.entities.applyTranslate( this.tileDim * col, this.tileDim * row );
+      this.entities.drawItem( new ShadowBlock() );
+      this.entities.popTransform();
+    }
     this.entities.applyTranslate( this.tileDim * tank.xPos, this.tileDim * tank.yPos );
     this.entities.addLayer( tank.getLayer(), -10, -10 );
     this.entities.applyTranslate( this.tileDim / 2, this.tileDim );
@@ -492,7 +511,16 @@ class Game {
     return this.getPlayer().dir;
   }
 
-  getPlayerPowerups = () : Buff[] => {
-    return this.getPlayer().buffs;
+  getPlayerPowerups = () : void => {}
+
+  getBuildWall = () : Point => {
+    return this.buildWall;
+  }
+
+  setBuildWall = ( row : number, col : number ) : void => {
+    if( row === undefined && col === undefined ) {
+      this.buildWall = null;
+    }
+    this.buildWall = { row : row, col : col };
   }
 }
