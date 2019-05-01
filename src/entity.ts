@@ -153,6 +153,11 @@ class Tank extends Entity {
     else if( powerup instanceof BuildWallToken ) this.buildWall++;
     this.sprite.setBuffs( this.multiShot, this.buildWall );
   }
+
+  clearPowerups = () : void => {
+    this.multiShot = 0;
+    this.buildWall = 0;
+  }
 }
 
 class Bullet extends Entity {

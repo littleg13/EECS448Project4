@@ -330,6 +330,7 @@ class Game {
       bullet.attachToLayer( this.entities );
       this.bullets.push( bullet );
       shooter.canShoot = false;
+      shooter.clearPowerups();
     }
   }
 

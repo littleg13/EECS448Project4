@@ -255,12 +255,14 @@ var Game = /** @class */ (function () {
                 powerup.attachToLayer(_this.entities);
             });
         };
-        this.fire = function (shooterID, power, curve, dist, directionOffset) {
+        this.fire = function (shooterID, power, curve, dist) {
             var shooter = _this.getPlayer(shooterID);
             if (shooter.canShoot) {
-                var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir+directionOffset, dist, power, curve);
+                var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve);
                 bullet.attachToLayer(_this.entities);
                 _this.bullets.push(bullet);
+                shooter.canShoot = false;
+                shooter.clearPowerups();
             }
         };
         this.endGame = function (winnerUserID) {
