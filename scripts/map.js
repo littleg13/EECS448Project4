@@ -60,6 +60,7 @@ var Map = /** @class */ (function (_super) {
             });
         };
         _this.setTile = function (val, row, col) {
+            console.log("setting tile");
             if (val < 0) {
                 _this.tiles[row][col] = new OuterWallTile();
             }

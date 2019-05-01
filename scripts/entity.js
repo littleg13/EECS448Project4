@@ -153,11 +153,16 @@ var Bullet = /** @class */ (function (_super) {
         var _a;
         var _this = _super.call(this) || this;
         _this.render = function () {
+            console.log(_this);
             _this.layer.applyTranslate((_this.xPos + 0.5) * _this.width, (_this.yPos + 0.5) * _this.height);
             _this.layer.applyRotation(_this.dir);
             _this.layer.drawItem(_this.sprite);
             _this.layer.popTransform();
             _this.layer.popTransform();
+        };
+        _this.setTarget = function (targetData) {
+            console.log(targetData);
+            _this.target = targetData;
         };
         _this.detonate = function () {
             _this.boom = true;
@@ -168,7 +173,10 @@ var Bullet = /** @class */ (function (_super) {
             _this.yPos -= Math.cos(dirRad) * _this.speed;
             _this.distGone += _this.speed;
             _this.dir += Math.max(0, _this.distGone - _this.power) * _this.curve;
-            return _this.boom;
+            if (_this.distToGo <= _this.distGone) {
+                return false;
+            }
+            return true;
         };
         _this.shooterID = userID;
         _this.xPos = xPos;
@@ -181,6 +189,8 @@ var Bullet = /** @class */ (function (_super) {
         _this.power = power;
         _this.curve = curve;
         _this.speed = 0.5;
+        _this.target = null;
+        console.log(_this);
         return _this;
     }
     return Bullet;

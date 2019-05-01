@@ -169,7 +169,7 @@ class Bullet extends Entity {
   curve       : number;
   speed       : number;
   boom        : boolean;
-  trajectory  : Point[];
+  target      : any;
 
   constructor( userID : string, xPos : number, yPos : number, dir : number, distToGo : number, power : number, curve : number ) {
     super();
@@ -184,14 +184,22 @@ class Bullet extends Entity {
     this.power = power;
     this.curve = curve;
     this.speed = 0.5;
+    this.target = null;
+    console.log( this );
   }
 
   render = () : void => {
+    console.log( this );
     this.layer.applyTranslate( ( this.xPos + 0.5 ) * this.width, ( this.yPos + 0.5 ) * this.height );
     this.layer.applyRotation( this.dir );
     this.layer.drawItem( this.sprite );
     this.layer.popTransform();
     this.layer.popTransform();
+  }
+
+  setTarget = ( targetData ) : void => {
+    console.log( targetData );
+    this.target = targetData;
   }
 
   detonate = () : void => {
@@ -204,7 +212,8 @@ class Bullet extends Entity {
     this.yPos -= Math.cos( dirRad ) * this.speed;
     this.distGone += this.speed;
     this.dir += Math.max( 0, this.distGone - this.power ) * this.curve;
-    return this.boom;
+    if( this.distToGo <= this.distGone ) { return false }
+    return true;
   }
 }
 

@@ -7,6 +7,13 @@ class PowerupUpdate {
   type : string;
 }
 
+class BulletHit {
+  userID : string;
+  type : string;
+  row  : number;
+  col  : number;
+}
+
 class Game {
   background  : Layer;
   gameview    : Layer;
@@ -44,7 +51,7 @@ class Game {
     this.tanks       = [];
     this.bullets     = [];
     this.powerups    = [];
-    this.explosions = [];
+    this.explosions  = [];
 
     this.curTurn = "";
     this.distLeftThisTurn = 5.0;
@@ -130,7 +137,6 @@ class Game {
       let retVal = tiles[ row ][ col ].isBlocking;
       if( obj instanceof Bullet ) {
         this.map.redraw( row, col );
-//        this.effects.push( new ExplosionSprite() );
         this.background.applyTranslate( col * this.tileDim, row * this.tileDim );
         this.background.drawItem( this.map.getTile( row, col ) );
         this.background.popTransform();
@@ -153,7 +159,6 @@ class Game {
     let [ bullX, bullY ] = [ bullet.xPos + 0.5, bullet.yPos + 0.5 ];
     bullX += speed * Math.sin( bullet.dir * Math.PI / 180.0 );
     bullY -= speed * Math.cos( bullet.dir * Math.PI / 180.0 );
-    console.log( bullet.xPos, bullet.yPos, bullet.dir * Math.PI / 180.0 );
     if( this.checkBulletTrajectory( bullX, bullY, bullet.shooterID ) )
       return true;
     else return false;
@@ -334,10 +339,11 @@ class Game {
     this.background.drawItem( this.map );
   }
 
-  fire = ( shooterID : string, power : number, curve : number, dist : number, dirOffset : number ) => {
+  fire = ( shooterID : string, power : number, curve : number, dist : number, bulletHit : BulletHit, dirOffset : number ) => {
     let shooter = this.getPlayer( shooterID );
     if( shooter.canShoot ) {
       let bullet = new Bullet( shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve );
+      bullet.setTarget( bulletHit );
       bullet.attachToLayer( this.entities );
       this.bullets.push( bullet );
     }
@@ -355,7 +361,7 @@ class Game {
     let msg = document.createElement( "div" );
     let username = this.getPlayer( userID ).playerName;
 
-    if( userID = localStorage.userID ) { msg.classList.add("self"); }
+    if( userID == localStorage.userID ) { msg.classList.add("self"); }
     msg.classList.add( "message" );
 
     let sender = document.createElement( "div" );
@@ -380,11 +386,6 @@ class Game {
 */
   renderMap = () : void => {
     this.gameview.addLayer( this.background );
-  }
-
-  redrawTile = ( row : number, col : number ) : void => {
-    this.map.redraw( row, col );
-    this.background.drawItem( this.map );
   }
 
   renderMinimap = () : void => {
@@ -444,14 +445,19 @@ class Game {
   renderBullets = () : void => {
     this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
       bullet.render();
-      let delDir = Math.abs( this.getPlayer( bullet.shooterID ).dir - bullet.dir );
-      if( !this.checkBulletCollision( bullet ) && delDir < 270 ) {
-        bullet.update();
-        return true;
-      } else {
-        this.explosions.push( new ExplosionEffect( bullet.xPos, bullet.yPos, bullet.dir ) );
+      if( !bullet.update() ) {
+        if( bullet.target.type == "edge" ) return false;
+        if( bullet.target.type == "player" ) {
+          this.updateTankHealth( bullet.target.userID, bullet.target.newHealth );
+        } else if( bullet.target.type == "map" ) {
+          let [ row, col ] = [ bullet.target.row, bullet.target.col ];
+          this.map.setTile( 0, row, col );
+          this.background.drawItem( this.map );
+        }
+        this.explosions.push( new ExplosionEffect( bullet.xPos - 0.5, bullet.yPos - 0.5, bullet.dir ) );
         return false;
       }
+      return true;
     });
   }
 

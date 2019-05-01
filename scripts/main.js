@@ -1,5 +1,5 @@
 //const socket = io( "https://448.cuzzo.net" );
-const socket = io( "http://localhost:3000" );
+const socket = io( "http://192.168.1.100:3000" );
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
 var game = null;
@@ -340,22 +340,20 @@ var gameUpdateHandler = (data) => {
       }
       break;
     case "playerFire":
-      for( let i=0;i<data.count;i++ ){
-        if( data.mapUpdate ) {
-          game.updateMap( data.mapUpdate );
-        }
-        else if( data[i].playerHit ) {
-          game.updateTankHealth( data[i].playerHit, data[i].newHealth );
-          if( data.gameOver ) {
-            game.endGame( data.gameOver );
-            clearInterval( sendServerUpdateInt );
-            makeActive( "splash2" );
-          }
-        }
+      if( data.gameOver ) {
+        game.endGame( data.gameOver );
+        clearInterval( sendServerUpdate );
+        makeActive( "splash2" );
+      }
+      for( let i = 0; i < data.count; i++ ) {
+        let shot = data[i];
+        let bulletHit = shot.bulletHit;
         directionOffset = 0;
-        if(data.count > 1)
-          directionOffset = ((i-Math.floor(data.count/2))/Math.floor(data.count/2)) * 30
-        game.fire( data.userID, data.power, data.spin, data[i].distance, directionOffset );
+        if( data.count > 1 ) {
+          directionOffset = 30 * ( ( i - Math.floor(data.count/2) ) /
+                                         Math.floor(data.count/2) );
+        }
+        game.fire( data.userID, data.power, data.spin, shot.distance, bulletHit, directionOffset );
       }
       game.getPlayer(data.userID).clearPowerups()
       game.getPlayer(data.userID).canShoot = false;
@@ -495,7 +493,8 @@ var sendMsg = () => {
 };
 
 var chatMsg = ( data ) => {
-  let sender = data["senderID"];
+  console.log( data );
+  let senderID = data["senderID"];
   let content = data["content"];
   if( !document.getElementById( "chatToggle" ).checked ) {
     document.getElementById( "chatHeader" ).classList.add( "newMessage" );
