@@ -244,7 +244,7 @@ class Lobby:
                             turnsToAdvance = 0
                             self.players[collisionData[i][0]].alive = False
                         self.players[collisionData[i][0]].health = newHealth
-                        outboundData[i]['playerHit'] = collisionData[0]
+                        outboundData[i]['playerHit'] = collisionData[i][0]
                         outboundData[i]['newHealth'] = newHealth
                     self.advanceTurn(turnsToAdvance)
                     if (self.addedPowerup):
