@@ -1,5 +1,5 @@
-const socket = io( "https://448.cuzzo.net" );
-//const socket = io( "http://localhost:3000" );
+//const socket = io( "https://448.cuzzo.net" );
+const socket = io( "http://localhost:3000" );
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
 var game = null;
@@ -327,7 +327,6 @@ var gameUpdateHandler = (data) => {
       }
       break;
     case "playerFire":
-      console.log(data);
       for( let i=0;i<data.count;i++ ){
         if( data.mapUpdate ) {
           game.updateMap( data.mapUpdate );
@@ -345,6 +344,7 @@ var gameUpdateHandler = (data) => {
           directionOffset = ((i-Math.floor(data.count/2))/Math.floor(data.count/2)) * 30
         game.fire( data.userID, data.power, data.spin, data[i].distance, directionOffset );
       }
+      game.getPlayer(data.userID).clearPowerups()
       game.getPlayer(data.userID).canShoot = false;
       break;
      case "advanceTurn":
