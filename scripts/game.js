@@ -416,8 +416,8 @@ var Game = /** @class */ (function () {
             }), xOffset = _a[0], yOffset = _a[1];
             _this.renderMap();
             _this.renderMinimap();
-            _this.renderEffects();
             _this.renderEntities();
+            _this.renderEffects();
         };
         this.gameTick = function () {
             _this.renderLoop();
