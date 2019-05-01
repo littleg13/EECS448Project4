@@ -260,10 +260,10 @@ var Game = /** @class */ (function () {
             _this.map.redraw(row, col);
             _this.background.drawItem(_this.map);
         };
-        this.fire = function (shooterID, power, curve, dist) {
+        this.fire = function (shooterID, power, curve, dist, dirOffset) {
             var shooter = _this.getPlayer(shooterID);
             if (shooter.canShoot) {
-                var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve);
+                var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve);
                 bullet.attachToLayer(_this.entities);
                 _this.bullets.push(bullet);
                 shooter.canShoot = false;

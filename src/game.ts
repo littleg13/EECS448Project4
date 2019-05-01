@@ -329,10 +329,10 @@ class Game {
     this.background.drawItem( this.map );
   }
 
-  fire = ( shooterID : string, power : number, curve : number, dist : number ) => {
+  fire = ( shooterID : string, power : number, curve : number, dist : number, dirOffset : number ) => {
     let shooter = this.getPlayer( shooterID );
     if( shooter.canShoot ) {
-      let bullet = new Bullet( shooter.userID, shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve );
+      let bullet = new Bullet( shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve );
       bullet.attachToLayer( this.entities );
       this.bullets.push( bullet );
       shooter.canShoot = false;
