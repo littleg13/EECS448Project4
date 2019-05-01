@@ -125,14 +125,14 @@ var Game = /** @class */ (function () {
             if (_this.curTurn != localStorage.userID)
                 return;
             if (_this.keys["ArrowLeft"]) {
-                if (!_this.checkMapCollision(player, 0, -2.0)) {
-                    player.rotateCCW(2.0);
+                if (!_this.checkMapCollision(player, 0, -4.0)) {
+                    player.rotateCCW(4.0);
                     _this.setPlayerMoved();
                 }
             }
             if (_this.keys["ArrowRight"]) {
-                if (!_this.checkMapCollision(player, 0, 2.0)) {
-                    player.rotateCW(2.0);
+                if (!_this.checkMapCollision(player, 0, 4.0)) {
+                    player.rotateCW(4.0);
                     _this.setPlayerMoved();
                 }
             }
