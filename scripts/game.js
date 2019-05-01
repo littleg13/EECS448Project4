@@ -280,10 +280,11 @@ var Game = /** @class */ (function () {
             delete localStorage.userID;
             delete localStorage.lobbyCode;
         };
-        this.showMsg = function (username, text) {
+        this.showMsg = function (userID, text) {
             var messageWindow = document.getElementById("messageWindow");
             var msg = document.createElement("div");
-            if (username == _this.getPlayer().playerName) {
+            var username = _this.getPlayer(userID);
+            if (userID = localStorage.userID) {
                 msg.classList.add("self");
             }
             msg.classList.add("message");
