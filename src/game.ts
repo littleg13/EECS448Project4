@@ -342,6 +342,8 @@ class Game {
   }
 
   placeWall = ( row : number, col : number ) : void => {
+    let player = this.getPlayer( this.curTurn );
+    player.buildWall = Math.max( 0, player.buildWall - 1 );
     this.map.setTile( 1, row, col );
     this.map.redraw( row, col );
     this.background.drawItem( this.map );

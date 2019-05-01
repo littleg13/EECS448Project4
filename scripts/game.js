@@ -273,6 +273,8 @@ var Game = /** @class */ (function () {
             });
         };
         this.placeWall = function (row, col) {
+            var player = _this.getPlayer(_this.curTurn);
+            player.buildWall = Math.max(0, player.buildWall - 1);
             _this.map.setTile(1, row, col);
             _this.map.redraw(row, col);
             _this.background.drawItem(_this.map);
@@ -416,8 +418,8 @@ var Game = /** @class */ (function () {
             }), xOffset = _a[0], yOffset = _a[1];
             _this.renderMap();
             _this.renderMinimap();
-            _this.renderEntities();
             _this.renderEffects();
+            _this.renderEntities();
         };
         this.gameTick = function () {
             _this.renderLoop();

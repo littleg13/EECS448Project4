@@ -357,6 +357,8 @@ var gameUpdateHandler = (data) => {
     case "playerFire":
       if( data.gameOver ) {
         game.endGame( data.gameOver );
+        document.getElementById( "game" ).style.display = "none";
+        wrapper.style.display = "block";
         makeActive( "splash2" );
       }
       for( let i = 0; i < data.count; i++ ) {
@@ -378,8 +380,6 @@ var gameUpdateHandler = (data) => {
     case "blockPlaced":
       row = data['mapUpdate'][0];
       col = data['mapUpdate'][1];
-      console.log("place block");
-      console.log( row, col );
       game.placeWall( row, col );
       break;
   }
