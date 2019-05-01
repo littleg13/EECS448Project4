@@ -337,8 +337,8 @@ class Lobby:
                     collidedWith = 'map'
                 else:
                     collidedWith = 'edge'
-            position[0] =  math.sin(direction)*increment + position[0]
-            position[1] =  -math.cos(direction)*increment + position[1]
+            position[0] =  math.sin(direction)*increment + position[0] + 0.5
+            position[1] =  -math.cos(direction)*increment + position[1] + 0.5
             finalDistance += increment
             direction += max(0, finalDistance - power) * spin*math.pi/(180)
             print("{", position[0], ", ", position[1], ", ", direction, "}", flush='true')
@@ -349,7 +349,7 @@ class Lobby:
         return [collidedWith, finalDistance, position[0]-math.sin(direction)*increment, position[1]+math.cos(direction)*increment]
 
     def getDistanceToPlayer(self, position, player):
-        return math.sqrt(math.pow(position[0] - (player.xPos + 0.5), 2) + math.pow(position[1] - (player.yPos+0.5), 2))
+        return math.sqrt(math.pow(position[0] - (player.xPos ), 2) + math.pow(position[1] - (player.yPos+0.5), 2))
 
     def isPositionInPlayerBounds(self, position):
         """Checks to see if the given position is inside another player
