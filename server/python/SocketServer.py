@@ -167,7 +167,7 @@ def enterMatchmaking(sid, data):
 
 @io.on('sendMsg')
 def sendMsg(sid, data):
-    io.emit('chatMsg', {'sender': io.get_session(sid)['userID'], 'content': makeStringSafe(data['content'])}, room=io.get_session(sid)['lobbyCode'])
+    io.emit('chatMsg', {'senderID': io.get_session(sid)['userID'], 'content': makeStringSafe(data['content'])}, room=io.get_session(sid)['lobbyCode'])
 
 @io.on('gameEvent')
 def gameEvent(sid, data):
