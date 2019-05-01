@@ -240,6 +240,7 @@ var gameStartHandler = (data) => {
   socket.emit( "requestInfo", { request : "getTurn" } );
   wrapper.style.display = "none";
   document.getElementById("game").style.display = "block";
+  handleResize();
   localStorage.gameActive = true;
 };
 socket.on("gameStart" , gameStartHandler);
@@ -253,6 +254,7 @@ var gameInProgressHandler = ( data ) => {
   socket.emit( "requestInfo", { request : "getTurn" } );
   wrapper.style.display = "none";
   document.getElementById("game").style.display = "block";
+  handleResize();
   localStorage.gameActive = true;
 }
 socket.on( "gameInProgress", gameInProgressHandler );
