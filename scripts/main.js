@@ -1,5 +1,5 @@
-//const socket = io( "https://448.cuzzo.net" );
-const socket = io( "http://localhost:3000" );
+const socket = io( "https://448.cuzzo.net" );
+//const socket = io( "http://localhost:3000" );
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
 var game = null;
