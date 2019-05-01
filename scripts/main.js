@@ -351,9 +351,11 @@ var gameUpdateHandler = (data) => {
       game.updateTurn( data["userID"] );
       break;
     case "blockPlaced":
-      xPosOfUpdate = data['mapUpdate'][0];
-      yPosOfUpdate = data['mapUpdate'][1];
-      game.placeWall( yPosOfUpdate, xPosOfUpdate );
+      row = data['mapUpdate'][0];
+      col = data['mapUpdate'][1];
+      console.log("place block");
+      console.log( row, col );
+      game.placeWall( row, col );
       break;
   }
   if( data.powerupsOnMap ) {

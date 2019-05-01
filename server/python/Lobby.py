@@ -272,12 +272,12 @@ class Lobby:
                 if self.getDistanceToPlayer([col, row], player) > 3:
                     print("Place block failed due to being too far away.")
                     print("Player is at (", player.xPos, ", ", player.yPos, "). With direction: ", direction)
-                    print("Tried to place at (", xPos, ", ", yPos, ").")
-                    print("That distance is: ", self.getDistanceToPlayer([xPos, yPos], player))
-                print("Attempting to place block at (", xPos, ", ", yPos, ").")
-                print("Maps value there is: ", self.map[xPos][yPos])
-                if (self.map[xPos][yPos] == 0):
-                    self.map[xPos][yPos] = 1
+                    print("Tried to place at (", col, ", ", row, ").")
+                    print("That distance is: ", self.getDistanceToPlayer([col, row], player))
+                print("Attempting to place block at (", col, ", ", row, ").")
+                print("Maps value there is: ", self.map[col][row])
+                if (self.map[col][row] == 0):
+                    self.map[col][row] = 1
                 outboundData['eventType'] = 'blockPlaced'
                 outboundData['mapUpdate'] = [ row, col ]
                 print(outboundData)
