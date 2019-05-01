@@ -318,7 +318,7 @@ class Lobby:
                  distance from the player who shot to whatever it collided with
 
         """
-        position = [player.xPos + 0.5, player.yPos + 0.5]
+        position = [player.xPos, player.yPos]
         direction = player.direction + directionOffset
         spin = spin/5
         increment = 0.5

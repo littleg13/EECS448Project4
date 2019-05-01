@@ -81,11 +81,6 @@ def removePlayer():
         flag = False
     return flag
 
-def processEvent():
-    try:
-        testLobby = Lobby(generateRandomString(4))
-        userID = generateRandomString(10)
-
 def main():
     print("Connect to Server and Create Lobby: ")
     if(CreateLobby()):
@@ -119,12 +114,6 @@ def main():
 
     print("Remove a player from a game: ")
     if(removePlayer()):
-        print("Passed\n")
-    else:
-        print("Failed\n")
-
-    print("Process Game Events ")
-    if(processEvent()):
         print("Passed\n")
     else:
         print("Failed\n")
