@@ -39,7 +39,7 @@ var Game = /** @class */ (function () {
             var userInfoDiv = document.getElementById("userCard");
             var lobbyInfoDiv = document.getElementById("lobbyInfo");
             userInfoDiv.innerHTML = "";
-            lobbyInfoDiv.inneRHTML = "";
+            lobbyInfoDiv.innerHTML = "";
             _this.tanks.map(function (tank) {
                 var userID = tank.userID;
                 if (document.getElementById("info" + userID) === null) {
