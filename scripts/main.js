@@ -344,6 +344,11 @@ var gameUpdateHandler = (data) => {
      case "advanceTurn":
       game.updateTurn( data["userID"] );
       break;
+    case "blockPlaced":
+      xPosOfUpdate = data['mapUpdate'][0]
+      yPosOfUpdate = data['mapUpdate'][1]
+      // TODO: Change the value of this POS on map and re-render
+      break;
   }
   if( data.powerupsOnMap ) {
     let parsedUpdate = [];
@@ -436,7 +441,10 @@ function sendServerUpdate() {
       let spin = document.getElementById( "spinSlider" ).valueAsNumber;
       socket.emit( "gameEvent", { eventType: "playerFire", power: powr, spin: spin } );
       game.setPlayerShot( false );
-    } else if( game.getBuildWall() ) {} // returns pair : { row : , col : }
+    } else if( game.getBuildWall() ) {
+      socket.emit("gameEvent", { eventType: "placeBlock"});
+      game.setBuildWall();
+    } // returns pair : { row : , col : }
   }
 }
 

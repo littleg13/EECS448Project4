@@ -142,6 +142,13 @@ var Game = /** @class */ (function () {
                 }
                 _this.keys[" "] = false;
             }
+            if (_this.keys["e"] && player.buildWall != 0) {
+                var _a = [player.xPos, player.yPos], xPos = _a[0], yPos = _a[1];
+                xPos += 1.5 * Math.sin(player.dir * Math.PI / 180.0);
+                yPos -= 1.5 * Math.cos(player.dir * Math.PI / 180.0);
+                var _b = [xPos + 0.5, yPos + 0.5].map(Math.floor), col = _b[0], row = _b[1];
+                _this.setBuildWall(row, col);
+            }
             if (player.distanceLeft <= 0)
                 return;
             var deltaPos = Math.min(player.distanceLeft, 0.125);
@@ -156,13 +163,6 @@ var Game = /** @class */ (function () {
                     player.moveBackward(0.125);
                     _this.setPlayerMoved();
                 }
-            }
-            if (_this.keys["e"] && player.buildWall != 0) {
-                var _a = [player.xPos, player.yPos], xPos = _a[0], yPos = _a[1];
-                xPos += 1.5 * Math.sin(player.dir * Math.PI / 180.0);
-                yPos -= 1.5 * Math.cos(player.dir * Math.PI / 180.0);
-                var _b = [xPos + 0.5, yPos + 0.5].map(Math.floor), col = _b[0], row = _b[1];
-                _this.setBuildWall(row, col);
             }
             if (_this.getPlayerMoved()) {
                 var powerupIndex = _this.checkPowerupCollision(player);

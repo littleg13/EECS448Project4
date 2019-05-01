@@ -250,8 +250,11 @@ class Lobby:
                 outboundData['eventType'] = 'playerFire'
                 outboundData['userID'] = userID
             elif data['eventType'] == 'placeBlock':
-                if 'placeBlock' not in player.powerups:
+                print("Player placed block")
+                print(player.powerups)
+                if 'buildWall' not in player.powerups:
                     return outboundData
+
                 xPos = math.floor(player.xPos)
                 yPos = math.floor(player.yPos)
                 direction = player.direction
@@ -266,15 +269,18 @@ class Lobby:
                     xPos = xPos - 1
                 else:
                     print("Direction out of bounds. Direction is: " + str(direction))
-                if getDistanceToPlayer([xPos, yPos], player) > 2:
+                if self.getDistanceToPlayer([xPos, yPos], player) > 3:
                     print("Place block failed due to being too far away.")
                     print("Player is at (", player.xPos, ", ", player.yPos, "). With direction: ", direction)
                     print("Tried to place at (", xPos, ", ", yPos, ").")
+                    print("That distance is: ", self.getDistanceToPlayer([xPos, yPos], player))
                 print("Attempting to place block at (", xPos, ", ", yPos, ").")
                 print("Maps value there is: ", self.map[xPos][yPos])
                 if (self.map[xPos][yPos] == 0):
                     self.map[xPos][yPos] = 1
-                outboundData['mapUpdate'] = self.map
+                outboundData['eventType'] = 'blockPlaced'
+                outboundData['mapUpdate'] = [xPos, yPos]
+                print(outboundData)
         return outboundData
 
     def checkForPowerupCollision(self, userID, player):
