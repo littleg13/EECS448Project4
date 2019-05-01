@@ -327,19 +327,25 @@ var gameUpdateHandler = (data) => {
       }
       break;
     case "playerFire":
-      console.log( data );
-      if( data.mapUpdate ) {
-        game.updateMap( data.mapUpdate );
-      }
-      else if( data.playerHit ) {
-        game.updateTankHealth( data.playerHit, data.newHealth );
-        if( data.gameOver ) {
-          game.endGame( data.gameOver );
-          clearInterval( sendServerUpdateInt );
-          makeActive( "splash2" );
+      console.log(data);
+      for( let i=0;i<data.count;i++ ){
+        if( data.mapUpdate ) {
+          game.updateMap( data.mapUpdate );
         }
+        else if( data[i].playerHit ) {
+          game.updateTankHealth( data[i].playerHit, data[i].newHealth );
+          if( data.gameOver ) {
+            game.endGame( data.gameOver );
+            clearInterval( sendServerUpdateInt );
+            makeActive( "splash2" );
+          }
+        }
+        directionOffset = 0;
+        if(data.count > 1)
+          directionOffset = ((i-Math.floor(data.count/2))/Math.floor(data.count/2)) * 30
+        game.fire( data.userID, data.power, data.spin, data[i].distance, directionOffset );
       }
-      game.fire( data.userID, data.power, data.spin, data.distance );
+      game.getPlayer(data.userID).canShoot = false;
       break;
      case "advanceTurn":
       game.updateTurn( data["userID"] );
