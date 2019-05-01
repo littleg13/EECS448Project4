@@ -198,6 +198,7 @@ var playerListHandler = (data) => {
   console.log( "Player list received" );
   console.log( data );
   if( game ) {
+    game.tanks = [];
     for(let user in data) {
       let userData = data[user];
       if( game.getPlayer( user ) ) { continue; }

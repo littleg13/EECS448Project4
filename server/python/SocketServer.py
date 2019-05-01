@@ -119,7 +119,7 @@ def auth(sid, data):
         io.emit('clearStorage', {}, room=data['lobbyCode'])
         return
     elif lobbyHandler.getLobby(data['lobbyCode']).getGameStarted():
-        io.emit('gameStart', {}, room=sid)
+        io.emit('gameInProgress', {}, room=sid)
     else:
         if (not lobbyHandler.getLobby(data['lobbyCode']).updateSeen(data['userID'])):
             pass
@@ -140,6 +140,7 @@ def requestInfo(sid, data):
 @io.on('logout')
 def logout(sid, data):
     lobbyHandler.getLobby(data['lobbyCode']).removePlayer(data['userID'])
+    io.emit('playerList', lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getPlayersInfo(), room=data['lobbyCode'])
 
 @io.on('startGame')
 def startGame(sid, data):
