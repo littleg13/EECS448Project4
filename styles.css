@@ -365,6 +365,12 @@ input[type="checkbox"].toggle {
   display: none;
 }
 
+#logoutButton {
+  position: fixed;
+  left: 20px;
+  bottom: 15px;
+}
+
 .colorSwatch {
   display: inline-block;
   height: 10px;
