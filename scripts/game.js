@@ -202,7 +202,20 @@ var Game = /** @class */ (function () {
             _this.getPlayer(userID).setHealth(health);
         };
         this.updateTankPowerups = function (userID, powerups) {
-            console.log(powerups);
+            var player = _this.getPlayer(userID);
+            player.clearPowerups();
+            powerups.forEach(function (powerup) {
+                switch (powerup) {
+                    case "buildWall":
+                        player.addPowerup(new BuildWallToken(0, 0));
+                        break;
+                    case "multiShot":
+                        player.addPowerup(new MultiShotToken(0, 0));
+                        break;
+                    default:
+                        break;
+                }
+            });
         };
         this.updateTankDistanceLeft = function (userID, distanceLeft) {
             _this.getPlayer(userID).distanceLeft = distanceLeft;
@@ -227,11 +240,6 @@ var Game = /** @class */ (function () {
             else if (deltaLocalY < 0) {
                 tank.moveBackward(-deltaLocalY);
             }
-            /*
-            this.checkPowerupCollision( tank ).forEach( ( powerupIndex : number ) : void => {
-              tank.addPowerups( this.powerups.splice( powerupIndex, 1 ) );
-            } );
-            */
         };
         this.updateTurn = function (userID) {
             var prevPlayer = _this.getPlayer(_this.curTurn);
@@ -273,7 +281,6 @@ var Game = /** @class */ (function () {
             var shooter = _this.getPlayer(shooterID);
             if (shooter.canShoot) {
                 var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve);
-                console.log(bulletHit);
                 bullet.setTarget(bulletHit);
                 bullet.attachToLayer(_this.entities);
                 _this.bullets.push(bullet);

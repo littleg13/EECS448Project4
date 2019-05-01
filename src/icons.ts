@@ -149,6 +149,7 @@ class TankSprite extends Sprite {
     this.turret     = new Circle( 0, 0, 10, color, "#000" );
     this.multiShot  = 0;
     this.buildWall  = 0;
+    this.color      = color;
   }
 
   render = ( ctx: CanvasRenderingContext2D, multiShot = 0, buildWall = 0 ) : void => {
@@ -156,11 +157,11 @@ class TankSprite extends Sprite {
     if( this.multiShot != 0 ) {
       ctx.save();
       ctx.rotate( Math.PI / 6 );
-      this.getAuxBarrel().map( ( item : Renderable ) => { item.render( ctx ); } );
+      this.getAuxBarrel().render( ctx );
       ctx.restore();
       ctx.save();
       ctx.rotate( -Math.PI / 6 );
-      this.getAuxBarrel().map( ( item : Renderable ) => { item.render( ctx ); } );
+      this.getAuxBarrel().render( ctx );
       ctx.restore();
     }
   }
@@ -171,10 +172,10 @@ class TankSprite extends Sprite {
              this.cap, this.turret ];
   }
 
-  getAuxBarrel = () : Renderable[] => {
-    return [
-      new Rect( -3, -25, 6, 15, "green" )
-    ];
+  getAuxBarrel = () : Collection => {
+    return new Collection ( [
+      new Rect( -3, -25, 6, 15, this.color )
+    ] );
   }
 
   getDim = () : number[] => {

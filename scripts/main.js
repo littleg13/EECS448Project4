@@ -1,5 +1,5 @@
-//const socket = io( "https://448.cuzzo.net" );
-const socket = io( "http://192.168.1.100:3000" );
+const socket = io( "https://448.cuzzo.net" );
+//const socket = io( "http://192.168.1.100:3000" );
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
 var game = null;
@@ -344,6 +344,7 @@ var gameUpdateHandler = (data) => {
                                  data["newDir"] );
       }
       if( data.playerPowerups ) {
+        console.log( data.playerPowerups );
         game.updateTankPowerups( data.userID, data.playerPowerups );
         if( data.updateHealth ) {
           game.updateTankHealth( data.userID, data.updateHealth );
@@ -356,7 +357,6 @@ var gameUpdateHandler = (data) => {
     case "playerFire":
       if( data.gameOver ) {
         game.endGame( data.gameOver );
-        clearInterval( sendServerUpdate );
         makeActive( "splash2" );
       }
       for( let i = 0; i < data.count; i++ ) {

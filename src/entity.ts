@@ -185,7 +185,6 @@ class Bullet extends Entity {
     this.curve = curve;
     this.speed = 0.5;
     this.target = null;
-    console.log( this.curve );
   }
 
   render = () : void => {

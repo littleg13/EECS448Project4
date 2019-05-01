@@ -269,7 +269,20 @@ class Game {
   }
 
   updateTankPowerups = ( userID : string, powerups : string[] ) : void => {
-    console.log( powerups );
+    let player = this.getPlayer( userID );
+    player.clearPowerups();
+    powerups.forEach( ( powerup ) => {
+      switch( powerup ) {
+        case "buildWall":
+          player.addPowerup( new BuildWallToken( 0, 0 ) );
+          break;
+        case "multiShot":
+          player.addPowerup( new MultiShotToken( 0, 0 ) );
+          break;
+        default:
+          break;
+      }
+    } );
   }
 
   updateTankDistanceLeft = ( userID : string, distanceLeft : number ) : void => {
@@ -295,11 +308,6 @@ class Game {
     } else if( deltaLocalY < 0 ) {
       tank.moveBackward( -deltaLocalY );
     }
-    /*
-    this.checkPowerupCollision( tank ).forEach( ( powerupIndex : number ) : void => {
-      tank.addPowerups( this.powerups.splice( powerupIndex, 1 ) );
-    } );
-    */
   }
 
   updateTurn = ( userID : string ) => {
@@ -343,7 +351,6 @@ class Game {
     let shooter = this.getPlayer( shooterID );
     if( shooter.canShoot ) {
       let bullet = new Bullet( shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve );
-      console.log( bulletHit )
       bullet.setTarget( bulletHit );
       bullet.attachToLayer( this.entities );
       this.bullets.push( bullet );

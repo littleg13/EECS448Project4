@@ -188,7 +188,6 @@ var Bullet = /** @class */ (function (_super) {
         _this.curve = curve;
         _this.speed = 0.5;
         _this.target = null;
-        console.log(_this.curve);
         return _this;
     }
     return Bullet;

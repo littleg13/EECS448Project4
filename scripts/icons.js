@@ -136,11 +136,11 @@ var TankSprite = /** @class */ (function (_super) {
             if (_this.multiShot != 0) {
                 ctx.save();
                 ctx.rotate(Math.PI / 6);
-                _this.getAuxBarrel().map(function (item) { item.render(ctx); });
+                _this.getAuxBarrel().render(ctx);
                 ctx.restore();
                 ctx.save();
                 ctx.rotate(-Math.PI / 6);
-                _this.getAuxBarrel().map(function (item) { item.render(ctx); });
+                _this.getAuxBarrel().render(ctx);
                 ctx.restore();
             }
         };
@@ -150,9 +150,9 @@ var TankSprite = /** @class */ (function (_super) {
                 _this.cap, _this.turret];
         };
         _this.getAuxBarrel = function () {
-            return [
-                new Rect(-3, -25, 6, 15, "green")
-            ];
+            return new Collection([
+                new Rect(-3, -25, 6, 15, _this.color)
+            ]);
         };
         _this.getDim = function () {
             return [_this.width, _this.height];
@@ -199,6 +199,7 @@ var TankSprite = /** @class */ (function (_super) {
         _this.turret = new Circle(0, 0, 10, color, "#000");
         _this.multiShot = 0;
         _this.buildWall = 0;
+        _this.color = color;
         return _this;
     }
     return TankSprite;
