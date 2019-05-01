@@ -104,7 +104,7 @@ class Game {
     let userInfoDiv = document.getElementById("userCard");
     let lobbyInfoDiv = document.getElementById("lobbyInfo");
     userInfoDiv.innerHTML = "";
-    lobbyInfoDiv.inneRHTML = "";
+    lobbyInfoDiv.innerHTML = "";
     this.tanks.map( ( tank ) => {
       let userID = tank.userID;
       if( document.getElementById( "info" + userID ) === null ) {
