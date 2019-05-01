@@ -120,7 +120,7 @@ class Lobby:
 
     def removePlayer(self, userID):
         if(self.checkForPlayer(userID)):
-            self.colorList += self.players[userID].color
+            self.colorList.append(self.players[userID].color)
             self.spawnPosList.append({'x': self.players[userID].xPos, 'y': self.players[userID].yPos})
             del self.players[userID]
             return True
