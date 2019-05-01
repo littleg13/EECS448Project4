@@ -513,14 +513,15 @@ class Game {
 
   getPlayerPowerups = () : void => {}
 
-  getBuildWall = () : Point => {
+  getBuildWall = () : object => {
     return this.buildWall;
   }
 
   setBuildWall = ( row : number, col : number ) : void => {
     if( row === undefined && col === undefined ) {
       this.buildWall = null;
+    } else {
+      this.buildWall = { row : row, col : col };
     }
-    this.buildWall = { row : row, col : col };
   }
 }

@@ -150,7 +150,8 @@ var Game = /** @class */ (function () {
                     player.moveForward(0.125);
                     _this.setPlayerMoved();
                 }
-            } else if (_this.keys["ArrowDown"]) {
+            }
+            if (_this.keys["ArrowDown"]) {
                 if (!_this.checkMapCollision(player, -0.125, 0)) {
                     player.moveBackward(0.125);
                     _this.setPlayerMoved();
@@ -443,7 +444,9 @@ var Game = /** @class */ (function () {
             if (row === undefined && col === undefined) {
                 _this.buildWall = null;
             }
-            _this.buildWall = { row: row, col: col };
+            else {
+                _this.buildWall = { row: row, col: col };
+            }
         };
         this.map = new Map(mapDim);
         this.mapDim = mapDim;
