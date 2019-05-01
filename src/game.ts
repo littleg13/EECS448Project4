@@ -103,6 +103,8 @@ class Game {
   populateSidebar = () : void => {
     let userInfoDiv = document.getElementById("userCard");
     let lobbyInfoDiv = document.getElementById("lobbyInfo");
+    userInfoDiv.innerHTML = "";
+    lobbyInfoDiv.inneRHTML = "";
     this.tanks.map( ( tank ) => {
       let userID = tank.userID;
       if( document.getElementById( "info" + userID ) === null ) {
@@ -168,6 +170,7 @@ class Game {
     } else {
       let retVal = this.tanks.some( ( tank : Tank ) : boolean => {
         if( tank.userID == userID ) return false;
+        if( tank.health == 0 ) return false;
         let dirRad = tank.dir * Math.PI / 180.0;
         let [ xPos, yPos ] = [ tank.xPos + 0.5, tank.yPos + 0.5 ];
         let between = ( val, a, b ) => {
@@ -251,6 +254,7 @@ class Game {
     } else {
       this.map.setTiles( map );
       this.background.drawItem( this.map );
+      this.startGame();
     }
   }
 
@@ -335,7 +339,6 @@ class Game {
       let bullet = new Bullet( shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve );
       bullet.attachToLayer( this.entities );
       this.bullets.push( bullet );
-      shooter.canShoot = false;
     }
   }
 
@@ -473,17 +476,10 @@ class Game {
     let [ xOffset, yOffset ] = this.getPlayerPos().map( ( val : number ) => {
       return -( val + 0.5 ) * this.tileDim;
     } );
-    this.gameview.clear();
-    this.gameview.applyScale( this.scale, this.scale );
-    this.gameview.applyTranslate( xOffset, yOffset );
-    this.gameview.center();
     this.renderMap();
     this.renderMinimap();
     this.renderEffects();
     this.renderEntities();
-    this.gameview.popTransform();
-    this.gameview.popTransform();
-    this.gameview.popTransform();
   }
 
   gameTick = () : void => {

@@ -65,7 +65,6 @@ canvas#gameview {
   background: black;
   box-shadow: 0 0 4em black;
   border: 0.5em solid black;
-  border-radius: 50%;
 }
 
 div#mini {

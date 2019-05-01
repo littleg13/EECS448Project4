@@ -38,6 +38,8 @@ var Game = /** @class */ (function () {
         this.populateSidebar = function () {
             var userInfoDiv = document.getElementById("userCard");
             var lobbyInfoDiv = document.getElementById("lobbyInfo");
+            userInfoDiv.innerHTML = "";
+            lobbyInfoDiv.inneRHTML = "";
             _this.tanks.map(function (tank) {
                 var userID = tank.userID;
                 if (document.getElementById("info" + userID) === null) {
@@ -105,6 +107,8 @@ var Game = /** @class */ (function () {
             else {
                 var retVal = _this.tanks.some(function (tank) {
                     if (tank.userID == userID)
+                        return false;
+                    if (tank.health == 0)
                         return false;
                     var dirRad = tank.dir * Math.PI / 180.0;
                     var _a = [tank.xPos + 0.5, tank.yPos + 0.5], xPos = _a[0], yPos = _a[1];
@@ -187,6 +191,7 @@ var Game = /** @class */ (function () {
             else {
                 _this.map.setTiles(map);
                 _this.background.drawItem(_this.map);
+                _this.startGame();
             }
         };
         this.updateTankHealth = function (userID, health) {
@@ -266,7 +271,6 @@ var Game = /** @class */ (function () {
                 var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve);
                 bullet.attachToLayer(_this.entities);
                 _this.bullets.push(bullet);
-                shooter.canShoot = false;
             }
         };
         this.endGame = function (winnerUserID) {
@@ -394,17 +398,10 @@ var Game = /** @class */ (function () {
             var _a = _this.getPlayerPos().map(function (val) {
                 return -(val + 0.5) * _this.tileDim;
             }), xOffset = _a[0], yOffset = _a[1];
-            _this.gameview.clear();
-            _this.gameview.applyScale(_this.scale, _this.scale);
-            _this.gameview.applyTranslate(xOffset, yOffset);
-            _this.gameview.center();
             _this.renderMap();
             _this.renderMinimap();
             _this.renderEffects();
             _this.renderEntities();
-            _this.gameview.popTransform();
-            _this.gameview.popTransform();
-            _this.gameview.popTransform();
         };
         this.gameTick = function () {
             _this.renderLoop();
