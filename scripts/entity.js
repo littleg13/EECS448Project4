@@ -43,15 +43,6 @@ var Entity = /** @class */ (function () {
     }
     return Entity;
 }());
-var Hitbox = /** @class */ (function () {
-    function Hitbox(xOffset, yOffset, w, h) {
-        this.xOffset = xOffset;
-        this.yOffset = yOffset;
-        this.w = w;
-        this.h = h;
-    }
-    return Hitbox;
-}());
 var Tank = /** @class */ (function (_super) {
     __extends(Tank, _super);
     function Tank(xPos, yPos, dir, playerName, userID, color, health) {
@@ -123,7 +114,6 @@ var Tank = /** @class */ (function (_super) {
                 _this.multiShot++;
             else if (powerup instanceof BuildWallToken)
                 _this.buildWall++;
-            _this.sprite.setBuffs(_this.multiShot, _this.buildWall);
         };
         _this.clearPowerups = function () {
             _this.multiShot = 0;

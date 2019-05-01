@@ -1,3 +1,17 @@
+class Hitbox {
+  xOffset : number;
+  yOffset : number;
+  w : number;
+  h : number;
+
+  constructor( xOffset : number, yOffset : number, w : number, h : number) {
+    this.xOffset = xOffset;
+    this.yOffset = yOffset;
+    this.w = w;
+    this.h = h;
+  }
+}
+
 class Sprite extends Animated {
   width   : number;
   height  : number;
@@ -24,15 +38,6 @@ class Tread extends Sprite {
       new Rect( x,  10, 10, 2, "#000", "#0000" ),
       new Rect( x,  15, 10, 2, "#000", "#0000" )
     ];
-    /*
-      Counter states:
-      0 - [11000 11000 11000 11000 11000 11000 11000]
-      1 - [01100 01100 01100 01100 01100 01100 01100]
-      2 - [00110 00110 00110 00110 00110 00110 00110]
-      3 - [00011 00011 00011 00011 00011 00011 00011]
-      4 - [10001 10001 10001 10001 10001 10001 10001]
-      5 - rolls over to 0...
-    */
     this.counter = new Counter( 0, 1, 5 );
     this.counter.setParent( this );
     this.counter.onInc = () : void => {
@@ -151,8 +156,11 @@ class TankSprite extends Sprite {
   }
 
   render = ( ctx: CanvasRenderingContext2D ) : void => {
-    this.getItems().map( ( item : Renderable ) => { item.render( ctx ); } );
     if( this.multiShot ) {
+      this.leftTread.render( ctx );
+      this.rightTread.render( ctx );
+      this.body.render( ctx );
+      this.getAuxBarrel().render( ctx );
       ctx.save();
       ctx.rotate( Math.PI / 6 );
       this.getAuxBarrel().render( ctx );
@@ -161,22 +169,26 @@ class TankSprite extends Sprite {
       ctx.rotate( -Math.PI / 6 );
       this.getAuxBarrel().render( ctx );
       ctx.restore();
+      this.turret.render( ctx );
+    } else {
+      this.getItems().forEach( (item) => { item.render( ctx ) } );
     }
   }
 
   getItems = () : Renderable[] => {
     return [ this.leftTread, this.rightTread,
-             this.body, this.barrel,
-             this.cap, this.turret ];
+                  this.body, this.barrel,
+                   this.cap, this.turret ];
   }
 
-  setMulti = ( num : number ) => {
+  setMulti = ( num : number ) : void => {
     this.multiShot = ( num > 0 );
   }
 
   getAuxBarrel = () : Collection => {
     return new Collection ( [
-      new Rect( -3, -25, 6, 15, this.color )
+      new Rect( -4, -22.5, 8, 20, this.color, "#000" ),
+      new RoundRect( -7, -27.5, 14, 5, 2.5, this.color, "#000" )
     ] );
   }
 

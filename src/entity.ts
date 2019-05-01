@@ -34,19 +34,6 @@ abstract class Entity {
   }
 }
 
-class Hitbox {
-  xOffset : number;
-  yOffset : number;
-  w : number;
-  h : number;
-
-  constructor( xOffset : number, yOffset : number, w : number, h : number) {
-    this.xOffset = xOffset;
-    this.yOffset = yOffset;
-    this.w = w;
-    this.h = h;
-  }
-}
 
 class Tank extends Entity {
   playerName  : string;
@@ -152,7 +139,6 @@ class Tank extends Entity {
   addPowerup = ( powerup : Powerup ) : void => {
     if( powerup instanceof MultiShotToken ) this.multiShot++;
     else if( powerup instanceof BuildWallToken ) this.buildWall++;
-    this.sprite.setBuffs( this.multiShot, this.buildWall );
   }
 
   clearPowerups = () : void => {
