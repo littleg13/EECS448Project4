@@ -185,6 +185,7 @@ def gameEvent(sid, data):
         lobbyCode = io.get_session(sid)['lobbyCode']
         userID = io.get_session(sid)['userID']
         gameUpdate = lobbyHandler.getLobby(lobbyCode).processGameEvent(userID, data)
+        print(gameUpdate)
         io.emit('gameUpdate', gameUpdate , room=lobbyCode)
         if('eventType' in gameUpdate):
             if(gameUpdate['eventType'] == 'playerFire'):
