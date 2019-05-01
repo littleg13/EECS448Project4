@@ -55,6 +55,7 @@ class Game {
     this.keyTimes  = {};
     this.movedSinceLastTransmit = false;
     this.playerShot = false;
+    this.buildWall = null;
     this.begun = false;
     this.won = false;
     this.initLayers();
@@ -219,7 +220,7 @@ class Game {
         this.setPlayerMoved();
       }
     }
-    if( this.keys["e"] && player.buildWall != 0 ) {
+    if( this.keys["e"] && player.buildWall != 0 && this.buildWall === null ) {
       let [ xPos, yPos ] = [ player.xPos, player.yPos ];
       xPos += 1.5 * Math.sin( player.dir * Math.PI / 180.0 );
       yPos -= 1.5 * Math.cos( player.dir * Math.PI / 180.0 );
@@ -235,13 +236,6 @@ class Game {
       }
     }
     player.distanceLeft = Math.max( 0, player.distanceLeft );
-  }
-
-  recordKeyPress = ( key : string ) : void => {
-    if( !this.keys[ " " ] ) {
-      this.keyTimes[ key ] = new Date();
-      this.keys[ " " ] = true;
-    }
   }
 
 /**

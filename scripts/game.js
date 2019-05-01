@@ -125,14 +125,14 @@ var Game = /** @class */ (function () {
             if (_this.curTurn != localStorage.userID)
                 return;
             if (_this.keys["ArrowLeft"]) {
-                if (!_this.checkMapCollision(player, 0, -4.0)) {
-                    player.rotateCCW(4.0);
+                if (!_this.checkMapCollision(player, 0, -2.0)) {
+                    player.rotateCCW(2.0);
                     _this.setPlayerMoved();
                 }
             }
             if (_this.keys["ArrowRight"]) {
-                if (!_this.checkMapCollision(player, 0, 4.0)) {
-                    player.rotateCW(4.0);
+                if (!_this.checkMapCollision(player, 0, 2.0)) {
+                    player.rotateCW(2.0);
                     _this.setPlayerMoved();
                 }
             }
@@ -157,7 +157,7 @@ var Game = /** @class */ (function () {
                     _this.setPlayerMoved();
                 }
             }
-            if (_this.keys["e"] && player.buildWall != 0) {
+            if (_this.keys["e"] && player.buildWall != 0 && _this.buildWall === null) {
                 var _a = [player.xPos, player.yPos], xPos = _a[0], yPos = _a[1];
                 xPos += 1.5 * Math.sin(player.dir * Math.PI / 180.0);
                 yPos -= 1.5 * Math.cos(player.dir * Math.PI / 180.0);
@@ -172,12 +172,6 @@ var Game = /** @class */ (function () {
                 }
             }
             player.distanceLeft = Math.max(0, player.distanceLeft);
-        };
-        this.recordKeyPress = function (key) {
-            if (!_this.keys[" "]) {
-                _this.keyTimes[key] = new Date();
-                _this.keys[" "] = true;
-            }
         };
         /**
         *   UPDATE METHODS:
@@ -465,6 +459,7 @@ var Game = /** @class */ (function () {
         this.keyTimes = {};
         this.movedSinceLastTransmit = false;
         this.playerShot = false;
+        this.buildWall = null;
         this.begun = false;
         this.won = false;
         this.initLayers();
