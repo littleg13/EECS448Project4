@@ -486,22 +486,22 @@ var main = () => {
 };
 
 var sendMsg = () => {
-  let username = localStorage.username;
+  let userID = ;
   let textbox = document.getElementById('textBox');
   let text = textbox.value;
   textbox.value = "";
   if( text.length > 0 ) {
-    socket.emit( "sendMsg", { sender: username, content: text } );
+    socket.emit( "sendMsg", { content: text } );
   }
 };
 
 var chatMsg = ( data ) => {
-  let sender = data["sender"];
+  let sender = data["senderID"];
   let content = data["content"];
   if( !document.getElementById( "chatToggle" ).checked ) {
     document.getElementById( "chatHeader" ).classList.add( "newMessage" );
   }
-  game.showMsg( sender, content );
+  game.showMsg( senderID, content );
 };
 socket.on( "chatMsg", chatMsg );
 

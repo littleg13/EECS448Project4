@@ -350,10 +350,12 @@ class Game {
     delete localStorage.lobbyCode;
   }
 
-  showMsg = ( username : string, text : string ) => {
+  showMsg = ( userID : string, text : string ) => {
     let messageWindow = document.getElementById( "messageWindow" );
     let msg = document.createElement( "div" );
-    if( username == this.getPlayer().playerName ) { msg.classList.add("self"); }
+    let username = this.getPlayer( userID );
+
+    if( userID = localStorage.userID ) { msg.classList.add("self"); }
     msg.classList.add( "message" );
 
     let sender = document.createElement( "div" );
