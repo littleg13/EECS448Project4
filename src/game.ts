@@ -220,12 +220,14 @@ class Game {
         this.setPlayerMoved();
       }
     }
-    if( this.keys["e"] && player.buildWall != 0 && this.buildWall === null ) {
+    if( this.keys["e"] && player.buildWall != 0 ) {
       let [ xPos, yPos ] = [ player.xPos, player.yPos ];
       xPos += 1.5 * Math.sin( player.dir * Math.PI / 180.0 );
       yPos -= 1.5 * Math.cos( player.dir * Math.PI / 180.0 );
       let [ col, row ] = [ xPos + 0.5, yPos + 0.5 ].map( Math.floor );
       this.setBuildWall( row, col );
+      player.buildWall--;
+      this.keys["e"] = false;
     }
 
     if( this.getPlayerMoved() ) {
