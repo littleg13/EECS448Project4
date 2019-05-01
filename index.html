@@ -8,40 +8,16 @@
     <script src="scripts/socket.io.js"></script>
     <script src="scripts/render.js"></script>
     <script src="scripts/icons.js"></script>
+    <script src="scripts/effects.js"></script>
     <script src="scripts/cards.js"></script>
     <script src="scripts/entity.js"></script>
     <script src="scripts/map.js"></script>
     <script src="scripts/game.js"></script>
-    <script src="scripts/main.js" defer></script>
     <!-- <link
       rel="stylesheet"    href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
       integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
       crossorigin="anonymous"
     /> -->
-    <script>
-    const delay = 100;
-    var resizeTaskId = null;
-
-    var handleResize = ( evt ) => {
-      if( game === null ) return;
-      let size = Math.min( window.innerWidth, window.innerHeight );
-      let gameBody = document.getElementById( "gameBody" );
-      gameBody.style.width = size + "px";
-      gameBody.style.height = size + "px";
-    }
-
-    window.addEventListener("resize", (evt) => {
-      if( resizeTaskId !== null ) {
-        clearTimeout( resizeTaskId );
-      }
-
-      resizeTaskId = setTimeout( () => {
-        resizeTaskId = null;
-        handleResize( evt );
-      }, delay);
-    });
-
-    </script>
   </head>
   <body>
     <main id="wrapper">
@@ -90,6 +66,7 @@
       </div>
       <div id="playerBar" class="sidebar">
         <div id="additionalInfo">
+          <button onclick="redrawMap()">Re-render Map</button>
           <div id="userInfo">
             <div id="userCard">
             </div>
@@ -146,5 +123,6 @@
       <button type="button" onclick="logout()">Exit</button>
     </div>
     <div id="hidden"></div>
+    <script src="scripts/main.js"></script>
   </body>
 </html>

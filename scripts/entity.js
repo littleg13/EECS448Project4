@@ -118,13 +118,11 @@ var Tank = /** @class */ (function (_super) {
             _this.infoCard.setTurn(isTurn);
         };
         _this.addPowerup = function (powerup) {
-            var buff = null;
             if (powerup instanceof MultiShotToken)
-                buff = new Buff();
+                _this.multiShot++;
             else if (powerup instanceof BuildWallToken)
-                buff = new Buff();
-            if (buff != null)
-                _this.buffs.push(buff);
+                _this.buildWall++;
+            _this.sprite.setBuffs(_this.multiShot, _this.buildWall);
         };
         _this.xPos = xPos;
         _this.yPos = yPos;
@@ -138,8 +136,9 @@ var Tank = /** @class */ (function (_super) {
         _this.nameTag = new NameTag(playerName, health);
         _this.layer = new Layer(playerName, 60, 60);
         _this.health = health;
-        _this.buffs = [];
         _this.canShoot = false;
+        _this.multiShot = 0;
+        _this.buildWall = 0;
         return _this;
     }
     return Tank;
@@ -160,13 +159,12 @@ var Bullet = /** @class */ (function (_super) {
             _this.boom = true;
         };
         _this.update = function () {
-            if (_this.boom)
-                return;
             var dirRad = _this.dir * Math.PI / 180.0;
             _this.xPos += Math.sin(dirRad) * _this.speed;
             _this.yPos -= Math.cos(dirRad) * _this.speed;
             _this.distGone += _this.speed;
             _this.dir += Math.max(0, _this.distGone - _this.power) * _this.curve;
+            return _this.boom;
         };
         _this.shooterID = userID;
         _this.xPos = xPos;
@@ -204,7 +202,6 @@ var MultiShotToken = /** @class */ (function (_super) {
     __extends(MultiShotToken, _super);
     function MultiShotToken(x, y) {
         var _this = _super.call(this, x, y) || this;
-        console.log({ x: x, y: y, powerup: _this });
         _this.sprite = new MultiShotSprite();
         return _this;
     }
@@ -237,8 +234,3 @@ var HealthPackToken = /** @class */ (function (_super) {
     }
     return HealthPackToken;
 }(Powerup));
-var Buff = /** @class */ (function () {
-    function Buff() {
-    }
-    return Buff;
-}());

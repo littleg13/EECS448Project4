@@ -59,7 +59,8 @@ class Tank extends Entity {
   nameTag     : NameTag;
   distanceLeft: number;
   alive       : boolean;
-  buffs       : Buff[];
+  multiShot   : number;
+  buildWall   : number;
 
   constructor( xPos : number, yPos : number, dir : number, playerName : string, userID : string, color : string, health : number ) {
     super();
@@ -77,8 +78,9 @@ class Tank extends Entity {
     this.layer      = new Layer( playerName, 60, 60 );
 
     this.health   = health;
-    this.buffs    = [];
     this.canShoot = false;
+    this.multiShot = 0;
+    this.buildWall = 0;
   }
 
   updateImage = () : void => {
@@ -147,12 +149,9 @@ class Tank extends Entity {
   }
 
   addPowerup = ( powerup : Powerup ) : void => {
-    let buff = null;
-    if( powerup instanceof MultiShotToken ) buff = new Buff();
-    if( powerup instanceof IncreaseMoveDistToken ) buff = new Buff();
-    if( powerup instanceof BuildWallToken ) buff = new Buff();
-    if( powerup instanceof HealthPackToken ) buff = new Buff();
-    if( buff != null ) this.buffs.push( buff );
+    if( powerup instanceof MultiShotToken ) this.multiShot++;
+    else if( powerup instanceof BuildWallToken ) this.buildWall++;
+    this.sprite.setBuffs( this.multiShot, this.buildWall );
   }
 }
 
@@ -194,13 +193,13 @@ class Bullet extends Entity {
     this.boom = true;
   }
 
-  update = () : void => {
-    if( this.boom ) return;
+  update = () : boolean => {
     let dirRad = this.dir * Math.PI / 180.0;
     this.xPos += Math.sin( dirRad ) * this.speed;
     this.yPos -= Math.cos( dirRad ) * this.speed;
     this.distGone += this.speed;
     this.dir += Math.max( 0, this.distGone - this.power ) * this.curve;
+    return this.boom;
   }
 }
 
@@ -222,7 +221,6 @@ abstract class Powerup extends Entity {
 class MultiShotToken extends Powerup {
   constructor( x : number, y : number ) {
     super( x, y );
-    console.log( { x: x, y: y, powerup: this } );
     this.sprite = new MultiShotSprite();
   }
 }
@@ -247,5 +245,3 @@ class HealthPackToken extends Powerup {
     this.sprite = new HealthPackSprite();
   }
 }
-
-class Buff {}

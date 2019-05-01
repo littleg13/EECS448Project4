@@ -123,22 +123,43 @@ var Tread = /** @class */ (function (_super) {
         return _this;
     }
     return Tread;
-}(Animated));
+}(Sprite));
 var TankSprite = /** @class */ (function (_super) {
     __extends(TankSprite, _super);
     function TankSprite(color) {
         if (color === void 0) { color = "#c00"; }
         var _this = _super.call(this) || this;
-        _this.render = function (ctx) {
+        _this.render = function (ctx, multiShot, buildWall) {
+            if (multiShot === void 0) { multiShot = 0; }
+            if (buildWall === void 0) { buildWall = 0; }
             _this.getItems().map(function (item) { item.render(ctx); });
+            if (_this.multiShot != 0) {
+                ctx.save();
+                ctx.rotate(Math.PI / 6);
+                _this.getAuxBarrel().map(function (item) { item.render(ctx); });
+                ctx.restore();
+                ctx.save();
+                ctx.rotate(-Math.PI / 6);
+                _this.getAuxBarrel().map(function (item) { item.render(ctx); });
+                ctx.restore();
+            }
         };
         _this.getItems = function () {
             return [_this.leftTread, _this.rightTread,
                 _this.body, _this.barrel,
                 _this.cap, _this.turret];
         };
+        _this.getAuxBarrel = function () {
+            return [
+                new Rect(-3, -25, 6, 15, "green")
+            ];
+        };
         _this.getDim = function () {
             return [_this.width, _this.height];
+        };
+        _this.setBuffs = function (multiShot, buildWall) {
+            _this.multiShot = multiShot;
+            _this.buildWall = buildWall;
         };
         _this.changeColor = function (color) {
             _this.getItems().map(function (item) {
@@ -176,6 +197,8 @@ var TankSprite = /** @class */ (function (_super) {
         _this.barrel = new Rect(-5, -20, 10, 25, color, "#000");
         _this.cap = new RoundRect(-7.5, -25, 15, 7.5, 2.5, color, "#000");
         _this.turret = new Circle(0, 0, 10, color, "#000");
+        _this.multiShot = 0;
+        _this.buildWall = 0;
         return _this;
     }
     return TankSprite;
@@ -221,7 +244,6 @@ var BulletSprite = /** @class */ (function (_super) {
         };
         _this.width = 40;
         _this.height = 40;
-        //    this.hitbox = new Hitbox( -5, -15, 10, 25 );
         _this.hitbox = new Hitbox(0, -15, 0, 25);
         _this.body = new Path(-5, 5, "#606060");
         var segments = [
@@ -234,12 +256,112 @@ var BulletSprite = /** @class */ (function (_super) {
     }
     return BulletSprite;
 }(Sprite));
+var ShadowBlock = /** @class */ (function (_super) {
+    __extends(ShadowBlock, _super);
+    function ShadowBlock() {
+        var _this = _super.call(this) || this;
+        _this.render = function (ctx) {
+            _this.items.render(ctx);
+        };
+        var items = [
+            new RoundRect(0, 0, 40, 40, 3, "rgba( 0, 0, 0, 0.5 )", "transparent"),
+            new RoundRect(1, 2, 18, 7, 3, "rgba( 112, 112, 112, 0.5 )", "transparent"),
+            new RoundRect(21, 2, 18, 7, 3, "rgba( 112, 112, 112, 0.5 )", "transparent"),
+            new RoundRect(1, 11, 8, 7, 3, "rgba( 80, 80, 80, 0.5 )", "transparent"),
+            new RoundRect(11, 11, 18, 7, 3, "rgba( 80, 80, 80, 0.5 )", "transparent"),
+            new RoundRect(31, 11, 8, 7, 3, "rgba( 80, 80, 80, 0.5 )", "transparent"),
+            new RoundRect(1, 20, 18, 7, 3, "rgba( 48, 48, 48, 0.5 )", "transparent"),
+            new RoundRect(21, 20, 18, 7, 3, "rgba( 48, 48, 48, 0.5 )", "transparent"),
+            new RoundRect(1, 29, 8, 7, 3, "rgba( 16, 16, 16, 0.5 )", "transparent"),
+            new RoundRect(11, 29, 18, 7, 3, "rgba( 16, 16, 16, 0.5 )", "transparent"),
+            new RoundRect(31, 29, 8, 7, 3, "rgba( 16, 16, 16, 0.5 )", "transparent")
+        ];
+        _this.items = new Collection(items);
+        return _this;
+    }
+    return ShadowBlock;
+}(Sprite));
 var ExplosionSprite = /** @class */ (function (_super) {
     __extends(ExplosionSprite, _super);
     function ExplosionSprite() {
         var _this = _super.call(this) || this;
-        _this.render = function (ctx) {
+        _this.update = function () {
+            var count = _this.counter.get();
+            var growth = _this.growth * count / _this.counter.max;
+            if (count == 0) {
+                return true;
+            }
+            _this.radii1 = _this.radii1.map(function (p) {
+                var innerR = p.x;
+                var outerR = p.y;
+                return new Point(innerR + growth, outerR + growth);
+            });
+            _this.radii2 = _this.radii2.map(function (p) {
+                var innerR = p.x;
+                var outerR = p.y;
+                return new Point(innerR + growth / 2, outerR + growth / 2);
+            });
+            _this.counter.dec();
+            return false;
         };
+        _this.render = function (ctx) {
+            var a = _this.counter.get() / _this.counter.max;
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(0, -_this.radii1[0].x);
+            _this.radii1.forEach(function (p) {
+                var innerR = p.x;
+                var outerR = p.y;
+                ctx.lineTo(0, -innerR);
+                ctx.rotate(2 * Math.PI / _this.numPoints);
+                ctx.lineTo(0, -outerR);
+                ctx.rotate(2 * Math.PI / _this.numPoints);
+            });
+            ctx.lineTo(0, -_this.radii1[0].x);
+            ctx.closePath();
+            ctx.fillStyle = "rgba( 255, 0, 0, " + a + " )";
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            _this.radii2.forEach(function (p) {
+                var innerR = p.x;
+                var outerR = p.y;
+                ctx.lineTo(0, -innerR);
+                ctx.rotate(2 * Math.PI / _this.numPoints);
+                ctx.lineTo(0, -outerR);
+                ctx.rotate(2 * Math.PI / _this.numPoints);
+            });
+            ctx.lineTo(0, -_this.radii2[0].x);
+            ctx.closePath();
+            ctx.fillStyle = "rgba( 255, 255, 0, " + a + " )";
+            ctx.fill();
+            ctx.restore();
+        };
+        _this.width = 40;
+        _this.height = 40;
+        _this.radii1 = [];
+        _this.radii2 = [];
+        _this.innerVar = 10;
+        _this.outerVar = 10;
+        _this.growth = 1;
+        _this.numPoints = 32;
+        _this.counter = new Counter(0, 1, 32);
+        _this.counter.dec();
+        var innerR = 10;
+        var outerR = 20;
+        for (var i = 0; i < _this.numPoints / 2; i++) {
+            var p1 = new Point(innerR, outerR);
+            var p2 = new Point(innerR / 2, outerR / 2);
+            p1.x += (Math.random() - 0.5) * _this.innerVar;
+            p1.y += (Math.random() - 0.5) * _this.outerVar;
+            p2.x += (Math.random() - 0.5) * _this.innerVar / 2;
+            p2.y += (Math.random() - 0.5) * _this.outerVar / 2;
+            _this.radii1.push(p1);
+            _this.radii2.push(p2);
+        }
         return _this;
     }
     return ExplosionSprite;

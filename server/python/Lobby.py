@@ -242,11 +242,39 @@ class Lobby:
                 if (self.addedPowerup):
                     self.addedPowerup = False
                     outboundData['powerupsOnMap'] = self.powerups
+                outboundData['xPos'] = collisionData[2]
+                outboundData['yPos'] = collisionData[3]
                 outboundData['distance'] = collisionData[1]
                 outboundData['power'] = data['power']
                 outboundData['spin'] = data['spin']
                 outboundData['eventType'] = 'playerFire'
                 outboundData['userID'] = userID
+            elif data['eventType'] == 'placeBlock':
+                if 'placeBlock' not in player.powerups:
+                    return outboundData
+                xPos = math.floor(player.xPos)
+                yPos = math.floor(player.yPos)
+                direction = player.direction
+                pi = math.pi
+                if (7 * pi / 4) <= direction or direction < (pi / 4): # North
+                    yPos = yPos - 1
+                elif (pi/4) <= direction <= (3 * pi / 4): # East
+                    xPos = xPos + 1
+                elif (3 * pi / 4) <= direction <= (5 * pi / 4): # South
+                    yPos = yPos + 1
+                elif (5 * pi / 4) <= direction <= (7 * pi / 4):
+                    xPos = xPos - 1
+                else:
+                    print("Direction out of bounds. Direction is: " + str(direction))
+                if getDistanceToPlayer([xPos, yPos], player) > 2:
+                    print("Place block failed due to being too far away.")
+                    print("Player is at (", player.xPos, ", ", player.yPos, "). With direction: ", direction)
+                    print("Tried to place at (", xPos, ", ", yPos, ").")
+                print("Attempting to place block at (", xPos, ", ", yPos, ").")
+                print("Maps value there is: ", self.map[xPos][yPos])
+                if (self.map[xPos][yPos] == 0):
+                    self.map[xPos][yPos] = 1
+                outboundData['mapUpdate'] = self.map
         return outboundData
 
     def checkForPowerupCollision(self, userID, player):
@@ -306,7 +334,7 @@ class Lobby:
             if(abs(player.direction - direction) >= 3/4 * 2*math.pi):
                 collided = True
                 collidedWith = 'edge'
-        return [collidedWith, finalDistance]
+        return [collidedWith, finalDistance, position[0]-math.sin(direction)*increment, position[1]+math.cos(direction)*increment]
 
     def getDistanceToPlayer(self, position, player):
         return math.sqrt(math.pow(position[0] - (player.xPos + 0.5), 2) + math.pow(position[1] - (player.yPos+0.5), 2))

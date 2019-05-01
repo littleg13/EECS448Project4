@@ -83,8 +83,17 @@ var Game = /** @class */ (function () {
             return retIndex;
         };
         this.checkBulletCollision = function (bullet) {
-            var _a = [bullet.xPos + 0.5, bullet.yPos + 0.5], bullX = _a[0], bullY = _a[1];
-            var _b = [bullX, bullY].map(Math.floor), bullCol = _b[0], bullRow = _b[1];
+            for (var speed = 0.1; speed < bullet.speed; speed += 0.1) {
+                var _a = [bullet.xPos + 0.5, bullet.yPos + 0.5], bullX = _a[0], bullY = _a[1];
+                bullX += speed * Math.sin(bullet.dir * Math.PI / 180.0);
+                bullY -= speed * Math.cos(bullet.dir * Math.PI / 180.0);
+                if (_this.checkBulletTrajectory(bullX, bullY, bullet.shooterID))
+                    return true;
+            }
+            return false;
+        };
+        this.checkBulletTrajectory = function (bullX, bullY, userID) {
+            var _a = [bullX, bullY].map(Math.floor), bullCol = _a[0], bullRow = _a[1];
             var tile = _this.map.getTile(bullRow, bullCol);
             if (tile.isBlocking) {
                 _this.map.redraw(bullRow, bullCol);
@@ -93,20 +102,23 @@ var Game = /** @class */ (function () {
                 _this.background.popTransform();
                 return true;
             }
-            return _this.tanks.some(function (tank) {
-                if (tank.userID == bullet.shooterID)
-                    return false;
-                var dirRad = tank.dir * Math.PI / 180.0;
-                var _a = [tank.xPos + 0.5, tank.yPos + 0.5], xPos = _a[0], yPos = _a[1];
-                var between = function (val, a, b) {
-                    var low = Math.min(a, b);
-                    var high = Math.max(a, b);
-                    return (low < val && val < high);
-                };
-                var _b = [bullX - xPos, bullY - yPos], delX = _b[0], delY = _b[1];
-                var dist = Math.sqrt(delX * delX + delY * delY);
-                return dist < 0.5;
-            });
+            else {
+                var retVal = _this.tanks.some(function (tank) {
+                    if (tank.userID == userID)
+                        return false;
+                    var dirRad = tank.dir * Math.PI / 180.0;
+                    var _a = [tank.xPos + 0.5, tank.yPos + 0.5], xPos = _a[0], yPos = _a[1];
+                    var between = function (val, a, b) {
+                        var low = Math.min(a, b);
+                        var high = Math.max(a, b);
+                        return (low < val && val < high);
+                    };
+                    var _b = [bullX - xPos, bullY - yPos], delX = _b[0], delY = _b[1];
+                    var dist = Math.sqrt(delX * delX + delY * delY);
+                    return dist < 0.5;
+                });
+                return retVal;
+            }
         };
         this.processInput = function () {
             var player = _this.getPlayer();
@@ -138,17 +150,23 @@ var Game = /** @class */ (function () {
                     player.moveForward(0.125);
                     _this.setPlayerMoved();
                 }
-            }
-            if (_this.keys["ArrowDown"]) {
+            } else if (_this.keys["ArrowDown"]) {
                 if (!_this.checkMapCollision(player, -0.125, 0)) {
                     player.moveBackward(0.125);
                     _this.setPlayerMoved();
                 }
             }
+            if (_this.keys["e"] && player.buildWall != 0) {
+                var _a = [player.xPos, player.yPos], xPos = _a[0], yPos = _a[1];
+                xPos += 1.5 * Math.sin(player.dir * Math.PI / 180.0);
+                yPos -= 1.5 * Math.cos(player.dir * Math.PI / 180.0);
+                var _b = [xPos + 0.5, yPos + 0.5].map(Math.floor), col = _b[0], row = _b[1];
+                _this.setBuildWall(row, col);
+            }
             if (_this.getPlayerMoved()) {
                 var powerupIndex = _this.checkPowerupCollision(player);
                 if (powerupIndex > -1) {
-                    let powerup = _this.powerups.splice(powerupIndex, 1)[0];
+                    var powerup = _this.powerups.splice(powerupIndex, 1)[0];
                     player.addPowerup(powerup);
                 }
             }
@@ -179,11 +197,10 @@ var Game = /** @class */ (function () {
         };
         this.updateTankPowerups = function (userID, powerups) {
             console.log(powerups);
-            //    this.getPlayer( userID ).addPowerups( objs );
         };
-        this.updateTankDistanceLeft = function (userID, moveDistance) {
-            _this.getPlayer(userID).distanceLeft = moveDistance;
-        }
+        this.updateTankDistanceLeft = function (userID, distanceLeft) {
+            _this.getPlayer(userID).distanceLeft = distanceLeft;
+        };
         this.updateTankPosition = function (userID, newXPos, newYPos, newDirection) {
             var tank = _this.getPlayer(userID);
             var deltaDir = ((newDirection * 180.0 / Math.PI) - tank.dir) % 360.0;
@@ -238,14 +255,14 @@ var Game = /** @class */ (function () {
                 }
             });
             _this.powerups.forEach(function (powerup) {
-                powerup.attachToLayer(_this.effects);
+                powerup.attachToLayer(_this.entities);
             });
         };
         this.fire = function (shooterID, power, curve, dist) {
             var shooter = _this.getPlayer(shooterID);
             if (shooter.canShoot) {
                 var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve);
-                bullet.attachToLayer(_this.effects);
+                bullet.attachToLayer(_this.entities);
                 _this.bullets.push(bullet);
                 shooter.canShoot = false;
             }
@@ -271,7 +288,10 @@ var Game = /** @class */ (function () {
             content.innerHTML = text;
             msg.appendChild(content);
             msg.appendChild(sender);
+            var updateScroll = (messageWindow.scrollHeight - messageWindow.offsetHeight) == messageWindow.scrollTop;
             messageWindow.insertAdjacentElement("beforeend", msg);
+            if (updateScroll)
+                msg.scrollIntoView(false);
         };
         /**
         *   RENDERING METHODS:
@@ -286,6 +306,13 @@ var Game = /** @class */ (function () {
             _this.minimap.addLayer(_this.background);
             _this.minimap.popTransform();
         };
+        this.renderEntities = function () {
+            _this.entities.clear();
+            _this.renderBullets();
+            _this.renderPowerups();
+            _this.renderTanks();
+            _this.gameview.addLayer(_this.entities);
+        };
         this.renderTanks = function () {
             _this.tanks.forEach(function (tank) {
                 if (tank.health <= 0) {
@@ -296,16 +323,26 @@ var Game = /** @class */ (function () {
         };
         this.renderTank = function (tank) {
             tank.updateImage();
-            _this.gameview.applyTranslate(_this.tileDim * tank.xPos, _this.tileDim * tank.yPos);
-            _this.gameview.addLayer(tank.getLayer(), -10, -10);
-            _this.gameview.applyTranslate(_this.tileDim / 2, _this.tileDim);
-            _this.gameview.drawItem(tank.nameTag);
-            _this.gameview.popTransform();
-            _this.gameview.popTransform();
+            if (tank.buildWall != 0) {
+                var dirRad = tank.dir * Math.PI / 180.0;
+                var _a = [tank.xPos, tank.yPos], xPos = _a[0], yPos = _a[1];
+                xPos += 1.5 * Math.sin(dirRad);
+                yPos -= 1.5 * Math.cos(dirRad);
+                var _b = [xPos + 0.5, yPos + 0.5].map(Math.floor), col = _b[0], row = _b[1];
+                _this.entities.applyTranslate(_this.tileDim * col, _this.tileDim * row);
+                _this.entities.drawItem(new ShadowBlock());
+                _this.entities.popTransform();
+            }
+            _this.entities.applyTranslate(_this.tileDim * tank.xPos, _this.tileDim * tank.yPos);
+            _this.entities.addLayer(tank.getLayer(), -10, -10);
+            _this.entities.applyTranslate(_this.tileDim / 2, _this.tileDim);
+            _this.entities.drawItem(tank.nameTag);
+            _this.entities.popTransform();
+            _this.entities.popTransform();
             // To-do: add nametag w/ health bar
-            var _a = [tank.xPos, tank.yPos].map(function (val) {
+            var _c = [tank.xPos, tank.yPos].map(function (val) {
                 return _this.miniDim * (val + 0.5);
-            }), xOffset = _a[0], yOffset = _a[1];
+            }), xOffset = _c[0], yOffset = _c[1];
             _this.minimap.applyTranslate(xOffset, yOffset);
             _this.minimap.drawItem(new Circle(0, 0, _this.miniDim / 2, tank.color));
             _this.minimap.popTransform();
@@ -313,6 +350,18 @@ var Game = /** @class */ (function () {
         this.renderPowerups = function () {
             _this.powerups.forEach(function (powerup) {
                 powerup.render();
+            });
+        };
+        this.renderBullets = function () {
+            _this.bullets = _this.bullets.filter(function (bullet) {
+                bullet.render();
+                if (!_this.checkBulletCollision(bullet)) {
+                    bullet.update();
+                    return true;
+                }
+                else {
+                    _this.explosions.push(new ExplosionEffect(bullet.xPos, bullet.yPos, bullet.dir));
+                }
             });
         };
         this.renderEffects = function () {
@@ -323,23 +372,15 @@ var Game = /** @class */ (function () {
                 _this.effects.drawItem(new Circle(0, 0, tank.distanceLeft * _this.tileDim, "rgba( 238, 255, 0, 0.5 )", "#000000"));
                 _this.effects.popTransform();
             }
-            _this.renderBullets();
-            _this.renderPowerups();
-            _this.gameview.addLayer(_this.effects);
-        };
-        this.renderBullets = function () {
-            _this.bullets = _this.bullets.filter(function (bullet) {
-                bullet.render();
-                if (!_this.checkMapCollision(bullet, bullet.speed, 0.0) &&
-                    !_this.checkBulletCollision(bullet)) {
-                    bullet.update();
-                    return true;
-                }
-                else {
-                    console.log("Bullet collision detected");
-                    return false;
-                }
+            _this.explosions = _this.explosions.filter(function (explosion) {
+                var _a = [explosion.xPos + 0.5, explosion.yPos + 0.5], xPos = _a[0], yPos = _a[1];
+                _this.effects.applyTranslate(xPos * _this.tileDim, yPos * _this.tileDim);
+                _this.effects.drawItem(explosion);
+                _this.effects.popTransform();
+                explosion.update();
+                return !explosion.done;
             });
+            _this.gameview.addLayer(_this.effects);
         };
         this.renderLoop = function () {
             var _a = _this.getPlayerPos().map(function (val) {
@@ -350,9 +391,9 @@ var Game = /** @class */ (function () {
             _this.gameview.applyTranslate(xOffset, yOffset);
             _this.gameview.center();
             _this.renderMap();
-            _this.renderEffects();
             _this.renderMinimap();
-            _this.renderTanks();
+            _this.renderEffects();
+            _this.renderEntities();
             _this.gameview.popTransform();
             _this.gameview.popTransform();
             _this.gameview.popTransform();
@@ -394,20 +435,29 @@ var Game = /** @class */ (function () {
         this.getPlayerDir = function () {
             return _this.getPlayer().dir;
         };
-        this.getPlayerPowerups = function () {
-            return _this.getPlayer().buffs;
+        this.getPlayerPowerups = function () { };
+        this.getBuildWall = function () {
+            return _this.buildWall;
+        };
+        this.setBuildWall = function (row, col) {
+            if (row === undefined && col === undefined) {
+                _this.buildWall = null;
+            }
+            _this.buildWall = { row: row, col: col };
         };
         this.map = new Map(mapDim);
         this.mapDim = mapDim;
         this.scale = 1;
+        // Entity lists
         this.tanks = [];
+        this.bullets = [];
+        this.powerups = [];
+        this.explosions = [];
         this.curTurn = "";
         this.distLeftThisTurn = 5.0;
         this.curBoxDim = 40;
         this.tileDim = 40;
         this.miniDim = 10;
-        this.bullets = [];
-        this.powerups = [];
         this.keys = [];
         this.keyTimes = {};
         this.movedSinceLastTransmit = false;

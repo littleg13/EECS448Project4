@@ -12,6 +12,7 @@ var error;
   * @arg {string} the id of the element to be displayed
   */
 var makeActive = ( id ) => {
+  if( wrapper.calcula)
   console.log( "Make " + id + " Active" );
   Array.from(wrapper.getElementsByTagName("div")).forEach((elem) => {
     if( elem.id == id ) elem.classList.add("active");
@@ -429,14 +430,13 @@ function sendServerUpdate() {
       socket.emit("gameEvent", { eventType: "playerMove",
                                  newPos: myPos,
                                  newDir: myDir } );
-    }
-    else if ( game.getPlayerShot() ) {
+    } else if( game.getPlayerShot() ) {
       let finalTime = new Date();
       let powr = document.getElementById( "powerSlider" ).valueAsNumber;
       let spin = document.getElementById( "spinSlider" ).valueAsNumber;
       socket.emit( "gameEvent", { eventType: "playerFire", power: powr, spin: spin } );
       game.setPlayerShot( false );
-    }
+    } else if( game.getBuildWall() ) // returns pair : { row : , col : } 
   }
 }
 
@@ -453,7 +453,7 @@ var main = () => {
    game = new Game(20);
    handleResize();
    wrapper.style.display = "none";
-   socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
+   socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
  }
 };
 
@@ -483,3 +483,32 @@ var resetChatHeader = () => {
   else { header.innerHTML = "Show Chat"; }
   document.getElementById( "chatHeader" ).classList.remove( "newMessage" );
 }
+
+const delay = 100;
+var resizeTaskId = null;
+
+var handleResize = ( evt ) => {
+  if( game === null ) return;
+  let size = Math.min( window.innerWidth, window.innerHeight );
+  let gameBody = document.getElementById( "gameBody" );
+  gameBody.style.width = size + "px";
+  gameBody.style.height = size + "px";
+}
+
+window.addEventListener("resize", (evt) => {
+  if( resizeTaskId !== null ) {
+    clearTimeout( resizeTaskId );
+  }
+
+  resizeTaskId = setTimeout( () => {
+    resizeTaskId = null;
+    handleResize( evt );
+  }, delay);
+});
+
+var redrawMap = () => {
+  game.map.redrawRange( 0, 20, 0, 20 );
+  game.background.drawItem( game.map );
+}
+
+window.addEventListener( "load", handleResize );
