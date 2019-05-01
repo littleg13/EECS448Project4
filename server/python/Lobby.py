@@ -341,6 +341,7 @@ class Lobby:
             position[1] =  -math.cos(direction)*increment + position[1]
             finalDistance += increment
             direction += max(0, finalDistance - power) * spin*math.pi/(180)
+            print("{", position[0], ", ", position[1], ", ", direction, "}", flush='true')
 
             if(abs(player.direction - direction) >= 3/4 * 2*math.pi):
                 collided = True
