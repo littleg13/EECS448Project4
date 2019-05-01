@@ -204,6 +204,15 @@ class Game {
       }
       this.keys[" "] = false;
     }
+    if( this.keys["e"] && player.buildWall != 0 ) {
+      let [ xPos, yPos ] = [ player.xPos, player.yPos ];
+      xPos += 1.5 * Math.sin( player.dir * Math.PI / 180.0 );
+      yPos -= 1.5 * Math.cos( player.dir * Math.PI / 180.0 );
+      let [ col, row ] = [ xPos + 0.5, yPos + 0.5 ].map( Math.floor );
+      this.setBuildWall( row, col );
+      player.buildWall--;
+      this.keys["e"] = false;
+    }
 
     if( player.distanceLeft <= 0 ) return;
     let deltaPos = Math.min( player.distanceLeft, 0.125 );
@@ -219,15 +228,6 @@ class Game {
         player.moveBackward( 0.125 );
         this.setPlayerMoved();
       }
-    }
-    if( this.keys["e"] && player.buildWall != 0 ) {
-      let [ xPos, yPos ] = [ player.xPos, player.yPos ];
-      xPos += 1.5 * Math.sin( player.dir * Math.PI / 180.0 );
-      yPos -= 1.5 * Math.cos( player.dir * Math.PI / 180.0 );
-      let [ col, row ] = [ xPos + 0.5, yPos + 0.5 ].map( Math.floor );
-      this.setBuildWall( row, col );
-      player.buildWall--;
-      this.keys["e"] = false;
     }
 
     if( this.getPlayerMoved() ) {
@@ -368,6 +368,11 @@ class Game {
 */
   renderMap = () : void => {
     this.gameview.addLayer( this.background );
+  }
+
+  redrawMap = () : void => {
+    this.map.redrawRange( 0, this.mapDim, 0, this.mapDim );
+    this.background.drawItem( this.map );
   }
 
   renderMinimap = () : void => {

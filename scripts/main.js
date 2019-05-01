@@ -1,5 +1,5 @@
-//const socket = io( "https://448.cuzzo.net" );
-const socket = io( "http://localhost:3000" );
+const socket = io( "https://448.cuzzo.net" );
+//const socket = io( "http://localhost:3000" );
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
 var game = null;
@@ -12,7 +12,6 @@ var error;
   * @arg {string} the id of the element to be displayed
   */
 var makeActive = ( id ) => {
-  if( wrapper.calcula)
   console.log( "Make " + id + " Active" );
   Array.from(wrapper.getElementsByTagName("div")).forEach((elem) => {
     if( elem.id == id ) elem.classList.add("active");
@@ -313,9 +312,9 @@ var gameUpdateHandler = (data) => {
   switch(data["eventType"]) {
     case "playerMove":
       if(localStorage.userID != data["userID"]) {
-        game.updateTankPosition(data["userID"],
-                                data["newPos"][0], data["newPos"][1],
-                                data["newDir"]);
+        game.updateTankPosition( data["userID"],
+                                 data["newPos"][0], data["newPos"][1],
+                                 data["newDir"] );
       }
       if( data.playerPowerups ) {
         game.updateTankPowerups( data.userID, data.playerPowerups );
@@ -328,6 +327,7 @@ var gameUpdateHandler = (data) => {
       }
       break;
     case "playerFire":
+      console.log( data );
       if( data.mapUpdate ) {
         game.updateMap( data.mapUpdate );
       }
@@ -506,9 +506,4 @@ window.addEventListener("resize", (evt) => {
   }, delay);
 });
 
-var redrawMap = () => {
-  game.map.redrawRange( 0, 20, 0, 20 );
-  game.background.drawItem( game.map );
-}
-
-handleResize();
+setTimeout( handleResize, 500 );

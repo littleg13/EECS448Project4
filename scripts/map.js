@@ -59,6 +59,17 @@ var Map = /** @class */ (function (_super) {
                 });
             });
         };
+        _this.setTile = function (val, row, col) {
+            if (val < 0) {
+                _this.tiles[row][col] = new OuterWallTile();
+            }
+            if (val == 0) {
+                _this.tiles[row][col] = new FloorTile();
+            }
+            if (val > 0) {
+                _this.tiles[row][col] = new WallTile(val);
+            }
+        };
         _this.setTiles = function (tiles) {
             tiles.forEach(function (row, i) {
                 row.forEach(function (val, j) {

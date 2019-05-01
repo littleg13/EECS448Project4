@@ -65,6 +65,12 @@ class Map extends Renderable {
     } );
   }
 
+  setTile = ( val : number, row : number, col : number ) : void => {
+    if( val  < 0 ) { this.tiles[ row ][ col ] = new OuterWallTile(); }
+    if( val == 0 ) { this.tiles[ row ][ col ] = new FloorTile(); }
+    if( val >  0 ) { this.tiles[ row ][ col ] = new WallTile( val ); }
+  }
+
   setTiles = ( tiles : number[][] ) : void => {
     tiles.forEach( ( row, i ) => {
       row.forEach( ( val, j ) => {
