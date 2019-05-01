@@ -436,7 +436,7 @@ function sendServerUpdate() {
       let spin = document.getElementById( "spinSlider" ).valueAsNumber;
       socket.emit( "gameEvent", { eventType: "playerFire", power: powr, spin: spin } );
       game.setPlayerShot( false );
-    } else if( game.getBuildWall() ) // returns pair : { row : , col : } 
+    } else if( game.getBuildWall() ) {} // returns pair : { row : , col : } 
   }
 }
 
