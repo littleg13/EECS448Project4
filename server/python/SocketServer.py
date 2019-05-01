@@ -192,4 +192,4 @@ def gameEvent(sid, data):
         io.emit('error', {'errorType': 'Unknown lobbycode given in gameEvent'},  room=lobbyCode)
 
 if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 3000)), app)
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 3001)), app)
