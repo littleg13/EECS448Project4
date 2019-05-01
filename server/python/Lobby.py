@@ -239,7 +239,7 @@ class Lobby:
                     collisionData[i] = self.checkBulletCollision( userID, player, data['power'], data['spin'], directionOffset )
                     if(collisionData[i][0]['type'] == 'map'):
                         outboundData[i]['bulletHit'] = collisionData[i][0]
-                    elif(collisionData[i][0] != 'edge'):
+                    elif(collisionData[i][0]["type"] != 'edge'):
                         userID = collisionData[i][0]["userID"]
                         newHealth = self.players[userID].health - 20
                         if(newHealth <= 0):
