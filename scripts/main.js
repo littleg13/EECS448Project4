@@ -1,5 +1,5 @@
-//const socket = io( "https://448.cuzzo.net" );
-const socket = io( "http://localhost:3000" );
+const socket = io( "https://448.cuzzo.net" );
+//const socket = io( "http://localhost:3000" );
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
 var game = null;
@@ -12,7 +12,6 @@ var error;
   * @arg {string} the id of the element to be displayed
   */
 var makeActive = ( id ) => {
-  if( wrapper.calcula)
   console.log( "Make " + id + " Active" );
   Array.from(wrapper.getElementsByTagName("div")).forEach((elem) => {
     if( elem.id == id ) elem.classList.add("active");
@@ -313,9 +312,9 @@ var gameUpdateHandler = (data) => {
   switch(data["eventType"]) {
     case "playerMove":
       if(localStorage.userID != data["userID"]) {
-        game.updateTankPosition(data["userID"],
-                                data["newPos"][0], data["newPos"][1],
-                                data["newDir"]);
+        game.updateTankPosition( data["userID"],
+                                 data["newPos"][0], data["newPos"][1],
+                                 data["newDir"] );
       }
       if( data.playerPowerups ) {
         game.updateTankPowerups( data.userID, data.playerPowerups );
@@ -328,18 +327,25 @@ var gameUpdateHandler = (data) => {
       }
       break;
     case "playerFire":
-      if( data.mapUpdate ) {
-        game.updateMap( data.mapUpdate );
-      }
-      else if( data.playerHit ) {
-        game.updateTankHealth( data.playerHit, data.newHealth );
-        if( data.gameOver ) {
-          game.endGame( data.gameOver );
-          clearInterval( sendServerUpdateInt );
-          makeActive( "splash2" );
+      console.log(data);
+      for( let i=0;i<data.count;i++ ){
+        if( data.mapUpdate ) {
+          game.updateMap( data.mapUpdate );
         }
+        else if( data[i].playerHit ) {
+          game.updateTankHealth( data[i].playerHit, data[i].newHealth );
+          if( data.gameOver ) {
+            game.endGame( data.gameOver );
+            clearInterval( sendServerUpdateInt );
+            makeActive( "splash2" );
+          }
+        }
+        directionOffset = 0;
+        if(data.count > 1)
+          directionOffset = ((i-Math.floor(data.count/2))/Math.floor(data.count/2)) * 30
+        game.fire( data.userID, data.power, data.spin, data[i].distance, directionOffset );
       }
-      game.fire( data.userID, data.power, data.spin, data.distance );
+      game.getPlayer(data.userID).canShoot = false;
       break;
      case "advanceTurn":
       game.updateTurn( data["userID"] );
@@ -514,7 +520,4 @@ window.addEventListener("resize", (evt) => {
   }, delay);
 });
 
-var redrawMap = () => {
-  game.map.redrawRange( 0, 20, 0, 20 );
-  game.background.drawItem( game.map );
-}
+setTimeout( handleResize, 500 );

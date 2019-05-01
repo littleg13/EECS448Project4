@@ -124,6 +124,10 @@ var Tank = /** @class */ (function (_super) {
                 _this.buildWall++;
             _this.sprite.setBuffs(_this.multiShot, _this.buildWall);
         };
+        _this.clearPowerups = function () {
+            _this.multiShot = 0;
+            _this.buildWall = 0;
+        };
         _this.xPos = xPos;
         _this.yPos = yPos;
         _this.dir = dir;

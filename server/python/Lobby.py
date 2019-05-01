@@ -222,33 +222,43 @@ class Lobby:
                         outboundData['playerPowerups'] = player.powerups
                         outboundData['powerupsOnMap'] = self.powerups
             elif data['eventType'] == 'playerFire':
-                collisionData = self.checkBulletCollision(userID, player, data['power'], data['spin'])
                 turnsToAdvance = 1
-                if(collisionData[0] is 'map'):
-                    outboundData['mapUpdate'] = self.map
-                elif(collisionData[0] != 'edge'):
-                    newHealth = self.players[collisionData[0]].health - 20
-                    if(newHealth <= 0):
-                        newHealth = 0
-                        self.order.remove(collisionData[0])
-                        if (len(self.order) == 1):
-                            outboundData['gameOver'] = userID
-                        turnsToAdvance = 0
-                        self.players[collisionData[0]].alive = False
-                    self.players[collisionData[0]].health = newHealth
-                    outboundData['playerHit'] = collisionData[0]
-                    outboundData['newHealth'] = newHealth
-                self.advanceTurn(turnsToAdvance)
-                if (self.addedPowerup):
-                    self.addedPowerup = False
-                    outboundData['powerupsOnMap'] = self.powerups
-                outboundData['xPos'] = collisionData[2]
-                outboundData['yPos'] = collisionData[3]
-                outboundData['distance'] = collisionData[1]
+                count = int(math.pow(3,player.powerups.count('multiShot')))
+                outboundData['count'] = count
+                collisionData = {}
+                for i in range(0, count):
+                    outboundData[i] = {}
+                    directionOffset = 0
+                    if(count > 1):
+                        directionOffset = ((i-math.floor(count/2))/math.floor(count/2)) * math.pi/6
+                    collisionData[i] = self.checkBulletCollision(userID, player, data['power'], data['spin'], directionOffset)
+                    if(collisionData[i][0] is 'map'):
+                        outboundData['mapUpdate'] = self.map
+                    elif(collisionData[i][0] != 'edge'):
+                        newHealth = self.players[collisionData[i][0]].health - 20
+                        if(newHealth <= 0):
+                            newHealth = 0
+                            self.order.remove(collisionData[i][0])
+                            if (len(self.order) == 1):
+                                outboundData['gameOver'] = userID
+                            turnsToAdvance = 0
+                            self.players[collisionData[i][0]].alive = False
+                        self.players[collisionData[i][0]].health = newHealth
+                        outboundData[i]['playerHit'] = collisionData[0]
+                        outboundData[i]['newHealth'] = newHealth
+                    self.advanceTurn(turnsToAdvance)
+                    if (self.addedPowerup):
+                        self.addedPowerup = False
+                        outboundData['powerupsOnMap'] = self.powerups
+                    outboundData[i]['xPos'] = collisionData[i][2]
+                    outboundData[i]['yPos'] = collisionData[i][3]
+                    outboundData[i]['distance'] = collisionData[i][1]
                 outboundData['power'] = data['power']
                 outboundData['spin'] = data['spin']
                 outboundData['eventType'] = 'playerFire'
                 outboundData['userID'] = userID
+                player.powerups = []
+                outboundData['powerups'] = player.powerups
             elif data['eventType'] == 'placeBlock':
                 print("Player placed block")
                 print(player.powerups)
@@ -294,7 +304,7 @@ class Lobby:
                 return True
         return False
 
-    def checkBulletCollision(self, userID, player, power, spin):
+    def checkBulletCollision(self, userID, player, power, spin, directionOffset):
         """Handles the collision of bullets
 
         Checks if the bullet will collide with either a wall or a player, and
@@ -314,7 +324,7 @@ class Lobby:
 
         """
         position = [player.xPos + 0.5, player.yPos + 0.5]
-        direction = player.direction
+        direction = player.direction + directionOffset
         spin = spin/5
         increment = 0.1
         collided = False
