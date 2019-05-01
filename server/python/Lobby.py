@@ -200,16 +200,21 @@ class Lobby:
         outboundData = {}
         if userID == self.order[self.turn]:
             if data['eventType'] == 'playerMove':
+                outboundData['eventType'] = 'playerMove'
+                outboundData['userID'] = userID
                 distance = math.sqrt((player.xPos-data['newPos'][0])**2 + (player.yPos-data['newPos'][1])**2)
-                player.distanceLeft  -= distance
+                player.distanceLeft = max(player.distanceLeft - distance, 0)
+                print("Processing move with distanceLeft of: ", player.distanceLeft)
+                print("Dir is: ", player.direction)
+                player.direction = data['newDir']%(math.pi * 2)
+                print("And is now: ", player.direction)
+                outboundData['newDir'] = data['newDir']
+                outboundData['newPos'] = [player.xPos, player.yPos]
+                print("Is move fair?", player.distanceLeft > 0)
                 if player.distanceLeft > 0:
                     player.xPos = data['newPos'][0]
                     player.yPos = data['newPos'][1]
-                    player.direction = data['newDir']%(math.pi * 2)
-                    outboundData['eventType'] = 'playerMove'
-                    outboundData['userID'] = userID
                     outboundData['newPos'] = data['newPos']
-                    outboundData['newDir'] = data['newDir']
                     if (self.checkForPowerupCollision(userID, player)):
                         if('healthPack' in player.powerups):
                             player.health = min(100, player.health + 20)
