@@ -125,14 +125,14 @@ var Game = /** @class */ (function () {
             if (_this.curTurn != localStorage.userID)
                 return;
             if (_this.keys["ArrowLeft"]) {
-                if (!_this.checkMapCollision(player, 0, -2.0)) {
-                    player.rotateCCW(2.0);
+                if (!_this.checkMapCollision(player, 0, -4.0)) {
+                    player.rotateCCW(4.0);
                     _this.setPlayerMoved();
                 }
             }
             if (_this.keys["ArrowRight"]) {
-                if (!_this.checkMapCollision(player, 0, 2.0)) {
-                    player.rotateCW(2.0);
+                if (!_this.checkMapCollision(player, 0, 4.0)) {
+                    player.rotateCW(4.0);
                     _this.setPlayerMoved();
                 }
             }
@@ -262,7 +262,6 @@ var Game = /** @class */ (function () {
                 bullet.attachToLayer(_this.entities);
                 _this.bullets.push(bullet);
                 shooter.canShoot = false;
-                shooter.clearPowerups();
             }
         };
         this.endGame = function (winnerUserID) {
@@ -299,9 +298,9 @@ var Game = /** @class */ (function () {
         this.renderMap = function () {
             _this.gameview.addLayer(_this.background);
         };
-        this.redrawMap = function () {
-            _this.map.redrawRange(0, _this.mapDim, 0, _this.mapDim);
-            _this.background.drawItem(_this.map);
+        this.redrawTile = function (row, col) {
+            _this.map.redraw(row, col);
+            _this.background.drawItem(map);
         };
         this.renderMinimap = function () {
             _this.minimap.applyScale(_this.miniDim / _this.tileDim, _this.miniDim / _this.tileDim);
@@ -357,12 +356,14 @@ var Game = /** @class */ (function () {
         this.renderBullets = function () {
             _this.bullets = _this.bullets.filter(function (bullet) {
                 bullet.render();
-                if (!_this.checkBulletCollision(bullet)) {
+                var delDir = Math.abs(_this.getPlayer(bullet.shooterID).dir - bullet.dir);
+                if (!_this.checkBulletCollision(bullet) && delDir < 270) {
                     bullet.update();
                     return true;
                 }
                 else {
                     _this.explosions.push(new ExplosionEffect(bullet.xPos, bullet.yPos, bullet.dir));
+                    return false;
                 }
             });
         };

@@ -187,14 +187,14 @@ class Game {
     let player = this.getPlayer();
     if( this.curTurn != localStorage.userID ) return;
     if( this.keys["ArrowLeft"] ) {
-      if( !this.checkMapCollision( player, 0, -2.0 ) ) {
-        player.rotateCCW( 2.0 );
+      if( !this.checkMapCollision( player, 0, -4.0 ) ) {
+        player.rotateCCW( 4.0 );
         this.setPlayerMoved();
       }
     }
     if( this.keys["ArrowRight"] ) {
-      if( !this.checkMapCollision( player, 0, 2.0 ) ) {
-        player.rotateCW( 2.0 );
+      if( !this.checkMapCollision( player, 0, 4.0 ) ) {
+        player.rotateCW( 4.0 );
         this.setPlayerMoved();
       }
     }
@@ -330,7 +330,6 @@ class Game {
       bullet.attachToLayer( this.entities );
       this.bullets.push( bullet );
       shooter.canShoot = false;
-      shooter.clearPowerups();
     }
   }
 
@@ -371,9 +370,9 @@ class Game {
     this.gameview.addLayer( this.background );
   }
 
-  redrawMap = () : void => {
-    this.map.redrawRange( 0, this.mapDim, 0, this.mapDim );
-    this.background.drawItem( this.map );
+  redrawTile = ( row : number, col : number ) : void => {
+    this.map.redraw( row, col );
+    this.background.drawItem( map );
   }
 
   renderMinimap = () : void => {
@@ -433,11 +432,13 @@ class Game {
   renderBullets = () : void => {
     this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
       bullet.render();
-      if( !this.checkBulletCollision( bullet ) ) {
+      let delDir = Math.abs( this.getPlayer( bullet.shooterID ).dir - bullet.dir );
+      if( !this.checkBulletCollision( bullet ) && delDir < 270 ) {
         bullet.update();
         return true;
       } else {
         this.explosions.push( new ExplosionEffect( bullet.xPos, bullet.yPos, bullet.dir ) );
+        return false;
       }
     });
   }

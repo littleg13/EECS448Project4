@@ -353,7 +353,7 @@ var gameUpdateHandler = (data) => {
     case "blockPlaced":
       xPosOfUpdate = data['mapUpdate'][0]
       yPosOfUpdate = data['mapUpdate'][1]
-      // TODO: Change the value of this POS on map and re-render
+      game.redrawTile( yPosOfUpdate, xPosOfUpdate );
       break;
   }
   if( data.powerupsOnMap ) {
