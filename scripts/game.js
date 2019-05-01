@@ -283,7 +283,7 @@ var Game = /** @class */ (function () {
         this.showMsg = function (userID, text) {
             var messageWindow = document.getElementById("messageWindow");
             var msg = document.createElement("div");
-            var username = _this.getPlayer(userID);
+            var username = _this.getPlayer(userID).playerName;
             if (userID = localStorage.userID) {
                 msg.classList.add("self");
             }

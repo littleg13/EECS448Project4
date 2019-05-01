@@ -353,7 +353,7 @@ class Game {
   showMsg = ( userID : string, text : string ) => {
     let messageWindow = document.getElementById( "messageWindow" );
     let msg = document.createElement( "div" );
-    let username = this.getPlayer( userID );
+    let username = this.getPlayer( userID ).playerName;
 
     if( userID = localStorage.userID ) { msg.classList.add("self"); }
     msg.classList.add( "message" );
