@@ -117,10 +117,17 @@ var Tank = /** @class */ (function (_super) {
             _this.distanceLeft = 5.0;
             _this.infoCard.setTurn(isTurn);
         };
-        _this.addPowerups = function (powerups) {
-            powerups.forEach(_this.addPowerup);
+        _this.addPowerup = function (powerup) {
+            if (powerup instanceof MultiShotToken)
+                _this.multiShot++;
+            else if (powerup instanceof BuildWallToken)
+                _this.buildWall++;
+            _this.sprite.setBuffs(_this.multiShot, _this.buildWall);
         };
-        _this.addPowerup = function (powerup) { };
+        _this.clearPowerups = function () {
+            _this.multiShot = 0;
+            _this.buildWall = 0;
+        };
         _this.xPos = xPos;
         _this.yPos = yPos;
         _this.dir = dir;
@@ -134,13 +141,15 @@ var Tank = /** @class */ (function (_super) {
         _this.layer = new Layer(playerName, 60, 60);
         _this.health = health;
         _this.canShoot = false;
+        _this.multiShot = 0;
+        _this.buildWall = 0;
         return _this;
     }
     return Tank;
 }(Entity));
 var Bullet = /** @class */ (function (_super) {
     __extends(Bullet, _super);
-    function Bullet(xPos, yPos, dir, distToGo, power, curve) {
+    function Bullet(userID, xPos, yPos, dir, distToGo, power, curve) {
         var _a;
         var _this = _super.call(this) || this;
         _this.render = function () {
@@ -154,14 +163,14 @@ var Bullet = /** @class */ (function (_super) {
             _this.boom = true;
         };
         _this.update = function () {
-            if (_this.boom)
-                return;
             var dirRad = _this.dir * Math.PI / 180.0;
             _this.xPos += Math.sin(dirRad) * _this.speed;
             _this.yPos -= Math.cos(dirRad) * _this.speed;
             _this.distGone += _this.speed;
             _this.dir += Math.max(0, _this.distGone - _this.power) * _this.curve;
+            return _this.boom;
         };
+        _this.shooterID = userID;
         _this.xPos = xPos;
         _this.yPos = yPos;
         _this.dir = dir;
@@ -229,8 +238,3 @@ var HealthPackToken = /** @class */ (function (_super) {
     }
     return HealthPackToken;
 }(Powerup));
-var Buff = /** @class */ (function () {
-    function Buff() {
-    }
-    return Buff;
-}());

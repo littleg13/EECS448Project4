@@ -10,25 +10,28 @@ class PowerupUpdate {
 class Game {
   background  : Layer;
   gameview    : Layer;
+  entities    : Layer;
   effects     : Layer;
   minimap     : Layer;
   map         : Map;
   mapDim      : number;
   scale       : number;
   tanks       : Tank[];
+  bullets     : Bullet[];
+  powerups    : Powerup[];
+  explosions : Effect[];
   distLeftThisTurn : number;
   curTurn     : string;
   curBoxDim   : number;
   tileDim     : number;
   miniDim     : number;
-  bullets     : Bullet[];
-  powerups    : Powerup[];
   keys        : string[];
   keyTimes;
   movedSinceLastTransmit : boolean;
   playerShot             : boolean;
   begun                  : boolean;
   won                    : boolean;
+  buildWall              : object;
   gameTickUpdateInt      : number;
   sendServerUpdateInt    : number;
 
@@ -36,18 +39,23 @@ class Game {
     this.map = new Map( mapDim );
     this.mapDim = mapDim;
     this.scale = 1;
-    this.tanks = [];
+
+    // Entity lists
+    this.tanks       = [];
+    this.bullets     = [];
+    this.powerups    = [];
+    this.explosions = [];
+
     this.curTurn = "";
     this.distLeftThisTurn = 5.0;
     this.curBoxDim = 40;
     this.tileDim   = 40;
     this.miniDim   = 10;
-    this.bullets   = [];
-    this.powerups  = [];
     this.keys      = [];
     this.keyTimes  = {};
     this.movedSinceLastTransmit = false;
     this.playerShot = false;
+    this.buildWall = null;
     this.begun = false;
     this.won = false;
     this.initLayers();
@@ -60,14 +68,19 @@ class Game {
 */
 
   initLayers = () : void => {
-    let viewRadius = 7; // in tiles
+    let viewRadius = 10; // in tiles
     this.gameview = new Layer( "gameview", 2 * viewRadius * this.tileDim, 2 * viewRadius * this.tileDim );
-    this.gameview.attachToParent( document.getElementById( "center" ) );
+    this.gameview.attachToParent( document.getElementById( "gameBody" ) );
 
-    this.effects = new Layer( "effects", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
+    let canvasDim = this.mapDim * this.tileDim;
+
+    this.entities = new Layer( "entities", canvasDim, canvasDim );
+    this.entities.attachToParent( document.getElementById( "hidden" ) );
+
+    this.effects = new Layer( "effects", canvasDim, canvasDim );
     this.effects.attachToParent( document.getElementById( "hidden" ) );
 
-    this.background = new Layer( "background", this.mapDim * this.tileDim, this.mapDim * this.tileDim );
+    this.background = new Layer( "background", canvasDim, canvasDim );
     this.background.attachToParent( document.getElementById( "hidden" ) );
 
     this.minimap = new Layer( "minimap", this.miniDim * this.mapDim, this.miniDim * this.mapDim );
@@ -90,6 +103,8 @@ class Game {
   populateSidebar = () : void => {
     let userInfoDiv = document.getElementById("userCard");
     let lobbyInfoDiv = document.getElementById("lobbyInfo");
+    userInfoDiv.innerHTML = "";
+    lobbyInfoDiv.innerHTML = "";
     this.tanks.map( ( tank ) => {
       let userID = tank.userID;
       if( document.getElementById( "info" + userID ) === null ) {
@@ -115,6 +130,7 @@ class Game {
       let retVal = tiles[ row ][ col ].isBlocking;
       if( obj instanceof Bullet ) {
         this.map.redraw( row, col );
+//        this.effects.push( new ExplosionSprite() );
         this.background.applyTranslate( col * this.tileDim, row * this.tileDim );
         this.background.drawItem( this.map.getTile( row, col ) );
         this.background.popTransform();
@@ -123,34 +139,66 @@ class Game {
     } );
   }
 
-  checkPowerupCollision = ( obj : Entity ) : number[] => {
-    let corners = obj.projHitbox();
-    let powerupIndices = this.powerups.map( ( powerup : Powerup, index : number ) : number => {
-      let match = corners.some( ( point : Point ) : boolean => {
-        let [ col, row ] = [ point.x, point.y ].map( Math.floor );
-        let [ pCol, pRow ] = [ powerup.xPos, powerup.yPos ].map( Math.floor );
-        return ( pCol == col && pRow == row );
-      } );
-      return ( match ? index : -1 );
-    } ).filter( ( index : number ) : boolean => {
-      return index > -1;
-    } );
-    return powerupIndices;
+  checkPowerupCollision = ( obj : Entity ) : number => {
+    let [ col, row ] = [ obj.xPos + 0.5, obj.yPos + 0.5 ].map( Math.floor );
+    let retIndex = this.powerups.map( ( powerup : Powerup ) : boolean => {
+      if( powerup.xPos == col && powerup.yPos == row ) return true;
+      else return false;
+    } ).indexOf( true );
+    return retIndex;
   }
 
+  checkBulletCollision = ( bullet : Bullet ) : boolean => {
+    let speed = bullet.speed;
+    let [ bullX, bullY ] = [ bullet.xPos + 0.5, bullet.yPos + 0.5 ];
+    bullX += speed * Math.sin( bullet.dir * Math.PI / 180.0 );
+    bullY -= speed * Math.cos( bullet.dir * Math.PI / 180.0 );
+    console.log( bullet.xPos, bullet.yPos, bullet.dir * Math.PI / 180.0 );
+    if( this.checkBulletTrajectory( bullX, bullY, bullet.shooterID ) )
+      return true;
+    else return false;
+  }
+
+  checkBulletTrajectory = ( bullX : number, bullY : number, userID : string ) : boolean => {
+    let [ bullCol, bullRow ] = [ bullX, bullY ].map( Math.floor );
+    let tile = this.map.getTile( bullRow, bullCol );
+    if( tile.isBlocking ) {
+      this.map.redraw( bullRow, bullCol );
+      this.background.applyTranslate( bullCol * this.tileDim, bullRow * this.tileDim );
+      this.background.drawItem( this.map.getTile( bullRow, bullCol ) );
+      this.background.popTransform();
+      return true;
+    } else {
+      let retVal = this.tanks.some( ( tank : Tank ) : boolean => {
+        if( tank.userID == userID ) return false;
+        if( tank.health == 0 ) return false;
+        let dirRad = tank.dir * Math.PI / 180.0;
+        let [ xPos, yPos ] = [ tank.xPos + 0.5, tank.yPos + 0.5 ];
+        let between = ( val, a, b ) => {
+          let low = Math.min( a, b );
+          let high = Math.max( a, b );
+          return ( low < val && val < high );
+        }
+        let [ delX, delY ] = [ bullX - xPos, bullY - yPos ];
+        let dist = Math.sqrt( delX * delX + delY * delY );
+        return dist < 0.5;
+      } );
+      return retVal;
+    }
+  }
 
   processInput = () : void => {
     let player = this.getPlayer();
     if( this.curTurn != localStorage.userID ) return;
     if( this.keys["ArrowLeft"] ) {
-      if( !this.checkMapCollision( player, 0, -2.0 ) ) {
-        player.rotateCCW( 2.0 );
+      if( !this.checkMapCollision( player, 0, -4.0 ) ) {
+        player.rotateCCW( 4.0 );
         this.setPlayerMoved();
       }
     }
     if( this.keys["ArrowRight"] ) {
-      if( !this.checkMapCollision( player, 0, 2.0 ) ) {
-        player.rotateCW( 2.0 );
+      if( !this.checkMapCollision( player, 0, 4.0 ) ) {
+        player.rotateCW( 4.0 );
         this.setPlayerMoved();
       }
     }
@@ -159,6 +207,15 @@ class Game {
         this.setPlayerShot( true );
       }
       this.keys[" "] = false;
+    }
+    if( this.keys["e"] && player.buildWall != 0 ) {
+      let [ xPos, yPos ] = [ player.xPos, player.yPos ];
+      xPos += 1.5 * Math.sin( player.dir * Math.PI / 180.0 );
+      yPos -= 1.5 * Math.cos( player.dir * Math.PI / 180.0 );
+      let [ col, row ] = [ xPos + 0.5, yPos + 0.5 ].map( Math.floor );
+      this.setBuildWall( row, col );
+      player.buildWall--;
+      this.keys["e"] = false;
     }
 
     if( player.distanceLeft <= 0 ) return;
@@ -176,19 +233,15 @@ class Game {
         this.setPlayerMoved();
       }
     }
+
     if( this.getPlayerMoved() ) {
-      this.checkPowerupCollision( player ).forEach( ( powerupIndex ) => {
-        player.addPowerup( this.powerups.splice( powerupIndex, 1 ) );
-      } );
+      let powerupIndex = this.checkPowerupCollision( player );
+      if( powerupIndex > -1 ) {
+        let powerup = this.powerups.splice( powerupIndex, 1 )[0];
+        player.addPowerup( powerup );
+      }
     }
     player.distanceLeft = Math.max( 0, player.distanceLeft );
-  }
-
-  recordKeyPress = ( key : string ) : void => {
-    if( !this.keys[ " " ] ) {
-      this.keyTimes[ key ] = new Date();
-      this.keys[ " " ] = true;
-    }
   }
 
 /**
@@ -202,6 +255,7 @@ class Game {
     } else {
       this.map.setTiles( map );
       this.background.drawItem( this.map );
+      this.startGame();
     }
   }
 
@@ -210,11 +264,11 @@ class Game {
   }
 
   updateTankPowerups = ( userID : string, powerups : string[] ) : void => {
-    /*
-    let objs = powerups.map( ( str : string ) : Buff => {
-      return new Buff();
-    } );
-    this.getPlayer( userID ).addPowerups( objs );*/
+    console.log( powerups );
+  }
+
+  updateTankDistanceLeft = ( userID : string, distanceLeft : number ) : void => {
+    this.getPlayer( userID ).distanceLeft = distanceLeft;
   }
 
   updateTankPosition = ( userID : string, newXPos : number, newYPos: number, newDirection : number ) : void => {
@@ -236,9 +290,11 @@ class Game {
     } else if( deltaLocalY < 0 ) {
       tank.moveBackward( -deltaLocalY );
     }
+    /*
     this.checkPowerupCollision( tank ).forEach( ( powerupIndex : number ) : void => {
-      tank.addPowerup( this.powerups.splice( powerupIndex, 1 ) );
+      tank.addPowerups( this.powerups.splice( powerupIndex, 1 ) );
     } );
+    */
   }
 
   updateTurn = ( userID : string ) => {
@@ -268,17 +324,22 @@ class Game {
       }
     } );
     this.powerups.forEach( ( powerup : Powerup ) : void => {
-      powerup.attachToLayer( this.effects );
+      powerup.attachToLayer( this.entities );
     } );
   }
 
-  fire = ( shooterID : string, power : number, curve : number, dist : number ) => {
+  placeWall = ( row : number, col : number ) : void => {
+    this.map.setTile( 1, row, col );
+    this.map.redraw( row, col );
+    this.background.drawItem( this.map );
+  }
+
+  fire = ( shooterID : string, power : number, curve : number, dist : number, dirOffset : number ) => {
     let shooter = this.getPlayer( shooterID );
     if( shooter.canShoot ) {
-      let bullet = new Bullet( shooter.xPos, shooter.yPos, shooter.dir, dist, power, curve );
-      bullet.attachToLayer( this.effects );
+      let bullet = new Bullet( shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve );
+      bullet.attachToLayer( this.entities );
       this.bullets.push( bullet );
-      shooter.canShoot = false;
     }
   }
 
@@ -289,10 +350,12 @@ class Game {
     delete localStorage.lobbyCode;
   }
 
-  showMsg = ( username : string, text : string ) => {
+  showMsg = ( userID : string, text : string ) => {
     let messageWindow = document.getElementById( "messageWindow" );
     let msg = document.createElement( "div" );
-    if( username == this.getPlayer().playerName ) { msg.classList.add("self"); }
+    let username = this.getPlayer( userID ).playerName;
+
+    if( userID = localStorage.userID ) { msg.classList.add("self"); }
     msg.classList.add( "message" );
 
     let sender = document.createElement( "div" );
@@ -305,7 +368,9 @@ class Game {
     msg.appendChild( content );
     msg.appendChild( sender );
 
+    let updateScroll = ( messageWindow.scrollHeight - messageWindow.offsetHeight ) == messageWindow.scrollTop;
     messageWindow.insertAdjacentElement( "beforeend", msg );
+    if( updateScroll ) msg.scrollIntoView( false );
   }
 
 /**
@@ -317,10 +382,23 @@ class Game {
     this.gameview.addLayer( this.background );
   }
 
+  redrawTile = ( row : number, col : number ) : void => {
+    this.map.redraw( row, col );
+    this.background.drawItem( this.map );
+  }
+
   renderMinimap = () : void => {
     this.minimap.applyScale( this.miniDim / this.tileDim, this.miniDim / this.tileDim);
     this.minimap.addLayer( this.background );
     this.minimap.popTransform();
+  }
+
+  renderEntities = () : void => {
+    this.entities.clear();
+    this.renderBullets();
+    this.renderPowerups();
+    this.renderTanks();
+    this.gameview.addLayer( this.entities );
   }
 
   renderTanks = () : void => {
@@ -332,12 +410,22 @@ class Game {
 
   renderTank = ( tank ) : void => {
     tank.updateImage();
-    this.gameview.applyTranslate( this.tileDim * tank.xPos, this.tileDim * tank.yPos );
-    this.gameview.addLayer( tank.getLayer(), -10, -10 );
-    this.gameview.applyTranslate( this.tileDim / 2, this.tileDim );
-    this.gameview.drawItem( tank.nameTag );
-    this.gameview.popTransform();
-    this.gameview.popTransform();
+    if( tank.buildWall != 0 ) {
+      let dirRad = tank.dir * Math.PI / 180.0;
+      let [ xPos, yPos ] = [ tank.xPos, tank.yPos ];
+      xPos += 1.5 * Math.sin( dirRad );
+      yPos -= 1.5 * Math.cos( dirRad );
+      let [ col, row ] = [ xPos + 0.5, yPos + 0.5 ].map( Math.floor );
+      this.entities.applyTranslate( this.tileDim * col, this.tileDim * row );
+      this.entities.drawItem( new ShadowBlock() );
+      this.entities.popTransform();
+    }
+    this.entities.applyTranslate( this.tileDim * tank.xPos, this.tileDim * tank.yPos );
+    this.entities.addLayer( tank.getLayer(), -10, -10 );
+    this.entities.applyTranslate( this.tileDim / 2, this.tileDim );
+    this.entities.drawItem( tank.nameTag );
+    this.entities.popTransform();
+    this.entities.popTransform();
     // To-do: add nametag w/ health bar
     let [ xOffset, yOffset ] = [ tank.xPos, tank.yPos ].map( ( val ) => {
       return this.miniDim * ( val + 0.5 );
@@ -353,6 +441,20 @@ class Game {
     } );
   }
 
+  renderBullets = () : void => {
+    this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
+      bullet.render();
+      let delDir = Math.abs( this.getPlayer( bullet.shooterID ).dir - bullet.dir );
+      if( !this.checkBulletCollision( bullet ) && delDir < 270 ) {
+        bullet.update();
+        return true;
+      } else {
+        this.explosions.push( new ExplosionEffect( bullet.xPos, bullet.yPos, bullet.dir ) );
+        return false;
+      }
+    });
+  }
+
   renderEffects = () : void => {
     this.effects.clear();
     if( this.curTurn == localStorage.userID ) {
@@ -361,38 +463,26 @@ class Game {
       this.effects.drawItem( new Circle( 0, 0, tank.distanceLeft * this.tileDim, "rgba( 238, 255, 0, 0.5 )", "#000000") );
       this.effects.popTransform();
     }
-    this.renderBullets();
-    this.renderPowerups();
+    this.explosions = this.explosions.filter( ( explosion : ExplosionEffect ) : boolean => {
+      let [ xPos, yPos ] = [ explosion.xPos + 0.5, explosion.yPos + 0.5 ];
+      this.effects.applyTranslate( xPos * this.tileDim,
+                                   yPos * this.tileDim );
+      this.effects.drawItem( explosion );
+      this.effects.popTransform();
+      explosion.update();
+      return !explosion.done;
+    } );
     this.gameview.addLayer( this.effects );
-  }
-
-  renderBullets = () : void => {
-    this.bullets = this.bullets.filter( ( bullet : Bullet ) => {
-      bullet.render();
-      if( !this.checkMapCollision( bullet, bullet.speed, 0.0 ) ) {
-        bullet.update();
-        return true;
-      } else {
-        return false;
-      }
-    });
   }
 
   renderLoop = () : void => {
     let [ xOffset, yOffset ] = this.getPlayerPos().map( ( val : number ) => {
       return -( val + 0.5 ) * this.tileDim;
     } );
-    this.gameview.clear();
-    this.gameview.applyScale( this.scale, this.scale );
-    this.gameview.applyTranslate( xOffset, yOffset );
-    this.gameview.center();
     this.renderMap();
-    this.renderEffects();
     this.renderMinimap();
-    this.renderTanks();
-    this.gameview.popTransform();
-    this.gameview.popTransform();
-    this.gameview.popTransform();
+    this.renderEffects();
+    this.renderEntities();
   }
 
   gameTick = () : void => {
@@ -427,5 +517,19 @@ class Game {
 
   getPlayerDir = () : number => {
     return this.getPlayer().dir;
+  }
+
+  getPlayerPowerups = () : void => {}
+
+  getBuildWall = () : object => {
+    return this.buildWall;
+  }
+
+  setBuildWall = ( row : number, col : number ) : void => {
+    if( row === undefined && col === undefined ) {
+      this.buildWall = null;
+    } else {
+      this.buildWall = { row : row, col : col };
+    }
   }
 }

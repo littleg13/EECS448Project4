@@ -1,5 +1,5 @@
 //const socket = io( "https://448.cuzzo.net" );
-const socket = io( "http://localhost:3001" );
+const socket = io( "http://localhost:3000" );
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
 var game = null;
@@ -195,12 +195,10 @@ socket.on("moveToLobby", moveToLobbyHandler);
   * userIDs.
   */
 var playerListHandler = (data) => {
-  console.log( "Player list received" );
-  console.log( data );
   if( game ) {
-    for(let user in data) {
+    game.tanks = [];
+    for( let user in data ) {
       let userData = data[user];
-      if( game.getPlayer( user ) ) { continue; }
       let direction = userData[ "direction" ] * 180.0 / Math.PI;
       game.addTank( user,               userData['username'],
                     userData['xPos'],   userData['yPos'],
@@ -234,17 +232,32 @@ socket.on("playerJoin", playerJoinHandler);
   * @param {Object} data an empty data object. the server sends no information on gameStart
   */
 var gameStartHandler = (data) => {
+  if( !game ) { game = new Game( 20 ); }
   window.addEventListener( "keydown", handleKeyDown, true );
   window.addEventListener( "keyup", handleKeyUp, true );
-  socket.emit("requestInfo", {request : "getMap"});
+  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+  socket.emit( "requestInfo", { request : "getMap" } );
+  socket.emit( "requestInfo", { request : "getTurn" } );
   wrapper.style.display = "none";
   document.getElementById("game").style.display = "block";
+  handleResize();
   localStorage.gameActive = true;
-  game.startGame();
-  socket.emit("requestInfo", {request : "getTurn"});
 };
 socket.on("gameStart" , gameStartHandler);
 
+var gameInProgressHandler = ( data ) => {
+  game = new Game( 20 );
+  window.addEventListener( "keydown", handleKeyDown, true );
+  window.addEventListener( "keyup", handleKeyUp, true );
+  socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
+  socket.emit( "requestInfo", { request : "getMap" } );
+  socket.emit( "requestInfo", { request : "getTurn" } );
+  wrapper.style.display = "none";
+  document.getElementById("game").style.display = "block";
+  handleResize();
+  localStorage.gameActive = true;
+}
+socket.on( "gameInProgress", gameInProgressHandler );
 /**
   * The event handler for the mapUpdate signal from the server. The received
   * map data is sent to the Game object to be stored.
@@ -312,37 +325,57 @@ var gameUpdateHandler = (data) => {
   switch(data["eventType"]) {
     case "playerMove":
       if(localStorage.userID != data["userID"]) {
-        game.updateTankPosition(data["userID"],
-                                data["newPos"][0], data["newPos"][1],
-                                data["newDir"]);
+        game.updateTankPosition( data["userID"],
+                                 data["newPos"][0], data["newPos"][1],
+                                 data["newDir"] );
       }
       if( data.playerPowerups ) {
         game.updateTankPowerups( data.userID, data.playerPowerups );
+        if( data.updateHealth ) {
+          game.updateTankHealth( data.userID, data.updateHealth );
+        }
+        else if( data.updateMoveDistance ) {
+          game.updateTankDistanceLeft( data.userID, data.updateMoveDistance );
+        }
       }
       break;
     case "playerFire":
-      if( data.mapUpdate ) {
-        game.updateMap( data.mapUpdate );
-      }
-      else if( data.playerHit ) {
-        game.updateTankHealth( data.playerHit, data.newHealth );
-        if( data.gameOver ) {
-          game.endGame( data.gameOver );
-          clearInterval( sendServerUpdateInt );
-          makeActive( "splash2" );
+      for( let i=0;i<data.count;i++ ){
+        if( data.mapUpdate ) {
+          game.updateMap( data.mapUpdate );
         }
+        else if( data[i].playerHit ) {
+          game.updateTankHealth( data[i].playerHit, data[i].newHealth );
+          if( data.gameOver ) {
+            game.endGame( data.gameOver );
+            clearInterval( sendServerUpdateInt );
+            makeActive( "splash2" );
+          }
+        }
+        directionOffset = 0;
+        if(data.count > 1)
+          directionOffset = ((i-Math.floor(data.count/2))/Math.floor(data.count/2)) * 30
+        game.fire( data.userID, data.power, data.spin, data[i].distance, directionOffset );
       }
-      game.fire( data.userID, data.power, data.spin, data.distance );
+      game.getPlayer(data.userID).clearPowerups()
+      game.getPlayer(data.userID).canShoot = false;
       break;
      case "advanceTurn":
       game.updateTurn( data["userID"] );
       break;
+    case "blockPlaced":
+      row = data['mapUpdate'][0];
+      col = data['mapUpdate'][1];
+      console.log("place block");
+      console.log( row, col );
+      game.placeWall( row, col );
+      break;
   }
   if( data.powerupsOnMap ) {
     let parsedUpdate = [];
-    for( let row in data.powerupsOnMap ) {
-      for( let col in data.powerupsOnMap[row] ) {
-        let type = data.powerupsOnMap[row][col];
+    for( let col in data.powerupsOnMap ) {
+      for( let row in data.powerupsOnMap[col] ) {
+        let type = data.powerupsOnMap[col][row];
         parsedUpdate.push( { row : parseInt( row ), col : parseInt( col ), type : type } );
       }
     }
@@ -391,11 +424,6 @@ var handleKeyDown = (evt) => {
   }
 
   if( game.curTurn == localStorage.userID ) {
-    if( evt.key == " " ) {
-      game.recordKeyPress( evt.key );
-
-      return;
-    }
     game.keys[ evt.key ] = true;
   }
 }
@@ -408,10 +436,6 @@ var handleKeyDown = (evt) => {
   var handleKeyUp = (evt) => {
     if( document.activeElement.getAttribute( "id" ) == "textBox" ) {
       if( evt.key == "Enter" ) sendMsg();
-    }
-    else if(evt.key == " ") {
-      game.keys[ evt.key ] = true;
-      game.keys['spaceDown'] = false;
     }
     else {
       game.keys[ evt.key ] = false;
@@ -432,14 +456,16 @@ function sendServerUpdate() {
       socket.emit("gameEvent", { eventType: "playerMove",
                                  newPos: myPos,
                                  newDir: myDir } );
-    }
-    else if ( game.getPlayerShot() ) {
+    } else if( game.getPlayerShot() ) {
       let finalTime = new Date();
       let powr = document.getElementById( "powerSlider" ).valueAsNumber;
       let spin = document.getElementById( "spinSlider" ).valueAsNumber;
       socket.emit( "gameEvent", { eventType: "playerFire", power: powr, spin: spin } );
       game.setPlayerShot( false );
-    }
+    } else if( game.getBuildWall() ) {
+      socket.emit("gameEvent", { eventType: "placeBlock"});
+      game.setBuildWall();
+    } // returns pair : { row : , col : }
   }
 }
 
@@ -448,35 +474,33 @@ function sendServerUpdate() {
   * view depending on currently stored valid user information.
   */
 var main = () => {
+  handleResize();
   if(!localStorage.username) {
     makeActive("splash");
- } else if( !localStorage.lobbyCode || !localStorage.userID ) {
+  } else if( !localStorage.lobbyCode || !localStorage.userID ) {
     makeActive("splash2");
- } else {
-   handleResize();
-   game = new Game(20);
-   wrapper.style.display = "none";
-   socket.emit("requestInfo", {request : "getPlayerList", fullInfo : true});
- }
+  } else {
+    wrapper.style.display = "none";
+    document.getElementById("game").style.display = "block"
+  }
 };
 
 var sendMsg = () => {
-  let username = localStorage.username;
   let textbox = document.getElementById('textBox');
   let text = textbox.value;
   textbox.value = "";
   if( text.length > 0 ) {
-    socket.emit( "sendMsg", { sender: username, content: text } );
+    socket.emit( "sendMsg", { content: text } );
   }
 };
 
 var chatMsg = ( data ) => {
-  let sender = data["sender"];
+  let sender = data["senderID"];
   let content = data["content"];
   if( !document.getElementById( "chatToggle" ).checked ) {
     document.getElementById( "chatHeader" ).classList.add( "newMessage" );
   }
-  game.showMsg( sender, content );
+  game.showMsg( senderID, content );
 };
 socket.on( "chatMsg", chatMsg );
 
@@ -486,3 +510,27 @@ var resetChatHeader = () => {
   else { header.innerHTML = "Show Chat"; }
   document.getElementById( "chatHeader" ).classList.remove( "newMessage" );
 }
+
+const delay = 100;
+var resizeTaskId = null;
+
+var handleResize = ( evt ) => {
+  if( game === null ) return;
+  let size = Math.min( window.innerWidth, window.innerHeight );
+  let gameBody = document.getElementById( "gameBody" );
+  gameBody.style.width = size + "px";
+  gameBody.style.height = size + "px";
+}
+
+window.addEventListener("resize", (evt) => {
+  if( resizeTaskId !== null ) {
+    clearTimeout( resizeTaskId );
+  }
+
+  resizeTaskId = setTimeout( () => {
+    resizeTaskId = null;
+    handleResize( evt );
+  }, delay);
+});
+
+setTimeout( handleResize, 500 );

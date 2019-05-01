@@ -59,6 +59,17 @@ var Map = /** @class */ (function (_super) {
                 });
             });
         };
+        _this.setTile = function (val, row, col) {
+            if (val < 0) {
+                _this.tiles[row][col] = new OuterWallTile();
+            }
+            if (val == 0) {
+                _this.tiles[row][col] = new FloorTile();
+            }
+            if (val > 0) {
+                _this.tiles[row][col] = new WallTile(val);
+            }
+        };
         _this.setTiles = function (tiles) {
             tiles.forEach(function (row, i) {
                 row.forEach(function (val, j) {
@@ -131,17 +142,17 @@ var WallTile = /** @class */ (function (_super) {
         };
         _this.isBlocking = true;
         var items = [
-            new RoundRect(0, 0, 40, 40, 3, "#000000", "rgba(0,0,0,0)"),
-            new RoundRect(1, 2, 18, 7, 3, "#c0c0c0", "rgba(0,0,0,0)"),
-            new RoundRect(21, 2, 18, 7, 3, "#c0c0c0", "rgba(0,0,0,0)"),
-            new RoundRect(1, 11, 8, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
-            new RoundRect(11, 11, 18, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
-            new RoundRect(31, 11, 8, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
-            new RoundRect(1, 20, 18, 7, 3, "#909090", "rgba(0,0,0,0)"),
-            new RoundRect(21, 20, 18, 7, 3, "#909090", "rgba(0,0,0,0)"),
-            new RoundRect(1, 29, 8, 7, 3, "#606060", "rgba(0,0,0,0)"),
-            new RoundRect(11, 29, 18, 7, 3, "#606060", "rgba(0,0,0,0)"),
-            new RoundRect(31, 29, 8, 7, 3, "#606060", "rgba(0,0,0,0)")
+            new RoundRect(0, 0, 40, 40, 3, "#000000", "transparent"),
+            new RoundRect(1, 2, 18, 7, 3, "#c0c0c0", "transparent"),
+            new RoundRect(21, 2, 18, 7, 3, "#c0c0c0", "transparent"),
+            new RoundRect(1, 11, 8, 7, 3, "#a0a0a0", "transparent"),
+            new RoundRect(11, 11, 18, 7, 3, "#a0a0a0", "transparent"),
+            new RoundRect(31, 11, 8, 7, 3, "#a0a0a0", "transparent"),
+            new RoundRect(1, 20, 18, 7, 3, "#909090", "transparent"),
+            new RoundRect(21, 20, 18, 7, 3, "#909090", "transparent"),
+            new RoundRect(1, 29, 8, 7, 3, "#606060", "transparent"),
+            new RoundRect(11, 29, 18, 7, 3, "#606060", "transparent"),
+            new RoundRect(31, 29, 8, 7, 3, "#606060", "transparent")
         ];
         _this.items = new Collection(items);
         _this.health = new Counter(initHealth);
@@ -158,17 +169,17 @@ var OuterWallTile = /** @class */ (function (_super) {
         };
         _this.isBlocking = true;
         var items = [
-            new RoundRect(0, 0, 40, 40, 3, "#000000", "rgba(0,0,0,0)"),
-            new RoundRect(1, 2, 18, 7, 3, "#c0c0c0", "rgba(0,0,0,0)"),
-            new RoundRect(21, 2, 18, 7, 3, "#c0c0c0", "rgba(0,0,0,0)"),
-            new RoundRect(1, 11, 8, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
-            new RoundRect(11, 11, 18, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
-            new RoundRect(31, 11, 8, 7, 3, "#a0a0a0", "rgba(0,0,0,0)"),
-            new RoundRect(1, 20, 18, 7, 3, "#909090", "rgba(0,0,0,0)"),
-            new RoundRect(21, 20, 18, 7, 3, "#909090", "rgba(0,0,0,0)"),
-            new RoundRect(1, 29, 8, 7, 3, "#606060", "rgba(0,0,0,0)"),
-            new RoundRect(11, 29, 18, 7, 3, "#606060", "rgba(0,0,0,0)"),
-            new RoundRect(31, 29, 8, 7, 3, "#606060", "rgba(0,0,0,0)")
+            new RoundRect(0, 0, 40, 40, 3, "#000000", "transparent"),
+            new RoundRect(1, 2, 18, 7, 3, "#909090", "transparent"),
+            new RoundRect(21, 2, 18, 7, 3, "#909090", "transparent"),
+            new RoundRect(1, 11, 8, 7, 3, "#606060", "transparent"),
+            new RoundRect(11, 11, 18, 7, 3, "#606060", "transparent"),
+            new RoundRect(31, 11, 8, 7, 3, "#303030", "transparent"),
+            new RoundRect(1, 20, 18, 7, 3, "#303030", "transparent"),
+            new RoundRect(21, 20, 18, 7, 3, "#303030", "transparent"),
+            new RoundRect(1, 29, 8, 7, 3, "#101010", "transparent"),
+            new RoundRect(11, 29, 18, 7, 3, "#101010", "transparent"),
+            new RoundRect(31, 29, 8, 7, 3, "#101010", "transparent")
         ];
         _this.items = new Collection(items);
         return _this;

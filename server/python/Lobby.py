@@ -120,7 +120,7 @@ class Lobby:
 
     def removePlayer(self, userID):
         if(self.checkForPlayer(userID)):
-            self.colorList += self.players[userID].color
+            self.colorList.append(self.players[userID].color)
             self.spawnPosList.append({'x': self.players[userID].xPos, 'y': self.players[userID].yPos})
             del self.players[userID]
             return True
@@ -136,25 +136,26 @@ class Lobby:
         self.players[self.order[self.turn]].resetDistance()
 
     def updatePowerups(self):
-        self.turnsSinceLastPowerupSpawn += 1
-        if (random.random() < (self.turnsSinceLastPowerupSpawn * 0.2)): # Add powerup
-            self.addedPowerup = True
-            self.turnsSinceLastPowerupSpawn = 0
-            pos = self.powerUpSpawnList.pop(0)
-            while True:
-                pointTaken = False
-                for playerId, player in self.players.items():
-                    if (math.floor(player.xPos) == pos['x'] and math.floor(player.yPos) == pos['y']):
-                        pointTaken = True
+        if(len(self.powerUpSpawnList) > 0):
+            self.turnsSinceLastPowerupSpawn += 1
+            if (random.random() < (self.turnsSinceLastPowerupSpawn * 0.2)): # Add powerup
+                self.addedPowerup = True
+                self.turnsSinceLastPowerupSpawn = 0
+                pos = self.powerUpSpawnList.pop(0)
+                while True:
+                    pointTaken = False
+                    for playerId, player in self.players.items():
+                        if (math.floor(player.xPos + 0.5) == pos['x'] and math.floor(player.yPos + 0.5) == pos['y']):
+                            pointTaken = True
+                            break
+                    if (pointTaken):
+                        self.powerUpSpawnList.append(pos)
+                        pos = self.powerUpSpawnList.pop(0)
+                    else:
                         break
-                if (pointTaken):
-                    self.powerUpSpawnList.append(pos)
-                    pos = self.powerUpSpawnList.pop(0)
-                else:
-                    break
-            if (pos['x'] not in self.powerups):
-                self.powerups[pos['x']] = {}
-            self.powerups[pos['x']][pos['y']] = random.choice(self.powerupTypes)
+                if (pos['x'] not in self.powerups):
+                    self.powerups[pos['x']] = {}
+                self.powerups[pos['x']][pos['y']] = random.choice(self.powerupTypes)
 
     def getTurn(self):
         return self.order[self.turn]
@@ -192,57 +193,104 @@ class Lobby:
                                involved in that event.
 
         Returns:
-            outBoundData (dictionary): contains the updated information of the game
+            outboundData (dictionary): contains the updated information of the game
         """
         self.refreshLastUsedTime()
         player = self.players[userID]
         outboundData = {}
         if userID == self.order[self.turn]:
             if data['eventType'] == 'playerMove':
+                outboundData['eventType'] = 'playerMove'
+                outboundData['userID'] = userID
                 distance = math.sqrt((player.xPos-data['newPos'][0])**2 + (player.yPos-data['newPos'][1])**2)
-                player.distanceLeft  -= distance
+                player.distanceLeft = max(player.distanceLeft - distance, 0)
+                print("Processing move with distanceLeft of: ", player.distanceLeft)
+                print("Dir is: ", player.direction)
+                player.direction = data['newDir']%(math.pi * 2)
+                print("And is now: ", player.direction)
+                outboundData['newDir'] = data['newDir']
+                outboundData['newPos'] = [player.xPos, player.yPos]
+                print("Is move fair?", player.distanceLeft > 0)
                 if player.distanceLeft > 0:
                     player.xPos = data['newPos'][0]
                     player.yPos = data['newPos'][1]
-                    player.direction = data['newDir']%(math.pi * 2)
-                    outboundData['eventType'] = 'playerMove'
-                    outboundData['userID'] = userID
                     outboundData['newPos'] = data['newPos']
-                    outboundData['newDir'] = data['newDir']
                     if (self.checkForPowerupCollision(userID, player)):
+                        if('healthPack' in player.powerups):
+                            player.health = min(100, player.health + 20)
+                            player.powerups.remove('healthPack')
+                            outboundData['updateHealth'] = player.health
+                        elif('increaseMoveDist' in player.powerups):
+                            player.distanceLeft += 5
+                            player.powerups.remove('increaseMoveDist')
+                            outboundData['updateMoveDistance'] = player.distanceLeft
                         outboundData['playerPowerups'] = player.powerups
                         outboundData['powerupsOnMap'] = self.powerups
             elif data['eventType'] == 'playerFire':
-                collisionData = self.checkBulletCollision(userID, player, data['power'], data['spin'])
                 turnsToAdvance = 1
-                if(collisionData[0] is 'map'):
-                    outboundData['mapUpdate'] = self.map
-                elif(collisionData[0] != 'edge'):
-                    newHealth = self.players[collisionData[0]].health - 20
-                    if(newHealth <= 0):
-                        newHealth = 0
-                        self.order.remove(collisionData[0])
-                        if (len(self.order) == 1):
-                            outboundData['gameOver'] = userID
-                        turnsToAdvance = 0
-                        self.players[collisionData[0]].alive = False
-                    self.players[collisionData[0]].health = newHealth
-                    outboundData['playerHit'] = collisionData[0]
-                    outboundData['newHealth'] = newHealth
-                self.advanceTurn(turnsToAdvance)
-                if (self.addedPowerup):
-                    self.addedPowerup = False
-                    outboundData['powerupsOnMap'] = self.powerups
-                outboundData['distance'] = collisionData[1]
+                count = int(math.pow(3,player.powerups.count('multiShot')))
+                outboundData['count'] = count
+                collisionData = {}
+                for i in range(0, count):
+                    outboundData[i] = {}
+                    directionOffset = 0
+                    if(count > 1):
+                        directionOffset = ((i-math.floor(count/2))/math.floor(count/2)) * math.pi/6
+                    collisionData[i] = self.checkBulletCollision(userID, player, data['power'], data['spin'], directionOffset)
+                    if(collisionData[i][0] is 'map'):
+                        outboundData['mapUpdate'] = self.map
+                    elif(collisionData[i][0] != 'edge'):
+                        newHealth = self.players[collisionData[i][0]].health - 20
+                        if(newHealth <= 0):
+                            newHealth = 0
+                            self.order.remove(collisionData[i][0])
+                            if (len(self.order) == 1):
+                                outboundData['gameOver'] = userID
+                            turnsToAdvance = 0
+                            self.players[collisionData[i][0]].alive = False
+                        self.players[collisionData[i][0]].health = newHealth
+                        outboundData[i]['playerHit'] = collisionData[i][0]
+                        outboundData[i]['newHealth'] = newHealth
+                    self.advanceTurn(turnsToAdvance)
+                    if (self.addedPowerup):
+                        self.addedPowerup = False
+                        outboundData['powerupsOnMap'] = self.powerups
+                    outboundData[i]['xPos'] = collisionData[i][2]
+                    outboundData[i]['yPos'] = collisionData[i][3]
+                    outboundData[i]['distance'] = collisionData[i][1]
                 outboundData['power'] = data['power']
                 outboundData['spin'] = data['spin']
                 outboundData['eventType'] = 'playerFire'
                 outboundData['userID'] = userID
+                player.powerups = []
+                outboundData['powerups'] = player.powerups
+            elif data['eventType'] == 'placeBlock':
+                print("Player placed block")
+                print(player.powerups)
+                if 'buildWall' not in player.powerups:
+                    return outboundData
+                direction = player.direction
+                xPos = player.xPos + 0.5 + 1.5 * math.sin( direction )
+                yPos = player.yPos + 0.5 - 1.5 * math.cos( direction )
+                col = math.floor( xPos )
+                row = math.floor( yPos )
+                if self.getDistanceToPlayer([col, row], player) > 3:
+                    print("Place block failed due to being too far away.")
+                    print("Player is at (", player.xPos, ", ", player.yPos, "). With direction: ", direction)
+                    print("Tried to place at (", col, ", ", row, ").")
+                    print("That distance is: ", self.getDistanceToPlayer([col, row], player))
+                print("Attempting to place block at (", col, ", ", row, ").")
+                print("Maps value there is: ", self.map[row][col])
+                if (self.map[row][col] == 0):
+                    self.map[row][col] = 1
+                outboundData['eventType'] = 'blockPlaced'
+                outboundData['mapUpdate'] = [ row, col ]
+                print(outboundData)
         return outboundData
 
     def checkForPowerupCollision(self, userID, player):
-        playerxPos = round(player.xPos)
-        playeryPos = round(player.yPos)
+        playerxPos = math.floor(player.xPos + 0.5)
+        playeryPos = math.floor(player.yPos + 0.5)
         if (playerxPos in self.powerups):
             if (playeryPos in self.powerups[playerxPos]):
                 player.powerups.append(self.powerups[playerxPos][playeryPos])
@@ -251,7 +299,7 @@ class Lobby:
                 return True
         return False
 
-    def checkBulletCollision(self, userID, player, power, spin):
+    def checkBulletCollision(self, userID, player, power, spin, directionOffset):
         """Handles the collision of bullets
 
         Checks if the bullet will collide with either a wall or a player, and
@@ -271,9 +319,9 @@ class Lobby:
 
         """
         position = [player.xPos + 0.5, player.yPos + 0.5]
-        direction = player.direction
+        direction = player.direction + directionOffset
         spin = spin/5
-        increment = 0.1
+        increment = 0.5
         collided = False
         collidedWith = ''
         finalDistance = 0
@@ -289,18 +337,19 @@ class Lobby:
                     collidedWith = 'map'
                 else:
                     collidedWith = 'edge'
-            position[0] =  math.sin(direction)*increment + position[0]
-            position[1] =  -math.cos(direction)*increment + position[1]
+            position[0] =  math.sin(direction)*increment + position[0] + 0.5
+            position[1] =  -math.cos(direction)*increment + position[1] + 0.5
             finalDistance += increment
             direction += max(0, finalDistance - power) * spin*math.pi/(180)
+            print("{", position[0], ", ", position[1], ", ", direction, "}", flush='true')
 
             if(abs(player.direction - direction) >= 3/4 * 2*math.pi):
                 collided = True
                 collidedWith = 'edge'
-        return [collidedWith, finalDistance]
+        return [collidedWith, finalDistance, position[0]-math.sin(direction)*increment, position[1]+math.cos(direction)*increment]
 
     def getDistanceToPlayer(self, position, player):
-        return math.sqrt(math.pow(position[0] - (player.xPos + 0.5), 2) + math.pow(position[1] - (player.yPos+0.5), 2))
+        return math.sqrt(math.pow(position[0] - (player.xPos ), 2) + math.pow(position[1] - (player.yPos+0.5), 2))
 
     def isPositionInPlayerBounds(self, position):
         """Checks to see if the given position is inside another player

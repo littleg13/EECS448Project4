@@ -119,7 +119,7 @@ def auth(sid, data):
         io.emit('clearStorage', {}, room=data['lobbyCode'])
         return
     elif lobbyHandler.getLobby(data['lobbyCode']).getGameStarted():
-        io.emit('gameStart', {}, room=sid)
+        io.emit('gameInProgress', {}, room=sid)
     else:
         if (not lobbyHandler.getLobby(data['lobbyCode']).updateSeen(data['userID'])):
             pass
@@ -140,6 +140,7 @@ def requestInfo(sid, data):
 @io.on('logout')
 def logout(sid, data):
     lobbyHandler.getLobby(data['lobbyCode']).removePlayer(data['userID'])
+    io.emit('playerList', lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getPlayersInfo(), room=data['lobbyCode'])
 
 @io.on('startGame')
 def startGame(sid, data):
@@ -166,7 +167,7 @@ def enterMatchmaking(sid, data):
 
 @io.on('sendMsg')
 def sendMsg(sid, data):
-    io.emit('chatMsg', {'sender': data['sender'], 'content': data['content']}, room=io.get_session(sid)['lobbyCode'])
+    io.emit('chatMsg', {'sender': io.get_session(sid)['userID'], 'content': makeStringSafe(data['content'])}, room=io.get_session(sid)['lobbyCode'])
 
 @io.on('gameEvent')
 def gameEvent(sid, data):
@@ -184,6 +185,7 @@ def gameEvent(sid, data):
         lobbyCode = io.get_session(sid)['lobbyCode']
         userID = io.get_session(sid)['userID']
         gameUpdate = lobbyHandler.getLobby(lobbyCode).processGameEvent(userID, data)
+        print(gameUpdate)
         io.emit('gameUpdate', gameUpdate , room=lobbyCode)
         if('eventType' in gameUpdate):
             if(gameUpdate['eventType'] == 'playerFire'):
@@ -192,4 +194,4 @@ def gameEvent(sid, data):
         io.emit('error', {'errorType': 'Unknown lobbycode given in gameEvent'},  room=lobbyCode)
 
 if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 3001)), app)
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 3000)), app)

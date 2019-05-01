@@ -59,6 +59,8 @@ class Tank extends Entity {
   nameTag     : NameTag;
   distanceLeft: number;
   alive       : boolean;
+  multiShot   : number;
+  buildWall   : number;
 
   constructor( xPos : number, yPos : number, dir : number, playerName : string, userID : string, color : string, health : number ) {
     super();
@@ -77,6 +79,8 @@ class Tank extends Entity {
 
     this.health   = health;
     this.canShoot = false;
+    this.multiShot = 0;
+    this.buildWall = 0;
   }
 
   updateImage = () : void => {
@@ -144,14 +148,20 @@ class Tank extends Entity {
     this.infoCard.setTurn( isTurn );
   }
 
-  addPowerups = ( powerups : Powerup[] ) : void => {
-    powerups.forEach( this.addPowerup );
+  addPowerup = ( powerup : Powerup ) : void => {
+    if( powerup instanceof MultiShotToken ) this.multiShot++;
+    else if( powerup instanceof BuildWallToken ) this.buildWall++;
+    this.sprite.setBuffs( this.multiShot, this.buildWall );
   }
 
-  addPowerup = ( powerup : Powerup ) : void => {}
+  clearPowerups = () : void => {
+    this.multiShot = 0;
+    this.buildWall = 0;
+  }
 }
 
 class Bullet extends Entity {
+  shooterID   : string;
   distToGo    : number;
   distGone    : number;
   sprite      : BulletSprite;
@@ -161,8 +171,9 @@ class Bullet extends Entity {
   boom        : boolean;
   trajectory  : Point[];
 
-  constructor( xPos : number, yPos : number, dir : number, distToGo : number, power : number, curve : number ) {
+  constructor( userID : string, xPos : number, yPos : number, dir : number, distToGo : number, power : number, curve : number ) {
     super();
+    this.shooterID = userID;
     this.xPos = xPos;
     this.yPos = yPos;
     this.dir  = dir;
@@ -187,13 +198,13 @@ class Bullet extends Entity {
     this.boom = true;
   }
 
-  update = () : void => {
-    if( this.boom ) return;
+  update = () : boolean => {
     let dirRad = this.dir * Math.PI / 180.0;
     this.xPos += Math.sin( dirRad ) * this.speed;
     this.yPos -= Math.cos( dirRad ) * this.speed;
     this.distGone += this.speed;
     this.dir += Math.max( 0, this.distGone - this.power ) * this.curve;
+    return this.boom;
   }
 }
 
@@ -239,5 +250,3 @@ class HealthPackToken extends Powerup {
     this.sprite = new HealthPackSprite();
   }
 }
-
-class Buff {}

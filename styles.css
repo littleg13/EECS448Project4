@@ -41,18 +41,36 @@ main #lobbyList {
 }
 
 div#game {
+  position: fixed;
+  top: 0;
+  left: 0;
   display: none;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+div#gameBody {
   margin: auto;
+  height: 500px;
+  width: 500px;
 }
 
 canvas#gameview {
-  margin: 4em auto 4em auto;
-  display: inline-block;
+  width: 80%;
+  height: 80%;
+  margin-left: 10%;
+  margin-top: 10%;
   overflow: hidden;
   background: black;
   box-shadow: 0 0 4em black;
   border: 0.5em solid black;
-  border-radius: 50%;
+}
+
+div#mini {
+  position: fixed;
+  top: 1em;
+  left: 1em;
 }
 
 footer > * {
@@ -107,7 +125,7 @@ button {
   list-style: none;
 }
 
-#rightSide {
+#playerBar {
   display: block;
   position: absolute;
   right: 0;
@@ -176,13 +194,6 @@ div.playerCard canvas.tankSprite {
   border-width: 0;
 }
 
-#gameBody {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: flex-end;
-}
-
 input[type="checkbox"].toggle {
   display: none;
 }
@@ -191,7 +202,7 @@ input[type="checkbox"].toggle {
   width: 50%;
   height: 80%;
   position: fixed;
-  transition: all 2s;
+  transition: all 1s;
   padding: 0;
   margin: -2.5em auto 0 auto;
   overflow: hidden;
@@ -204,7 +215,7 @@ input[type="checkbox"].toggle {
 }
 
 #chatToggle:checked + #chatWindow {
-  transition: all 2s;
+  transition: all 1s;
   top: 10%;
 }
 

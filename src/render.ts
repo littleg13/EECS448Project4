@@ -79,7 +79,7 @@ class Counter {
   max     : number;
   parent  : object;
 
-  constructor( initial: number, delta = 1, max = Infinity ) {
+  constructor( initial: number, delta = 1, max = null ) {
     this.value = initial;
     this.delta = delta;
     if( delta < 0 ) { delta = -delta; }
@@ -93,7 +93,10 @@ class Counter {
     delta = Math.max( delta, this.delta );
     // extra max term added bc % returns - for - numbers
     for( let i = 0; i < delta; i++ ) {
-      this.value = ( this.value + this.max + 1 ) % this.max;
+      this.value++;
+      if( this.max != null ) {
+        this.value = ( this.value + this.max ) % this.max;
+      }
       this.onInc();
     }
   };
@@ -102,7 +105,10 @@ class Counter {
     delta = Math.max( delta, this.delta );
     // extra max term added bc % returns - for - numbers
     for( let i = 0; i < delta; i++ ) {
-      this.value = ( this.value + this.max - 1 ) % this.max;
+      this.value--;
+      if( this.max != null ) {
+        this.value = ( this.value + this.max ) % this.max;
+      }
       this.onDec();
     }
   }
@@ -121,8 +127,7 @@ abstract class Renderable {
 }
 
 abstract class Animated extends Renderable {
-  counters  : Counter[];
-  items     : Renderable[];
+  update = () : boolean => { return false; }
 }
 
 abstract class Shape extends Renderable {
