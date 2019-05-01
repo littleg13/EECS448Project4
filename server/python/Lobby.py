@@ -276,8 +276,8 @@ class Lobby:
                     print("That distance is: ", self.getDistanceToPlayer([col, row], player))
                 print("Attempting to place block at (", col, ", ", row, ").")
                 print("Maps value there is: ", self.map[col][row])
-                if (self.map[col][row] == 0):
-                    self.map[col][row] = 1
+                if (self.map[row][col] == 0):
+                    self.map[row][col] = 1
                 outboundData['eventType'] = 'blockPlaced'
                 outboundData['mapUpdate'] = [ row, col ]
                 print(outboundData)
