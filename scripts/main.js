@@ -252,6 +252,7 @@ var gameInProgressHandler = ( data ) => {
   socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
   socket.emit( "requestInfo", { request : "getMap" } );
   socket.emit( "requestInfo", { request : "getTurn" } );
+  socket.emit( "requestInfo", { request : "getPowerups" } );
   wrapper.style.display = "none";
   document.getElementById("game").style.display = "block";
   handleResize();
@@ -274,6 +275,19 @@ var mapUpdateHandler = (data) => {
   game.updateMap( mapData );
 };
 socket.on("mapUpdate", mapUpdateHandler);
+
+var powerupsOnMapHandler = (data) => {
+  let parsedUpdate = [];
+  for( let col in data.powerups ) {
+    for( let row in data.powerups[col] ) {
+      let type = data.powerups[col][row];
+      parsedUpdate.push( { row : parseInt( row ), col : parseInt( col ), type : type } );
+    }
+  }
+  game.updatePowerups( parsedUpdate );
+};
+
+socket.on("powerupsOnMap", powerupsOnMapHandler);
 
 /**
   * The event handler for the socket connect signal. It detects if the user has
