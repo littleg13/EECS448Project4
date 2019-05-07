@@ -60,12 +60,12 @@ and game state information.</p>
 
 <dl class="method">
 <dt id="Lobby.Lobby.appendPlayer">
-<code class="descname">appendPlayer</code><span class="sig-paren">(</span><em>userID</em>, <em>playerObject</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.appendPlayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.appendPlayer" title="Permalink to this definition">¶</a></dt>
+<code class="descname">appendPlayer</code><span class="sig-paren">(</span><em>userID</em>, <em>username</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.appendPlayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.appendPlayer" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="Lobby.Lobby.checkBulletCollision">
-<code class="descname">checkBulletCollision</code><span class="sig-paren">(</span><em>userID</em>, <em>player</em>, <em>power</em>, <em>spin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.checkBulletCollision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.checkBulletCollision" title="Permalink to this definition">¶</a></dt>
+<code class="descname">checkBulletCollision</code><span class="sig-paren">(</span><em>userID</em>, <em>player</em>, <em>power</em>, <em>spin</em>, <em>directionOffset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.checkBulletCollision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.checkBulletCollision" title="Permalink to this definition">¶</a></dt>
 <dd><p>Handles the collision of bullets</p>
 <p>Checks if the bullet will collide with either a wall or a player, and
 generates updated game information</p>
@@ -104,6 +104,16 @@ distance from the player who shot to whatever it collided with</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="Lobby.Lobby.checkForPowerupCollision">
+<code class="descname">checkForPowerupCollision</code><span class="sig-paren">(</span><em>userID</em>, <em>player</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.checkForPowerupCollision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.checkForPowerupCollision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.getDistance">
+<code class="descname">getDistance</code><span class="sig-paren">(</span><em>x1</em>, <em>x2</em>, <em>y1</em>, <em>y2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getDistance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getDistance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="Lobby.Lobby.getDistanceToPlayer">
 <code class="descname">getDistanceToPlayer</code><span class="sig-paren">(</span><em>position</em>, <em>player</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getDistanceToPlayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getDistanceToPlayer" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -114,6 +124,11 @@ distance from the player who shot to whatever it collided with</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="Lobby.Lobby.getHost">
+<code class="descname">getHost</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getHost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getHost" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="Lobby.Lobby.getLobbyCody">
 <code class="descname">getLobbyCody</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getLobbyCody"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getLobbyCody" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -121,6 +136,11 @@ distance from the player who shot to whatever it collided with</p>
 <dl class="method">
 <dt id="Lobby.Lobby.getMap">
 <code class="descname">getMap</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getMap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.getNumberofPlayers">
+<code class="descname">getNumberofPlayers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.getNumberofPlayers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.getNumberofPlayers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -204,12 +224,17 @@ involved in that event.</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">contains the updated information of the game</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">outBoundData (dictionary)</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">outboundData (dictionary)</p>
 </td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.refreshLastUsedTime">
+<code class="descname">refreshLastUsedTime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.refreshLastUsedTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.refreshLastUsedTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="Lobby.Lobby.removePlayer">
@@ -218,7 +243,12 @@ involved in that event.</li>
 
 <dl class="method">
 <dt id="Lobby.Lobby.startGame">
-<code class="descname">startGame</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.startGame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.startGame" title="Permalink to this definition">¶</a></dt>
+<code class="descname">startGame</code><span class="sig-paren">(</span><em>userID</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.startGame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.startGame" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="Lobby.Lobby.updatePowerups">
+<code class="descname">updatePowerups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/Lobby.html#Lobby.updatePowerups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Lobby.Lobby.updatePowerups" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">

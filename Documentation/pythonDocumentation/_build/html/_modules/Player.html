@@ -39,11 +39,11 @@
             
   <h1>Source code for Player</h1><div class="highlight"><pre>
 <div class="viewcode-block" id="Player"><a class="viewcode-back" href="../Player.html#Player.Player">[docs]</a><span></span><span class="k">class</span> <span class="nc">Player</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lastSeen</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="mi">5</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">powerups</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distanceLeft</span> <span class="o">=</span> <span class="mi">5</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
@@ -66,8 +66,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;xPos&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">xPos</span><span class="p">,</span> <span class="s1">&#39;yPos&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">yPos</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="p">}</span></div>
 
 <div class="viewcode-block" id="Player.setColor"><a class="viewcode-back" href="../Player.html#Player.Player.setColor">[docs]</a>    <span class="k">def</span> <span class="nf">setColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Player with name &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">+</span> <span class="s2">&quot; is now color: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span></div>
 
 <div class="viewcode-block" id="Player.resetDistance"><a class="viewcode-back" href="../Player.html#Player.Player.resetDistance">[docs]</a>    <span class="k">def</span> <span class="nf">resetDistance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distanceLeft</span> <span class="o">=</span> <span class="mi">5</span></div>
@@ -88,6 +87,7 @@
         <span class="n">output</span><span class="p">[</span><span class="s1">&#39;direction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span>
         <span class="n">output</span><span class="p">[</span><span class="s1">&#39;distanceLeft&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distanceLeft</span>
         <span class="n">output</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span>
+        <span class="n">output</span><span class="p">[</span><span class="s1">&#39;health&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">health</span>
         <span class="k">return</span> <span class="n">output</span></div></div>
 </pre></div>
 
