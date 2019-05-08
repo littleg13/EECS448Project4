@@ -11,6 +11,15 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var Hitbox = /** @class */ (function () {
+    function Hitbox(xOffset, yOffset, w, h) {
+        this.xOffset = xOffset;
+        this.yOffset = yOffset;
+        this.w = w;
+        this.h = h;
+    }
+    return Hitbox;
+}());
 var Sprite = /** @class */ (function (_super) {
     __extends(Sprite, _super);
     function Sprite() {
@@ -46,15 +55,6 @@ var Tread = /** @class */ (function (_super) {
                 new Rect(x, 10, 10, 2, "#000", "#0000"),
                 new Rect(x, 15, 10, 2, "#000", "#0000")
             ];
-        /*
-          Counter states:
-          0 - [11000 11000 11000 11000 11000 11000 11000]
-          1 - [01100 01100 01100 01100 01100 01100 01100]
-          2 - [00110 00110 00110 00110 00110 00110 00110]
-          3 - [00011 00011 00011 00011 00011 00011 00011]
-          4 - [10001 10001 10001 10001 10001 10001 10001]
-          5 - rolls over to 0...
-        */
         _this.counter = new Counter(0, 1, 5);
         _this.counter.setParent(_this);
         _this.counter.onInc = function () {
@@ -129,19 +129,24 @@ var TankSprite = /** @class */ (function (_super) {
     function TankSprite(color) {
         if (color === void 0) { color = "#c00"; }
         var _this = _super.call(this) || this;
-        _this.render = function (ctx, multiShot, buildWall) {
-            if (multiShot === void 0) { multiShot = 0; }
-            if (buildWall === void 0) { buildWall = 0; }
-            _this.getItems().map(function (item) { item.render(ctx); });
-            if (_this.multiShot != 0) {
+        _this.render = function (ctx) {
+            if (_this.multiShot) {
+                _this.leftTread.render(ctx);
+                _this.rightTread.render(ctx);
+                _this.body.render(ctx);
+                _this.getAuxBarrel().render(ctx);
                 ctx.save();
                 ctx.rotate(Math.PI / 6);
-                _this.getAuxBarrel().map(function (item) { item.render(ctx); });
+                _this.getAuxBarrel().render(ctx);
                 ctx.restore();
                 ctx.save();
                 ctx.rotate(-Math.PI / 6);
-                _this.getAuxBarrel().map(function (item) { item.render(ctx); });
+                _this.getAuxBarrel().render(ctx);
                 ctx.restore();
+                _this.turret.render(ctx);
+            }
+            else {
+                _this.getItems().forEach(function (item) { item.render(ctx); });
             }
         };
         _this.getItems = function () {
@@ -149,17 +154,17 @@ var TankSprite = /** @class */ (function (_super) {
                 _this.body, _this.barrel,
                 _this.cap, _this.turret];
         };
+        _this.setMulti = function (num) {
+            _this.multiShot = (num > 0);
+        };
         _this.getAuxBarrel = function () {
-            return [
-                new Rect(-3, -25, 6, 15, "green")
-            ];
+            return new Collection([
+                new Rect(-4, -22.5, 8, 20, _this.color, "#000"),
+                new RoundRect(-7, -27.5, 14, 5, 2.5, _this.color, "#000")
+            ]);
         };
         _this.getDim = function () {
             return [_this.width, _this.height];
-        };
-        _this.setBuffs = function (multiShot, buildWall) {
-            _this.multiShot = multiShot;
-            _this.buildWall = buildWall;
         };
         _this.changeColor = function (color) {
             _this.getItems().map(function (item) {
@@ -197,8 +202,8 @@ var TankSprite = /** @class */ (function (_super) {
         _this.barrel = new Rect(-5, -20, 10, 25, color, "#000");
         _this.cap = new RoundRect(-7.5, -25, 15, 7.5, 2.5, color, "#000");
         _this.turret = new Circle(0, 0, 10, color, "#000");
-        _this.multiShot = 0;
-        _this.buildWall = 0;
+        _this.color = color;
+        _this.multiShot = false;
         return _this;
     }
     return TankSprite;

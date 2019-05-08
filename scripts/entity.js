@@ -43,15 +43,6 @@ var Entity = /** @class */ (function () {
     }
     return Entity;
 }());
-var Hitbox = /** @class */ (function () {
-    function Hitbox(xOffset, yOffset, w, h) {
-        this.xOffset = xOffset;
-        this.yOffset = yOffset;
-        this.w = w;
-        this.h = h;
-    }
-    return Hitbox;
-}());
 var Tank = /** @class */ (function (_super) {
     __extends(Tank, _super);
     function Tank(xPos, yPos, dir, playerName, userID, color, health) {
@@ -61,6 +52,7 @@ var Tank = /** @class */ (function (_super) {
             _this.layer.clear();
             _this.layer.center();
             _this.layer.applyRotation(_this.dir);
+            _this.sprite.setMulti(_this.multiShot);
             _this.layer.drawItem(_this.sprite);
             _this.layer.popTransform();
             _this.layer.popTransform();
@@ -122,7 +114,6 @@ var Tank = /** @class */ (function (_super) {
                 _this.multiShot++;
             else if (powerup instanceof BuildWallToken)
                 _this.buildWall++;
-            _this.sprite.setBuffs(_this.multiShot, _this.buildWall);
         };
         _this.clearPowerups = function () {
             _this.multiShot = 0;
@@ -159,16 +150,22 @@ var Bullet = /** @class */ (function (_super) {
             _this.layer.popTransform();
             _this.layer.popTransform();
         };
+        _this.setTarget = function (targetData) {
+            _this.target = targetData;
+        };
         _this.detonate = function () {
             _this.boom = true;
         };
         _this.update = function () {
             var dirRad = _this.dir * Math.PI / 180.0;
-            _this.xPos += Math.sin(dirRad) * _this.speed;
-            _this.yPos -= Math.cos(dirRad) * _this.speed;
-            _this.distGone += _this.speed;
+            _this.xPos += Math.sin(dirRad) * 0.5;
+            _this.yPos -= Math.cos(dirRad) * 0.5;
+            _this.distGone += 0.5;
             _this.dir += Math.max(0, _this.distGone - _this.power) * _this.curve;
-            return _this.boom;
+            if (_this.distToGo <= _this.distGone) {
+                return false;
+            }
+            return true;
         };
         _this.shooterID = userID;
         _this.xPos = xPos;
@@ -181,6 +178,7 @@ var Bullet = /** @class */ (function (_super) {
         _this.power = power;
         _this.curve = curve;
         _this.speed = 0.5;
+        _this.target = null;
         return _this;
     }
     return Bullet;

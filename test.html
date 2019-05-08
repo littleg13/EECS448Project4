@@ -241,7 +241,8 @@ var main = () => {
   counter = 32;
   counterMax = 32;
   interval = setInterval( loop, Math.round( 1000 / 64 ) );
-  items = new ExplosionSprite();
+  items = new TankSprite();
+  items.setMulti( 5 );
 }
 
 /*

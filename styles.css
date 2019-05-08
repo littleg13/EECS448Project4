@@ -63,8 +63,8 @@ canvas#gameview {
   margin-top: 10%;
   overflow: hidden;
   background: black;
-  box-shadow: 0 0 4em black;
-  border: 0.5em solid black;
+  border: 0.25em solid black;
+  border-radius: 2em;
 }
 
 div#mini {
@@ -341,24 +341,34 @@ input[type="checkbox"].toggle {
   padding: 10px;
   border-radius: 10px;
   display: block;
-  height: 100%;
   width: 100%;
+}
+#additionalInfo > * {
+  margin: 5px;
 }
 
 #userInfo {
   padding: 5px;
-  height: 25%;
   width: 100%;
   text-align: center;
 }
 
+#userInfo > * {
+  margin: 5px;
+}
+
 #lobbyInfo {
-  height: 75%;
   width: 100%;
 }
 
 #hidden {
   display: none;
+}
+
+#logoutButton {
+  position: fixed;
+  left: 20px;
+  bottom: 15px;
 }
 
 .colorSwatch {

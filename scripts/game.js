@@ -5,6 +5,11 @@ var PowerupUpdate = /** @class */ (function () {
     }
     return PowerupUpdate;
 }());
+var BulletHit = /** @class */ (function () {
+    function BulletHit() {
+    }
+    return BulletHit;
+}());
 var Game = /** @class */ (function () {
     function Game(mapDim) {
         var _this = this;
@@ -66,7 +71,6 @@ var Game = /** @class */ (function () {
                 var retVal = tiles[row][col].isBlocking;
                 if (obj instanceof Bullet) {
                     _this.map.redraw(row, col);
-                    //        this.effects.push( new ExplosionSprite() );
                     _this.background.applyTranslate(col * _this.tileDim, row * _this.tileDim);
                     _this.background.drawItem(_this.map.getTile(row, col));
                     _this.background.popTransform();
@@ -89,7 +93,6 @@ var Game = /** @class */ (function () {
             var _a = [bullet.xPos + 0.5, bullet.yPos + 0.5], bullX = _a[0], bullY = _a[1];
             bullX += speed * Math.sin(bullet.dir * Math.PI / 180.0);
             bullY -= speed * Math.cos(bullet.dir * Math.PI / 180.0);
-            console.log(bullet.xPos, bullet.yPos, bullet.dir * Math.PI / 180.0);
             if (_this.checkBulletTrajectory(bullX, bullY, bullet.shooterID))
                 return true;
             else
@@ -199,7 +202,20 @@ var Game = /** @class */ (function () {
             _this.getPlayer(userID).setHealth(health);
         };
         this.updateTankPowerups = function (userID, powerups) {
-            console.log(powerups);
+            var player = _this.getPlayer(userID);
+            player.clearPowerups();
+            powerups.forEach(function (powerup) {
+                switch (powerup) {
+                    case "buildWall":
+                        player.addPowerup(new BuildWallToken(0, 0));
+                        break;
+                    case "multiShot":
+                        player.addPowerup(new MultiShotToken(0, 0));
+                        break;
+                    default:
+                        break;
+                }
+            });
         };
         this.updateTankDistanceLeft = function (userID, distanceLeft) {
             _this.getPlayer(userID).distanceLeft = distanceLeft;
@@ -224,11 +240,6 @@ var Game = /** @class */ (function () {
             else if (deltaLocalY < 0) {
                 tank.moveBackward(-deltaLocalY);
             }
-            /*
-            this.checkPowerupCollision( tank ).forEach( ( powerupIndex : number ) : void => {
-              tank.addPowerups( this.powerups.splice( powerupIndex, 1 ) );
-            } );
-            */
         };
         this.updateTurn = function (userID) {
             var prevPlayer = _this.getPlayer(_this.curTurn);
@@ -262,19 +273,24 @@ var Game = /** @class */ (function () {
             });
         };
         this.placeWall = function (row, col) {
+            var player = _this.getPlayer(_this.curTurn);
+            player.buildWall = Math.max(0, player.buildWall - 1);
             _this.map.setTile(1, row, col);
             _this.map.redraw(row, col);
             _this.background.drawItem(_this.map);
         };
-        this.fire = function (shooterID, power, curve, dist, dirOffset) {
+        this.fire = function (shooterID, power, curve, dist, bulletHit, dirOffset) {
             var shooter = _this.getPlayer(shooterID);
             if (shooter.canShoot) {
                 var bullet = new Bullet(shooter.userID, shooter.xPos, shooter.yPos, shooter.dir + dirOffset, dist, power, curve);
+                bullet.setTarget(bulletHit);
                 bullet.attachToLayer(_this.entities);
                 _this.bullets.push(bullet);
             }
         };
         this.endGame = function (winnerUserID) {
+            window.clearInterval(_this.gameTickUpdateInt);
+            window.clearInterval(_this.sendServerUpdateInt);
             _this.won = true;
             alert("Game over. Winner is: " + _this.getPlayer(winnerUserID).playerName);
             delete localStorage.userID;
@@ -283,8 +299,8 @@ var Game = /** @class */ (function () {
         this.showMsg = function (userID, text) {
             var messageWindow = document.getElementById("messageWindow");
             var msg = document.createElement("div");
-            var username = _this.getPlayer(userID);
-            if (userID = localStorage.userID) {
+            var username = _this.getPlayer(userID).playerName;
+            if (userID == localStorage.userID) {
                 msg.classList.add("self");
             }
             msg.classList.add("message");
@@ -308,10 +324,6 @@ var Game = /** @class */ (function () {
         */
         this.renderMap = function () {
             _this.gameview.addLayer(_this.background);
-        };
-        this.redrawTile = function (row, col) {
-            _this.map.redraw(row, col);
-            _this.background.drawItem(_this.map);
         };
         this.renderMinimap = function () {
             _this.minimap.applyScale(_this.miniDim / _this.tileDim, _this.miniDim / _this.tileDim);
@@ -367,15 +379,19 @@ var Game = /** @class */ (function () {
         this.renderBullets = function () {
             _this.bullets = _this.bullets.filter(function (bullet) {
                 bullet.render();
-                var delDir = Math.abs(_this.getPlayer(bullet.shooterID).dir - bullet.dir);
-                if (!_this.checkBulletCollision(bullet) && delDir < 270) {
-                    bullet.update();
-                    return true;
-                }
-                else {
+                if (!bullet.update()) {
+                    if (bullet.target.type == "player") {
+                        _this.updateTankHealth(bullet.target.userID, bullet.target.newHealth);
+                    }
+                    else if (bullet.target.type == "map") {
+                        var _a = [bullet.target.row, bullet.target.col], row = _a[0], col = _a[1];
+                        _this.map.setTile(0, row, col);
+                        _this.background.drawItem(_this.map);
+                    }
                     _this.explosions.push(new ExplosionEffect(bullet.xPos, bullet.yPos, bullet.dir));
                     return false;
                 }
+                return true;
             });
         };
         this.renderEffects = function () {

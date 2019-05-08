@@ -1,5 +1,5 @@
-// const socket = io( "https://448.cuzzo.net" );
-const socket = io( "http://localhost:3000" );
+const socket = io( "http://99.109.56.10:81" );
+
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
 var game = null;
@@ -252,6 +252,7 @@ var gameInProgressHandler = ( data ) => {
   socket.emit( "requestInfo", { request : "getPlayerList", fullInfo : true } );
   socket.emit( "requestInfo", { request : "getMap" } );
   socket.emit( "requestInfo", { request : "getTurn" } );
+  socket.emit( "requestInfo", { request : "getPowerups" } );
   wrapper.style.display = "none";
   document.getElementById("game").style.display = "block";
   handleResize();
@@ -274,6 +275,19 @@ var mapUpdateHandler = (data) => {
   game.updateMap( mapData );
 };
 socket.on("mapUpdate", mapUpdateHandler);
+
+var powerupsOnMapHandler = (data) => {
+  let parsedUpdate = [];
+  for( let col in data.powerups ) {
+    for( let row in data.powerups[col] ) {
+      let type = data.powerups[col][row];
+      parsedUpdate.push( { row : parseInt( row ), col : parseInt( col ), type : type } );
+    }
+  }
+  game.updatePowerups( parsedUpdate );
+};
+
+socket.on("powerupsOnMap", powerupsOnMapHandler);
 
 /**
   * The event handler for the socket connect signal. It detects if the user has
@@ -330,6 +344,7 @@ var gameUpdateHandler = (data) => {
                                  data["newDir"] );
       }
       if( data.playerPowerups ) {
+        console.log( data.playerPowerups );
         game.updateTankPowerups( data.userID, data.playerPowerups );
         if( data.updateHealth ) {
           game.updateTankHealth( data.userID, data.updateHealth );
@@ -340,25 +355,24 @@ var gameUpdateHandler = (data) => {
       }
       break;
     case "playerFire":
-      for( let i=0;i<data.count;i++ ){
-        if( data.mapUpdate ) {
-          game.updateMap( data.mapUpdate );
-        }
-        else if( data[i].playerHit ) {
-          game.updateTankHealth( data[i].playerHit, data[i].newHealth );
-          if( data.gameOver ) {
-            game.endGame( data.gameOver );
-            clearInterval( sendServerUpdateInt );
-            makeActive( "splash2" );
-          }
-        }
-        directionOffset = 0;
-        if(data.count > 1)
-          directionOffset = ((i-Math.floor(data.count/2))/Math.floor(data.count/2)) * 30
-        game.fire( data.userID, data.power, data.spin, data[i].distance, directionOffset );
+      if( data.gameOver ) {
+        game.endGame( data.gameOver );
+        document.getElementById( "game" ).style.display = "none";
+        wrapper.style.display = "block";
+        window.location.reload();
       }
-      game.getPlayer(data.userID).clearPowerups()
-      game.getPlayer(data.userID).canShoot = false;
+      for( let i = 0; i < data.count; i++ ) {
+        let shot = data[i];
+        let bulletHit = shot.bulletHit;
+        directionOffset = 0;
+        if( data.count > 1 ) {
+          directionOffset = 30 * ( ( i - Math.floor(data.count/2) ) /
+                                         Math.floor(data.count/2) );
+        }
+        game.fire( data.userID, data.power, data.spin, shot.distance, bulletHit, directionOffset );
+      }
+      game.getPlayer( data.userID ).clearPowerups()
+      game.getPlayer( data.userID ).canShoot = false;
       break;
      case "advanceTurn":
       game.updateTurn( data["userID"] );
@@ -366,8 +380,6 @@ var gameUpdateHandler = (data) => {
     case "blockPlaced":
       row = data['mapUpdate'][0];
       col = data['mapUpdate'][1];
-      console.log("place block");
-      console.log( row, col );
       game.placeWall( row, col );
       break;
   }
@@ -486,7 +498,6 @@ var main = () => {
 };
 
 var sendMsg = () => {
-  let userID = ;
   let textbox = document.getElementById('textBox');
   let text = textbox.value;
   textbox.value = "";
@@ -496,7 +507,8 @@ var sendMsg = () => {
 };
 
 var chatMsg = ( data ) => {
-  let sender = data["senderID"];
+  console.log( data );
+  let senderID = data["senderID"];
   let content = data["content"];
   if( !document.getElementById( "chatToggle" ).checked ) {
     document.getElementById( "chatHeader" ).classList.add( "newMessage" );

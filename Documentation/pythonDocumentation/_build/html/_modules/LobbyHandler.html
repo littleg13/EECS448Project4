@@ -38,8 +38,10 @@
           <div class="body" role="main">
             
   <h1>Source code for LobbyHandler</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">Player</span> <span class="k">import</span> <span class="n">Player</span>
-<span class="kn">from</span> <span class="nn">Lobby</span> <span class="k">import</span> <span class="n">Lobby</span>
+<span></span><span class="kn">from</span> <span class="nn">Lobby</span> <span class="k">import</span> <span class="n">Lobby</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">string</span>
 
 <div class="viewcode-block" id="LobbyHandler"><a class="viewcode-back" href="../LobbyHandler.html#LobbyHandler.LobbyHandler">[docs]</a><span class="k">class</span> <span class="nc">LobbyHandler</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Central Spot to handle lobbies on the server</span>
@@ -49,16 +51,40 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lobbyList</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matchmakingLobbyCode</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
 
-<div class="viewcode-block" id="LobbyHandler.createLobby"><a class="viewcode-back" href="../LobbyHandler.html#LobbyHandler.LobbyHandler.createLobby">[docs]</a>    <span class="k">def</span> <span class="nf">createLobby</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lobbyCode</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lobbyList</span><span class="p">[</span><span class="n">lobbyCode</span><span class="p">]</span> <span class="o">=</span> <span class="n">Lobby</span><span class="p">(</span><span class="n">lobbyCode</span><span class="p">)</span></div>
+<div class="viewcode-block" id="LobbyHandler.generateRandomString"><a class="viewcode-back" href="../LobbyHandler.html#LobbyHandler.LobbyHandler.generateRandomString">[docs]</a>    <span class="k">def</span> <span class="nf">generateRandomString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+            <span class="n">letter</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span><span class="p">)</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="n">letter</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="LobbyHandler.createLobby"><a class="viewcode-back" href="../LobbyHandler.html#LobbyHandler.LobbyHandler.createLobby">[docs]</a>    <span class="k">def</span> <span class="nf">createLobby</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkForDeadLobbies</span><span class="p">()</span>
+        <span class="n">codeToCheck</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generateRandomString</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">codeToCheck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobbyList</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">codeToCheck</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generateRandomString</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lobbyList</span><span class="p">[</span><span class="n">codeToCheck</span><span class="p">]</span> <span class="o">=</span> <span class="n">Lobby</span><span class="p">(</span><span class="n">codeToCheck</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">codeToCheck</span></div>
+
+<div class="viewcode-block" id="LobbyHandler.checkForDeadLobbies"><a class="viewcode-back" href="../LobbyHandler.html#LobbyHandler.LobbyHandler.checkForDeadLobbies">[docs]</a>    <span class="k">def</span> <span class="nf">checkForDeadLobbies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lobbiesToDelete</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">lobbyCode</span><span class="p">,</span> <span class="n">lobby</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobbyList</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">timeDiff</span> <span class="o">=</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">lobby</span><span class="o">.</span><span class="n">timeLobbyWasLastUsed</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">timeDiff</span> <span class="o">&gt;</span> <span class="mi">7200</span> <span class="ow">or</span> <span class="n">lobby</span><span class="o">.</span><span class="n">getNumberofPlayers</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">lobbiesToDelete</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lobbyCode</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">lobbyCode</span> <span class="ow">in</span> <span class="n">lobbiesToDelete</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobbyList</span><span class="p">[</span><span class="n">lobbyCode</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="LobbyHandler.joinLobby"><a class="viewcode-back" href="../LobbyHandler.html#LobbyHandler.LobbyHandler.joinLobby">[docs]</a>    <span class="k">def</span> <span class="nf">joinLobby</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lobbyCode</span><span class="p">,</span> <span class="n">userID</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isLobby</span><span class="p">(</span><span class="n">lobbyCode</span><span class="p">)):</span>
             <span class="n">lobby</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobbyList</span><span class="p">[</span><span class="n">lobbyCode</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">lobby</span><span class="o">.</span><span class="n">getNumberofPlayers</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">lobby</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="n">userID</span>
             <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">lobby</span><span class="o">.</span><span class="n">getGameStarted</span><span class="p">()):</span>
-                <span class="n">lobby</span><span class="o">.</span><span class="n">appendPlayer</span><span class="p">(</span><span class="n">userID</span><span class="p">,</span> <span class="n">Player</span><span class="p">(</span><span class="n">username</span><span class="p">))</span>
+                <span class="n">lobby</span><span class="o">.</span><span class="n">appendPlayer</span><span class="p">(</span><span class="n">userID</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="mi">200</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="mi">1</span>
@@ -68,7 +94,21 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobbyList</span><span class="p">[</span><span class="n">lobbyCode</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="LobbyHandler.isLobby"><a class="viewcode-back" href="../LobbyHandler.html#LobbyHandler.LobbyHandler.isLobby">[docs]</a>    <span class="k">def</span> <span class="nf">isLobby</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lobbyCode</span><span class="p">):</span>
-        <span class="k">return</span><span class="p">(</span><span class="n">lobbyCode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobbyList</span><span class="p">)</span></div></div>
+        <span class="k">return</span><span class="p">(</span><span class="n">lobbyCode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobbyList</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LobbyHandler.enterMatchmaking"><a class="viewcode-back" href="../LobbyHandler.html#LobbyHandler.LobbyHandler.enterMatchmaking">[docs]</a>    <span class="k">def</span> <span class="nf">enterMatchmaking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userID</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchmakingLobbyCode</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matchmakingLobbyCode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLobby</span><span class="p">()</span>
+        <span class="n">lobby</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lobbyList</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">matchmakingLobbyCode</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">joinLobby</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matchmakingLobbyCode</span><span class="p">,</span> <span class="n">userID</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
+        <span class="n">lobby</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="s2">&quot;matchmaking&quot;</span>
+        <span class="n">gameStarted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">lobbyCode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchmakingLobbyCode</span>
+        <span class="k">if</span> <span class="n">lobby</span><span class="o">.</span><span class="n">getNumberofPlayers</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">gameStarted</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">lobby</span><span class="o">.</span><span class="n">startGame</span><span class="p">(</span><span class="s2">&quot;matchmaking&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matchmakingLobbyCode</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;lobbyCode&#39;</span><span class="p">:</span> <span class="n">lobbyCode</span><span class="p">,</span> <span class="s1">&#39;gameStarted&#39;</span><span class="p">:</span> <span class="n">gameStarted</span><span class="p">}</span></div></div>
 </pre></div>
 
           </div>

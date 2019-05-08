@@ -54,6 +54,9 @@ def sendMap(sid, data):
 def sendHost(sid, data):
     io.emit('lobbyHost', {'host': lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).getHost()}, room=sid)
 
+def sendPowerups(sid, data):
+    io.emit('powerupsOnMap', {'powerups': lobbyHandler.getLobby(io.get_session(sid)['lobbyCode']).powerups}, room=sid)
+
 @io.on('joinLobby')
 def joinLobby(sid, data):
     """Adds a user to a lobby upon request
@@ -131,7 +134,8 @@ def requestInfo(sid, data):
         'getPlayerList' : sendPlayerList,
         'getTurn' : sendTurn,
         'getMap' : sendMap,
-        'getHost' : sendHost
+        'getHost' : sendHost,
+        'getPowerups' : sendPowerups
         }
         options[data['request']](sid, data)
     else:
@@ -167,7 +171,7 @@ def enterMatchmaking(sid, data):
 
 @io.on('sendMsg')
 def sendMsg(sid, data):
-    io.emit('chatMsg', {'sender': data['sender'], 'content': makeStringSafe(data['content'])}, room=io.get_session(sid)['lobbyCode'])
+    io.emit('chatMsg', {'senderID': io.get_session(sid)['userID'], 'content': makeStringSafe(data['content'])}, room=io.get_session(sid)['lobbyCode'])
 
 @io.on('gameEvent')
 def gameEvent(sid, data):
@@ -185,6 +189,7 @@ def gameEvent(sid, data):
         lobbyCode = io.get_session(sid)['lobbyCode']
         userID = io.get_session(sid)['userID']
         gameUpdate = lobbyHandler.getLobby(lobbyCode).processGameEvent(userID, data)
+        print(gameUpdate)
         io.emit('gameUpdate', gameUpdate , room=lobbyCode)
         if('eventType' in gameUpdate):
             if(gameUpdate['eventType'] == 'playerFire'):

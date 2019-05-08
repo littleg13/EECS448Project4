@@ -236,28 +236,32 @@ class Lobby:
                     directionOffset = 0
                     if(count > 1):
                         directionOffset = ((i-math.floor(count/2))/math.floor(count/2)) * math.pi/6
-                    collisionData[i] = self.checkBulletCollision(userID, player, data['power'], data['spin'], directionOffset)
-                    if(collisionData[i][0] is 'map'):
-                        outboundData['mapUpdate'] = self.map
-                    elif(collisionData[i][0] != 'edge'):
-                        newHealth = self.players[collisionData[i][0]].health - 20
+                    collisionData[i] = self.checkBulletCollision( userID, player, data['power'], data['spin'], directionOffset )
+
+                    if(collisionData[i][0]['type'] == 'map'):
+                        outboundData[i]['bulletHit'] = collisionData[i][0]
+                    elif(collisionData[i][0]["type"] != 'edge'):
+                        targetUserID = collisionData[i][0]["userID"]
+                        newHealth = self.players[targetUserID].health - 20
                         if(newHealth <= 0):
                             newHealth = 0
-                            self.order.remove(collisionData[i][0])
+                            self.order.remove( targetUserID )
                             if (len(self.order) == 1):
                                 outboundData['gameOver'] = userID
                             turnsToAdvance = 0
-                            self.players[collisionData[i][0]].alive = False
-                        self.players[collisionData[i][0]].health = newHealth
-                        outboundData[i]['playerHit'] = collisionData[i][0]
-                        outboundData[i]['newHealth'] = newHealth
-                    self.advanceTurn(turnsToAdvance)
+                            self.players[targetUserID].alive = False
+                        self.players[targetUserID].health = newHealth
+                        outboundData[i]['bulletHit'] = collisionData[i][0]
+                        outboundData[i]['bulletHit']['newHealth'] = newHealth
+                    else:
+                        outboundData[i]['bulletHit'] ={ 'type' : 'edge' }
                     if (self.addedPowerup):
                         self.addedPowerup = False
                         outboundData['powerupsOnMap'] = self.powerups
                     outboundData[i]['xPos'] = collisionData[i][2]
                     outboundData[i]['yPos'] = collisionData[i][3]
                     outboundData[i]['distance'] = collisionData[i][1]
+                self.advanceTurn(turnsToAdvance)
                 outboundData['power'] = data['power']
                 outboundData['spin'] = data['spin']
                 outboundData['eventType'] = 'playerFire'
@@ -318,38 +322,44 @@ class Lobby:
                  distance from the player who shot to whatever it collided with
 
         """
-        position = [player.xPos + 0.5, player.yPos + 0.5]
+        position  = [ player.xPos + 0.5, player.yPos + 0.5 ]
         direction = player.direction + directionOffset
-        spin = spin/5
-        increment = 0.5
-        collided = False
-        collidedWith = ''
+        spin      = spin
+        increment = 0.1
+        count     = 0
+        collided  = False
+        collidedWith = {}
         finalDistance = 0
         while(not collided):
-            collidedPlayerUserID = self.isPositionInPlayerBounds(position)
+            collidedPlayerUserID = self.isPositionInPlayerBounds( position )
+            row = math.floor( position[1] )
+            col = math.floor( position[0] )
+            val = self.map[ row ][ col ]
             if collidedPlayerUserID and collidedPlayerUserID != userID:
-                collidedWith = collidedPlayerUserID
+                collidedWith = { 'type': 'player', 'userID' : collidedPlayerUserID }
                 collided = True
-            elif self.map[math.floor(position[1])][math.floor(position[0])] != 0:
+            elif val != 0:
                 collided = True
-                if(self.map[math.floor(position[1])][math.floor(position[0])] != -1):
-                    self.map[math.floor(position[1])][math.floor(position[0])] -= 1
-                    collidedWith = 'map'
+                if( val != -1):
+                    self.map[ row ][ col ] -= 1
+                    collidedWith = { 'type': 'map', 'row' : row, 'col': col }
                 else:
-                    collidedWith = 'edge'
-            position[0] =  math.sin(direction)*increment + position[0]
-            position[1] =  -math.cos(direction)*increment + position[1]
-            finalDistance += increment
-            direction += max(0, finalDistance - power) * spin*math.pi/(180)
-            print("{", position[0], ", ", position[1], ", ", direction, "}", flush='true')
-
+                    collidedWith = { 'type': 'edge' }
+            position[0] =  math.sin(direction) * increment + position[0]
+            position[1] = -math.cos(direction) * increment + position[1]
+            count += 1
+            if( count % 5 == 0 ):
+                direction += max(0, finalDistance - power) * spin*math.pi/(180)
+                finalDistance += 5 * increment
+                count = 0
             if(abs(player.direction - direction) >= 3/4 * 2*math.pi):
                 collided = True
-                collidedWith = 'edge'
+                collidedWith = { 'type' : 'edge' }
+        print("collided with: ", collidedWith)
         return [collidedWith, finalDistance, position[0]-math.sin(direction)*increment, position[1]+math.cos(direction)*increment]
 
     def getDistanceToPlayer(self, position, player):
-        return math.sqrt(math.pow(position[0] - (player.xPos + 0.5), 2) + math.pow(position[1] - (player.yPos+0.5), 2))
+        return math.sqrt(math.pow(position[0] - (player.xPos ), 2) + math.pow(position[1] - (player.yPos+0.5), 2))
 
     def isPositionInPlayerBounds(self, position):
         """Checks to see if the given position is inside another player
@@ -369,10 +379,18 @@ class Lobby:
         """
         for playerID in self.order:
             player = self.players[playerID]
-            x = (position[0] - (player.xPos + 0.5))*math.sin(player.direction) + (position[1] - (player.yPos + 0.5))*math.cos(player.direction)
-            y = (position[0] - (player.xPos + 0.5))*math.cos(player.direction) - (position[1] - (player.yPos + 0.5))*math.sin(player.direction)
-            if -1/2 <= x <= 1/2:
-                if -1/2 <= y <= 1/2:
+            """Pixel dimensions of the sprite"""
+            width = 35.0 / 40.0
+            height = 40.0 / 40.0
+            """ Translate to tank coordinates, centered at tank center"""
+            localX = position[0] - player.xPos - 0.5
+            localY = position[1] - player.yPos - 0.5
+            """ Rotate so tank is vertical """
+            dir = player.direction
+            x = localX * math.cos( -dir ) - localY * math.sin( -dir )
+            y = localX * math.sin( -dir ) + localY * math.cos( -dir )
+            if -width / 2 <= x <= width / 2:
+                if -height / 2 <= y <= height / 2:
                     return playerID
         return False
 
