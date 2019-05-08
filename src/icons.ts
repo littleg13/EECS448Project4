@@ -1,9 +1,30 @@
+/**
+ * Class used for client-side collision calculations.
+ */
 class Hitbox {
+  /**
+   * Horizontal offset in local units for hitbox.
+   */
   xOffset : number;
+  /**
+   * Vertical offset in local units for hitbox.
+   */
   yOffset : number;
+  /**
+   * Width along local horizontal axis for hitbox.
+   */
   w : number;
+  /**
+   * Height along local vertical axis for hitbox.
+   */
   h : number;
 
+  /**
+   * @param xOffset Horizontal offset in local units for hitbox.
+   * @param yOffset Vertical offset in local units for hitbox.
+   * @param w Width along local horizontal axis for hitbox.
+   * @param h Height along local vertical axis for hitbox.
+   */
   constructor( xOffset : number, yOffset : number, w : number, h : number) {
     this.xOffset = xOffset;
     this.yOffset = yOffset;
@@ -12,18 +33,48 @@ class Hitbox {
   }
 }
 
+/**
+ * Generic class for collections of renderable objects that may contain animated features.
+ */
 class Sprite extends Animated {
+  /**
+   * Number of local units the sprite is defined across horizontally.
+   */
   width   : number;
+  /**
+   * Number of local units the sprite is defined across vertically.
+   */
   height  : number;
+  /**
+   * Hitbox used to calculate collisions for entities using this sprite.
+   */
   hitbox  : Hitbox;
 }
 
+/**
+ * Sprite used to encapsulate tread animation for tank sprites.
+ */
 class Tread extends Sprite {
+  /**
+   * The x offset in local sprite units.
+   */
   x         : number;
+  /**
+   * Rect that renders first, the main body of the tread.
+   */
   mainRect  : Rect;
+  /**
+   * The smaller rectangles that represent the treads.
+   */
   rects     : Rect[];
+  /**
+   * Counter that tracks the current state of the animation.
+   */
   counter   : Counter;
 
+  /**
+   * @param x the x offset in local units to render the tread.
+   */
   constructor( x : number ) {
     super();
     this.x = x;
@@ -111,35 +162,77 @@ class Tread extends Sprite {
     }
   }
 
+  /**
+   * Advance the tread state upwards by so many frames.
+   * @param delta The number of frames to increment.
+   */
   shiftUp = ( delta = 0 ) : void => {
     this.counter.inc( delta )
   }
 
+  /**
+   * Advance the tread state downwards by so many frames.
+   * @param delta The number of frames to decrement.
+   */
   shiftDown = ( delta = 0 ) : void => {
     this.counter.dec( delta );
   }
 
+  /**
+   * Render the tread to the given canvas context.
+   * @param ctx the canvas context to render the tread to.
+   */
   render = ( ctx: CanvasRenderingContext2D ) : void => {
     this.mainRect.render( ctx );
     this.rects.map( ( rect ) => { rect.render( ctx ); } );
   }
 }
 
+/**
+ * Class containing the rendering information for the tank sprites.
+ */
 class TankSprite extends Sprite {
+  /**
+   * Color used for colored tank renderables.
+   */
   color   : string;
   canFire : boolean;
 
   /*
    *  Initialize the shape variables
    */
+  /**
+   * Tread object for lefthand side of tank.
+   */
   leftTread   : Tread;
+  /**
+   * Tred object for righthand side of tank.
+   */
   rightTread  : Tread;
+  /**
+   * RoundRect for main body of tank.
+   */
   body        : RoundRect;
+  /**
+   * Rect for barrel of tank.
+   */
   barrel      : Rect;
+  /**
+   * Rect for the cap of the barrel.
+   */
   cap         : Rect;
+  /**
+   * Circle for the turrent of the tank. Centered on sprite.
+   */
   turret      : Circle;
+  /**
+   * Whether or not to alter rendering to display multishot powerup.
+   */
   multiShot   : boolean;
 
+  /**
+   * @param color Color to render tank with, default is #c00.
+   */
   constructor( color = "#c00" ) {
     super();
     this.width      = 40;
@@ -155,6 +248,10 @@ class TankSprite extends Sprite {
     this.multiShot  = false;
   }
 
+  /**
+   * Render the tank sprite to the given rendering context.
+   * @param ctx The canvas rendering context to draw to.
+   */
   render = ( ctx: CanvasRenderingContext2D ) : void => {
     if( this.multiShot ) {
       this.leftTread.render( ctx );
@@ -175,16 +272,29 @@ class TankSprite extends Sprite {
     }
   }
 
+  /**
+   * Return a list of the tank sprite's primary renderables.
+   */
   getItems = () : Renderable[] => {
     return [ this.leftTread, this.rightTread,
                   this.body, this.barrel,
                    this.cap, this.turret ];
   }
 
+  /**
+   * Set this.multiShot; true if passed value is > 0, else false. Called from
+   * Tank class.
+   * @param num Number of multishot powerups owned by tank.
+   */
   setMulti = ( num : number ) : void => {
     this.multiShot = ( num > 0 );
   }
 
+  /**
+   * Helper function to create renderables for extra barrels. Used to render
+   * altered sprite for multishot powerup.
+   * @returns Collection of renderables for altered multishot sprite.
+   */
   getAuxBarrel = () : Collection => {
     return new Collection ( [
       new Rect( -4, -22.5, 8, 20, this.color, "#000" ),
@@ -192,41 +302,81 @@ class TankSprite extends Sprite {
     ] );
   }
 
+  /**
+   * @returns List of sprite width and height, in local units.
+   */
   getDim = () : number[] => {
     return [ this.width, this.height ]
   }
 
+  /**
+   * Set renderables colors where applicable to a new color value.
+   * @param color Color to set items to.
+   */
   changeColor = ( color : string ) : void => {
     this.getItems().map( ( item ) => {
       if( item instanceof Shape ) { item.color = color; }
     } );
   }
 
+  /**
+   * Helper function to pass updates to Tread sprites on Tank.moveForward.
+   @param delta number of frames to update.
+   */
   moveTreadsForward = ( delta = 0 ) : void => {
     this.leftTread.shiftDown( delta );
     this.rightTread.shiftDown( delta );
   }
 
+  /**
+   * Helper function to pass updates to Tread sprites on Tank.moveBackward.
+   @param delta number of frames to update.
+   */
   moveTreadsBackward = ( delta = 0 ) : void => {
     this.leftTread.shiftUp( delta );
     this.rightTread.shiftUp( delta );
   }
 
+  /**
+   * Helper function to pass updates to Tread sprites on Tank.rotateCW.
+   @param delta number of frames to update.
+   */
   moveTreadsRight = ( delta = 0 ) : void => {
     this.leftTread.shiftDown( delta );
     this.rightTread.shiftUp( delta );
   }
+
+  /**
+   * Helper function to pass updates to Tread sprites on Tank.rotateCCW.
+   @param delta number of frames to update.
+   */
   moveTreadsLeft = ( delta = 0 ) : void => {
     this.leftTread.shiftUp( delta );
     this.rightTread.shiftDown( delta );
   }
 }
 
+/**
+ * Renderable item used to display tank healthbar on gameview.
+ */
 class NameTag extends Renderable {
+  /**
+   * Display name for player represented by the tank.
+   */
   playerName : string;
+  /**
+   * Rect object to render as background for healthbar.
+   */
   healthBar  : Rect;
+  /**
+   * Rect object to render as measure of current health.
+   */
   healthFill : Rect;
 
+  /**
+   * @param playerName display name of player.
+   * @param health Current health to display in healthbar, out of 100. Default is 100.
+   */
   constructor( playerName : string, health : number = 100 ) {
     super();
     while( playerName.indexOf( "&lt;" ) != -1
@@ -239,10 +389,18 @@ class NameTag extends Renderable {
     this.healthFill = new RoundRect( -18, 12.5, 36 * ( health / 100 ), 5, 2.5, "red" );
   }
 
+  /**
+   * Update the width of this.healthFill for new health value.
+   * @param health Health value to determine healthFill width.
+   */
   updateHealth = ( health : number ) : void => {
     this.healthFill.w = 36 * health / 100;
   }
 
+  /**
+   * Render nametag items to canvas context.
+   * @param ctx Canvas rendering context to draw to.
+   */
   render = ( ctx : CanvasRenderingContext2D ) : void => {
 //    ctx.font = "0.75em Consolas";
 //    ctx.fillText( this.playerName, -20, 0 );
@@ -252,10 +410,23 @@ class NameTag extends Renderable {
 }
 
 class BulletSprite extends Sprite {
+  /**
+   * Hitbox used in collision calculations.
+   */
   hitbox : Hitbox;
+  /**
+   * Path that defines the primary body of the sprite.
+   */
   body   : Path;
+  /**
+   * Number of local units used for sprite along horizontal axis.
+   */
   width  : number;
+  /**
+   * Number of local units used for sprite along vertical axis.
+   */
   height : number;
+
   constructor() {
     super();
     this.width = 40;
@@ -270,10 +441,17 @@ class BulletSprite extends Sprite {
     this.body.addSegments( segments );
   }
 
+  /**
+   * @returns List of sprite dimensions in local units.
+   */
   getDim = () : number[] => {
     return [ this.width, this.height ]
   }
 
+  /**
+   * Draw sprite renderables to a canvas rendering context.
+   * @param ctx The canvas rendering context to draw to.
+   */
   render = ( ctx : CanvasRenderingContext2D ) : void => {
     ctx.save();
     this.body.render( ctx );
@@ -283,6 +461,9 @@ class BulletSprite extends Sprite {
   }
 }
 
+/**
+ * Sprite used when a player has a buildwall powerup.
+ */
 class ShadowBlock extends Sprite {
   items : Collection;
   constructor( ) {
@@ -303,6 +484,10 @@ class ShadowBlock extends Sprite {
     this.items = new Collection( items );
   }
 
+  /**
+   * Draw sprite renderables to a canvas rendering context.
+   * @param ctx The canvas rendering context to draw to.
+   */
   render = ( ctx : CanvasRenderingContext2D ) : void => {
     this.items.render( ctx );
   }
@@ -407,10 +592,33 @@ class ExplosionSprite extends Sprite {
 }
 
 class MultiShotSprite extends Sprite {
+  /**
+   * Number of local units used for sprite along horizontal axis.
+   */
+  width  : number;
+  /**
+   * Number of local units used for sprite along vertical axis.
+   */
+  height : number;
+  /**
+   * Main body rectangle for sprite.
+   */
   box : RoundRect;
+  /**
+   * Circle for unique multishot token.
+   */
   hub : Circle;
+  /**
+   * Collection of items used to render turrets for unique multishot token.
+   */
   turret1 : Collection;
+  /**
+   * Collection of items used to render turrets for unique multishot token.
+   */
   turret2 : Collection;
+  /**
+   * Collection of items used to render turrets for unique multishot token.
+   */
   turret3 : Collection;
 
   constructor() {
@@ -430,6 +638,10 @@ class MultiShotSprite extends Sprite {
     this.hub = new Circle( 0, -3, 8, "#669", "transparent" ).setBorderWidth(2);
   }
 
+  /**
+   * Draws powerup sprite to rendering context.
+   * @param ctx Canvas rendering context to draw sprite to.
+   */
   render = ( ctx : CanvasRenderingContext2D ) : void => {
     this.box.render( ctx );
     ctx.save();
@@ -452,9 +664,21 @@ class MultiShotSprite extends Sprite {
 }
 
 class BuildWallSprite extends Sprite {
+  /**
+   * Number of local units used for sprite along horizontal axis.
+   */
   width  : number;
+  /**
+   * Number of local units used for sprite along vertical axis.
+   */
   height : number;
+  /**
+   * Main body rectangle for sprite.
+   */
   box : RoundRect;
+  /**
+   * Collection of RoundRects used for the unique BuildWall sprite.
+   */
   bricks : Collection;
 
   constructor() {
@@ -472,6 +696,10 @@ class BuildWallSprite extends Sprite {
     ] );
   }
 
+  /**
+   * Draws powerup sprite to rendering context.
+   * @param ctx Canvas rendering context to draw sprite to.
+   */
   render = ( ctx : CanvasRenderingContext2D ) : void => {
     this.box.render( ctx );
     this.bricks.render( ctx );
@@ -479,9 +707,21 @@ class BuildWallSprite extends Sprite {
 }
 
 class IncreaseMoveDistSprite extends Sprite {
+  /**
+   * Number of local units used for sprite along horizontal axis.
+   */
   width  : number;
+  /**
+   * Number of local units used for sprite along vertical axis.
+   */
   height : number;
+  /**
+   * Main body rectangle for sprite.
+   */
   box : RoundRect;
+  /**
+   * Collection of paths used to render arrows unique to multishot sprite.
+   */
   arrows : Collection;
 
   constructor() {
@@ -505,17 +745,37 @@ class IncreaseMoveDistSprite extends Sprite {
     }
   }
 
+  /**
+   * Draws powerup sprite to rendering context.
+   * @param ctx Canvas rendering context to draw sprite to.
+   */
   render = ( ctx : CanvasRenderingContext2D ) : void => {
     this.box.render( ctx );
     this.arrows.render( ctx );
   }
 }
 
+/**
+ * Rendering information for HealthPack powerup.
+ */
 class HealthPackSprite extends Sprite {
+  /**
+   * Number of local units used for sprite along horizontal axis.
+   */
   width  : number;
+  /**
+   * Number of local units used for sprite along vertical axis.
+   */
   height : number;
+  /**
+   * Main body rectangle for sprite.
+   */
   box : RoundRect;
+  /**
+   * Cross/plus-sign used for HealthPack.
+   */
   cross : Path;
+
   constructor() {
     super();
     this.width = 40;
@@ -544,6 +804,10 @@ class HealthPackSprite extends Sprite {
     this.cross.setBorderWidth( 2 );
   }
 
+  /**
+   * Draws powerup sprite to rendering context.
+   * @param ctx Canvas rendering context to draw sprite to.
+   */
   render = ( ctx : CanvasRenderingContext2D ) : void => {
     this.box.render( ctx );
     this.cross.render( ctx );
