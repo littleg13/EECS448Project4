@@ -15,7 +15,7 @@ And then installation instructions are in the [User Manual](Documentation/UserMa
 
 ## Documentation
 
-Further documentation can be found [here](Documentation/index.md), or if you download the repository and open up `./Documentation/index.html` in your web browser.
+Further documentation can be found in the Documentation directory in the repository.
 
 ## Built With
 
