@@ -39,7 +39,7 @@ In case the user wishes to edit this port, the line to edit is shown below, with
 
 ![Screenshot](UserManualImages/ServerSocketEdit.PNG)
 
-### Installing the client-side files:
+### Installing client-side files:
 Move the following files into this root directory, or a subdirectory of the root directory:
 
 *	index.html
