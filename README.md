@@ -15,7 +15,7 @@ And then installation instructions are in the [User Manual](Documentation/UserMa
 
 ## Documentation
 
-Further documentation can be found [here](Documentation/index.hmtl)
+Further documentation can be found [here](Documentation/index.html)
 
 ## Built With
 
