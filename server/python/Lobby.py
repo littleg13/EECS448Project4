@@ -245,7 +245,7 @@ class Lobby:
                         newHealth = self.players[targetUserID].health - 20
                         if(newHealth <= 0):
                             newHealth = 0
-                            self.order.remove( userID )
+                            self.order.remove( targetUserID )
                             if (len(self.order) == 1):
                                 outboundData['gameOver'] = userID
                             turnsToAdvance = 0
@@ -255,13 +255,13 @@ class Lobby:
                         outboundData[i]['bulletHit']['newHealth'] = newHealth
                     else:
                         outboundData[i]['bulletHit'] ={ 'type' : 'edge' }
-                    self.advanceTurn(turnsToAdvance)
                     if (self.addedPowerup):
                         self.addedPowerup = False
                         outboundData['powerupsOnMap'] = self.powerups
                     outboundData[i]['xPos'] = collisionData[i][2]
                     outboundData[i]['yPos'] = collisionData[i][3]
                     outboundData[i]['distance'] = collisionData[i][1]
+                self.advanceTurn(turnsToAdvance)
                 outboundData['power'] = data['power']
                 outboundData['spin'] = data['spin']
                 outboundData['eventType'] = 'playerFire'
@@ -325,7 +325,8 @@ class Lobby:
         position  = [ player.xPos + 0.5, player.yPos + 0.5 ]
         direction = player.direction + directionOffset
         spin      = spin
-        increment = 0.5
+        increment = 0.1
+        count     = 0
         collided  = False
         collidedWith = {}
         finalDistance = 0
@@ -346,8 +347,11 @@ class Lobby:
                     collidedWith = { 'type': 'edge' }
             position[0] =  math.sin(direction) * increment + position[0]
             position[1] = -math.cos(direction) * increment + position[1]
-            finalDistance += increment
-            direction += max(0, finalDistance - power) * spin*math.pi/(180)
+            count += 1
+            if( count % 5 == 0 ):
+                direction += max(0, finalDistance - power) * spin*math.pi/(180)
+                finalDistance += 5 * increment
+                count = 0
             if(abs(player.direction - direction) >= 3/4 * 2*math.pi):
                 collided = True
                 collidedWith = { 'type' : 'edge' }

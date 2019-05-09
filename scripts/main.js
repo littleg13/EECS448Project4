@@ -1,5 +1,5 @@
-const socket = io( "https://448.cuzzo.net" );
-//const socket = io( "http://192.168.1.100:3000" );
+const socket = io( "http://99.109.56.10:81" );
+
 var wrapper = document.getElementById( "wrapper" );
 var title   = document.getElementById( "title" );
 var game = null;
@@ -359,7 +359,7 @@ var gameUpdateHandler = (data) => {
         game.endGame( data.gameOver );
         document.getElementById( "game" ).style.display = "none";
         wrapper.style.display = "block";
-        makeActive( "splash2" );
+        window.location.reload();
       }
       for( let i = 0; i < data.count; i++ ) {
         let shot = data[i];

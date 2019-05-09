@@ -1,9 +1,31 @@
+/**
+ * Class that structures map tiles and provides a convenient interface to update current map.
+ * Also provides rendering method to easily redraw map to background layer.
+ */
 class Map extends Renderable {
+  /**
+   * 2D array of MapTiles used to render map.
+   */
   tiles : MapTile[][];
-  toRedraw : number[][];    // tiles queued to be redrawn
-  set : boolean // whether or not the map has been set w/ first update
+  /**
+   * Tiles queued to be redrawn.
+   */
+  toRedraw : number[][];
+  /**
+   * Whether or not the map's initial state has been set by server update.
+   */
+  set : boolean
+  /**
+   * Number of rows in map.
+   */
   rowCount : number
+  /**
+   * Number of cols in map.
+   */
   colCount : number
+  /**
+   * @param mapDim Dimensions of map; same value is used for both row and column count.
+   */
   constructor( mapDim : number ) {
     super();
     this.tiles = [];
@@ -21,6 +43,13 @@ class Map extends Renderable {
     }
   }
 
+  /**
+   * Redraw a range of tiles from this.toRedraw to current tile list.
+   * @param startRow which row to begin redraw at.
+   * @param numRows number of rows to be redrawn.
+   * @param startCol which column to begin redraw at.
+   * @param numCosl number of columns to be redrawn.
+   */
   redrawRange = ( startRow : number, numRows : number,
                   startCol : number, numCols : number ) : void => {
     for( let row = startRow; row < startRow + numRows; row++ ) {
@@ -30,6 +59,12 @@ class Map extends Renderable {
     }
   }
 
+  /**
+   * Replaces the tile in this.tiles with tile type corresponding to value in
+   * this.toRedraw at specified position.
+   * @param row The row of the tile to be redrawn.
+   * @param col The column of the tile to be redrawn.
+   */
   redraw = ( row : number, col : number ) : void => {
     if( this.toRedraw[ row ][ col ] == null ) return;
     let val = this.toRedraw[ row ][ col ];
@@ -39,6 +74,10 @@ class Map extends Renderable {
     this.toRedraw[ row ][ col ] = null;
   }
 
+  /**
+   * Render the map tiles to a given canvas rendering context.
+   * @param ctx The canvas rendering context to draw the map to.
+   */
   render = ( ctx: CanvasRenderingContext2D ) : void => {
     ctx.save();
     this.tiles.forEach( ( row : MapTile[], yIndex ) => {
@@ -53,6 +92,10 @@ class Map extends Renderable {
     ctx.restore();
   }
 
+  /**
+   * Called on server map update. Queues a redraw value if update is different than current value.
+   * @param tiles a 2D array of numbers corresponding to tile types.
+   */
   update = ( tiles: number[][] ) : void => {
     tiles.forEach( ( row, i ) => {
       row.forEach( ( val, j ) => {
@@ -65,6 +108,12 @@ class Map extends Renderable {
     } );
   }
 
+  /**
+   * Directly sets a tile in this.tiles to a new MapTile corresponding to a passed value.
+   * @param val The value corresponding to a tile type.
+   * @param row The row of the tile to be set.
+   * @param col The column of the tile to be set.
+   */
   setTile = ( val : number, row : number, col : number ) : void => {
     console.log( "setting tile" );
     if( val  < 0 ) { this.tiles[ row ][ col ] = new OuterWallTile(); }
@@ -72,6 +121,10 @@ class Map extends Renderable {
     if( val >  0 ) { this.tiles[ row ][ col ] = new WallTile( val ); }
   }
 
+  /**
+   * Directly sets a batch of tiles from passed integer values corresponding to tile types.
+   * @param tiles a 2D array of numbers that correspond to tile types.
+   */
   setTiles = ( tiles : number[][] ) : void => {
     tiles.forEach( ( row, i ) => {
       row.forEach( ( val, j ) => {
@@ -85,17 +138,27 @@ class Map extends Renderable {
     this.set = true;
   }
 
+  /**
+   * @param row The row of the tile to be returned.
+   * @param col The column of the tile to be returned.
+   * @returns The MapTile object of the specified tile.
+   */
   getTile = ( row : number, col : number ) : MapTile => {
     return this.tiles[ row ][ col ];
   }
 }
 
+/**
+ * Class to be extended for different types of map tiles.
+ */
 class MapTile extends Renderable {
-  above : MapTile;
-  below : MapTile;
-  left  : MapTile;
-  right : MapTile;
+  /**
+   * Whether or not the tile is to be considered in collision detection.
+   */
   isBlocking : boolean;
+  /**
+   * A collection of renderables that are used to render the tile.
+   */
   items : Collection;
   constructor() {
     super();
@@ -104,7 +167,14 @@ class MapTile extends Renderable {
 }
 
 class WallTile extends MapTile {
+  /**
+   * A counter object that tracks the number of hits on a WallTile before it is
+   * replaced with a FloorTile.
+   */
   health : Counter;
+  /**
+   * @param initHealth The initial value for this.health, default is 5.
+   */
   constructor( initHealth : number = 5 ) {
     super();
     this.isBlocking = true;
@@ -125,11 +195,18 @@ class WallTile extends MapTile {
     this.health = new Counter( initHealth );
   }
 
+  /**
+   * Updates health counter by a given amount of damage.
+   * @param damage The amount of damage to decrease health by.
+   */
   onHit = ( damage : number ) : void => {
     this.health.dec( damage );
     this.update();
   }
 
+  /**
+   * Called from this.onHit. Updates renderables to reflect current health.
+   */
   update = () : void => {
     let val = this.health.get();
     this.items.mapItems( ( item : Renderable ) => {
@@ -140,11 +217,20 @@ class WallTile extends MapTile {
     } );
   }
 
+  /**
+   * Renders WallTile items to given canvas rendering context.
+   * @param ctx Canvas rendering context to render to.
+   */
   render = ( ctx : CanvasRenderingContext2D ) : void => {
     this.items.render( ctx );
   }
 }
 
+/**
+ * Distinct wall tile for the outer walls. It does not have health as they are
+ * indestructible. Slightly different coloration to keep them distinct from
+ * ordinary wall tiles.
+ */
 class OuterWallTile extends MapTile {
   constructor( ) {
     super();
@@ -165,24 +251,29 @@ class OuterWallTile extends MapTile {
     this.items = new Collection( items );
   }
 
+  /**
+   * Renders tile items to given canvas rendering context.
+   * @param ctx Canvas rendering context to render to.
+   */
   render = ( ctx : CanvasRenderingContext2D ) : void => {
     this.items.render( ctx );
   }
 }
 
+/**
+ * Basic floor tile, used to manage rendering.
+ */
 class FloorTile extends MapTile {
   constructor() {
     super();
   }
 
+  /**
+   * Renders tile to given canvas rendering context.
+   * @param ctx Canvas rendering context to render to.
+   */
   render = ( ctx: CanvasRenderingContext2D ) : void => {
     ctx.fillStyle = "#963";
     ctx.fillRect( 0, 0, 40, 40 );
-    let stone = new Path( 10, 10, "#303030", "#303060" );
-    let shapes = [
-
-    ];
-    stone.addSegments( shapes );
-    stone.render( ctx );
   }
 }
