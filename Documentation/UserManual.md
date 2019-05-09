@@ -3,14 +3,14 @@
 ## Table of contents:
 
 * [Installing on a new server](#Installing-on-a-new-server)
-  * [Prerequisites](Prerequisites)
-  *	[Installing server-side files](#Installing-server-side-files)
-	* [Installing client-side files](#Installing-client-side-files)
+  * [Prerequisites](#Prerequisites)
+  * [Installing server-side files](#Installing-server-side-files)
+  * [Installing client-side files](#Installing-client-side-files)
 
 * [Playing the game](#Playing-the-game)
-	* [Splash screens](#Splash-screens)
-	*	[Joining a lobby, creating a lobby and matchmaking](#Lobbies)
-	* [Gameplay, controls and display](#Gameplay)
+  * [Splash screens](#Splash-screens)
+  * [Joining a lobby, creating a lobby and matchmaking](#Lobbies)
+  * [Gameplay, controls and display](#Gameplay)
 
 ## Installing on a new server.
 A user may play the game without installing any files by navigating to https://448.cuzzo.net. The following instructions, however, allow a user to install the game on their own web server.
@@ -37,7 +37,7 @@ The contents of the folder `./server/python` may be located anywhere that the us
 
 In case the user wishes to edit this port, the line to edit is shown below, with the port number highlighted:
 
-![Screenshot]](/UserManualImages/ServerSocketEdit.PNG)
+![Screenshot](UserManualImages/ServerSocketEdit.PNG)
 
 ### Installing the client-side files:
 Move the following files into this root directory, or a subdirectory of the root directory:
@@ -70,11 +70,11 @@ Such that you have the following sitemap:
 
 To configure the client-side code to connect to your new server, you must edit `./scripts/main.js` at the first line. Where it says:
 
-![Screenshot](/UserManualImages/ClientSocketURLDefault.png)
+![Screenshot](UserManualImages/ClientSocketURLDefault.png)
 
 Replace `https://448.cuzzo.net` with your `http://your.domain.net:xxxx`, where `xxxx` is your chosen port number. Example given below:
 
-![Screenshot](/UserManualImages/ClientSocketURLEdit.png)
+![Screenshot](UserManualImages/ClientSocketURLEdit.png)
 
 ### Starting game server:
 
@@ -90,7 +90,7 @@ To check that the installation is correct, and that your game server is up and r
 
 where `path/to/project/` is the relative path to the files from the root directory. If the additional Python3 server is not running, you will see the following screen:
 
-![Screenshot](/UserManualImages/ConnectError.PNG)
+![Screenshot](UserManualImages/ConnectError.PNG)
 
 Common issues include mismatching port numbers between client and server, as well as inadequate permissions on client-side files and directories. A web server running on a Linux-based operating system requires read and execution permissions for the directories your files are in and read permissions for the files that you want to serve. You can use the chmod command to edit file permissions within a Linux terminal. More information on chmod here:
 
@@ -102,11 +102,11 @@ https://ss64.com/bash/chmod.html
 
 At the initial splash screen (pictured below), you will be prompted to enter a username that will be displayed to all players in your game match. Click the “Enter Username” button to proceed.
 
-![Screenshot](/UserManualImages/Splash1.PNG)
+![Screenshot](UserManualImages/Splash1.PNG)
 
 The second splash screen (pictured below), gives three options on how to join a specific game match, referred to as a lobby.
 
-![Screenshot](/UserManualImages/Splash2.PNG)
+![Screenshot](UserManualImages/Splash2.PNG)
 
 ### Lobbies
 
@@ -118,7 +118,7 @@ This option automatically matches players with 3 other players who also select t
 
 If you have a friend you wish to play with, and you have their four-letter lobby code, select “Join a Lobby”. You’ll be brought to the following screen, where you will enter that four-letter lobby code. The server ignores lower- and upper-case distinctions.
 
-![Screenshot](/UserManualImages/JoinLobby.PNG)
+![Screenshot](UserManualImages/JoinLobby.PNG)
 
 #### Create a Lobby
 
@@ -128,7 +128,7 @@ If you wish to start a game and then invite friends, select “Create a Lobby”
 
 The next page you will see is the lobby page. This page shows the current list of players in your game match, as well as prominently displaying the lobby code in case you wish to invite any further players. In the case that you created this game lobby, you will see the following screen:
 
-![Screenshot](/UserManualImages/LobbyCreated.PNG)
+![Screenshot](UserManualImages/LobbyCreated.PNG)
 
 Note that only the creator of a lobby can start the game, and that lobbies created with the “Find a Game” option will automatically begin once four players have been added. The lobby code in the above example is “OQIB” and will look the same and be found in the same place regardless of how you joined the lobby.
 
@@ -136,7 +136,7 @@ Note that only the creator of a lobby can start the game, and that lobbies creat
 
 A typical game will look like:
 
-![Screenshot](/UserManualImages/NewGame.PNG)
+![Screenshot](UserManualImages/NewGame.PNG)
 
 In the upper left-hand side of the screen you will see a minimap of the current gameboard. On the right-hand side you see the player cards. At the bottom you see the chat box, currently out of view. In the bottom left, the Exit button allows you to leave the game at any time. In the center is the gameboard itself.
 
@@ -175,10 +175,10 @@ Powerups spawn randomly across the board between turns. There are four powerups 
 
 | Name | Effect | Image |
 | --- | --- | --- |
-| Health pack | Restores your tank’s health by 20 | ![Screenshot](/UserManualImages/HealthPackPowerup.png) |
-| Increased distance | Increases the amount of distance you’re able to move this turn by 5 tiles | ![Screenshot](/UserManualImages/DistancePowerup.png) |
-| Multishot | Allows you to fire 3 times as many bullets at once. These powerups multiply one another. | ![Screenshot](/UserManualImages/MultishotPowerup.png) |
-| Wall | Allows you to place a new wall tile in front of your tank this turn. They are placed by pressing the `E key` anytime during your turn. | ![Screenshot](/UserManualImages/WallPowerup.png) |
+| Health pack | Restores your tank’s health by 20 | ![Screenshot](UserManualImages/HealthPackPowerup.png) |
+| Increased distance | Increases the amount of distance you’re able to move this turn by 5 tiles | ![Screenshot](UserManualImages/DistancePowerup.png) |
+| Multishot | Allows you to fire 3 times as many bullets at once. These powerups multiply one another. | ![Screenshot](UserManualImages/MultishotPowerup.png) |
+| Wall | Allows you to place a new wall tile in front of your tank this turn. They are placed by pressing the `E key` anytime during your turn. | ![Screenshot](UserManualImages/WallPowerup.png) |
 
 Health pack and increased distance powerups are used automatically, whereas the multishot powerups will be used when you fire to end your turn, and the wall powerups are used by pressing the `E key` anytime during your turn. Multishot and wall powerups are removed at the end of your turn no matter what.
 
@@ -186,7 +186,7 @@ Health pack and increased distance powerups are used automatically, whereas the 
 
 The chat box allows players to send messages to one another. To open the chat box click the “Show Chat” tab. Messages will appear like so:
 
-![Screenshot](/UserManualImages/ChatBox.PNG)
+![Screenshot](UserManualImages/ChatBox.PNG)
 
 Your messages will be right-aligned and colored blue, while other players’ messages will be left-aligned and grey. The display name for the player is underneath the message’s text.
 If your chat box is not visible and you receive a message, the “Show Chat” tab will turn red. You can hide the chat box again by clicking the “Hide Chat” tab.
